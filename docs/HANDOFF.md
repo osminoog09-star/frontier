@@ -6,11 +6,18 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.56 - Building Repair`.
+- Последний локальный срез: `v1.57 - Mobile Pawn Drawer`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.56`. Наука: tools/medicine/cooking/walls/hunting/trading/marksman.
+- Текущий `GAME_VERSION`: `1.57`. Наука: tools/medicine/cooking/walls/hunting/trading/marksman.
 - Harness: Scenarios A-AT (46) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
+
+## Что изменилось в v1.57
+
+- Добавлен mobile-only drawer для телефонов: вкладки `Пешки` и `Лог` доступны без desktop sidebar.
+- Drawer стартует свернутым, открывается кнопкой `👥`, переключает вкладки и переиспользует те же карточки пешек, что desktop.
+- На 390px drawer остаётся слева от миникарты 96px и не создаёт horizontal overflow.
+- Local mobile browser smoke: build 1.57, 3 pawn cards, log entries, no minimap overlap, console errors = 0.
 
 ## Что изменилось в v1.56
 

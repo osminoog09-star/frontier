@@ -188,6 +188,15 @@
 ### Next Step
 - Продолжить Неделю 2 маленьким срезом: загоны/скот, compact animal panel, автотайлинг или mobile UX.
 
+## Update 2026-06-02 - v1.57 Mobile Pawn Drawer
+
+- Done: mobile-only drawer gives phones access to pawn cards and the event log while desktop keeps the sidebar.
+- Done: drawer opens/collapses, switches `Пешки`/`Лог`, and stays left of the minimap on 390px.
+- Done: local mobile browser smoke covers build 1.57, drawer tabs, pawn/log content, no horizontal overflow, no console errors.
+
+### Next Step
+- Continue mobile UX with compact schedule/research panels or take the next Week 2 content slice.
+
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.
 - Done: fences are real blockers; gates are passable; A* routes around blockers and through gates.

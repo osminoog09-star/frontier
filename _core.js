@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.56';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.57';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -2961,11 +2961,9 @@ function focusPawn(id) {
   renderPawns();            // мгновенно подсветить выбранную карточку
 }
 
-let _pawnListBound = false;
-function bindPawnListOnce() {
-  if (_pawnListBound) return;
-  const list = document.getElementById('pawn-list');
-  if (!list) return;
+const _boundPawnLists = new WeakSet();
+function bindPawnList(list) {
+  if (!list || _boundPawnLists.has(list)) return;
   // Делегирование: один слушатель на контейнере. Переживает пересборку innerHTML,
   // поэтому клик не теряется, даже если карточки перерисовались между mousedown/mouseup.
   list.addEventListener('click', (e) => {
@@ -2973,37 +2971,43 @@ function bindPawnListOnce() {
     if (!card) return;
     focusPawn(parseInt(card.dataset.pawnId, 10));
   });
-  _pawnListBound = true;
+  _boundPawnLists.add(list);
+}
+
+function bindPawnLists() {
+  ['pawn-list', 'mobile-pawn-list'].forEach(id => bindPawnList(document.getElementById(id)));
+}
+
+function createPawnCard(p) {
+  const card = document.createElement('div');
+  card.dataset.pawnId = p.id;
+  card.className = 'pawn-card' + (G.selectedPawnId===p.id?' selected':'') + (p.dead?' dead':'');
+  const stateNames = {idle:'Отдыхает',working:'Работает',sleeping:'Спит',fighting:'Сражается',joy:'Развлекается',breakdown:'Срыв!',downed:'🩸 Без сознания'};
+  const woundText = p.hp < p.maxHp*0.5 ? '🤕 Ранен' : '';
+  const sickText = p.sick ? `🤒 ${p.sick.name}` : '';
+  const traitChips = (p.traits||[]).map(t=>{
+    const tr = TRAITS[t]; if(!tr) return '';
+    return `<span class="trait-chip ${tr.good?'tg':'tb'}" title="${tr.desc}">${tr.icon} ${tr.name}</span>`;
+  }).join('');
+  card.innerHTML = `
+    <div class="pawn-name">🤠 ${p.name} ${p.dead?'(погиб)':''}</div>
+    <div class="pawn-status">${p.role}${(p.workLevel||0)>0?` ⭐${p.workLevel}`:''} • ${stateNames[p.state]||p.state} ${woundText} ${sickText}</div>
+    <div class="trait-row">${traitChips}</div>
+    ${bar('HP',p.hp,p.maxHp,'bar-hp')}
+    ${bar('Еда',p.food,p.maxFood,'bar-food')}
+    ${bar('Настр',p.mood,p.maxMood,'bar-mood')}
+    ${bar('Сила',p.energy,p.maxEnergy,'bar-energy')}
+    <div class="pawn-thoughts">${p.thoughts.slice(0,3).map(t=>`<span class="${t.neg?'thought-neg':'thought-pos'}">${t.text}</span>`).join(' ')}</div>
+  `;
+  return card;
 }
 
 function renderPawns() {
-  const list = document.getElementById('pawn-list');
-  bindPawnListOnce();
-  const goal = scenarioGoalStatus();
-  list.innerHTML = '';
-  for (const p of G.pawns) {
-    const card = document.createElement('div');
-    card.dataset.pawnId = p.id;
-    card.className = 'pawn-card' + (G.selectedPawnId===p.id?' selected':'') + (p.dead?' dead':'');
-    const stateNames = {idle:'Отдыхает',working:'Работает',sleeping:'Спит',fighting:'Сражается',joy:'Развлекается',breakdown:'Срыв!',downed:'🩸 Без сознания'};
-    const woundText = p.hp < p.maxHp*0.5 ? '🤕 Ранен' : '';
-    const sickText = p.sick ? `🤒 ${p.sick.name}` : '';
-    const traitChips = (p.traits||[]).map(t=>{
-      const tr = TRAITS[t]; if(!tr) return '';
-      return `<span class="trait-chip ${tr.good?'tg':'tb'}" title="${tr.desc}">${tr.icon} ${tr.name}</span>`;
-    }).join('');
-    card.innerHTML = `
-      <div class="pawn-name">🤠 ${p.name} ${p.dead?'(погиб)':''}</div>
-      <div class="pawn-status">${p.role}${(p.workLevel||0)>0?` ⭐${p.workLevel}`:''} • ${stateNames[p.state]||p.state} ${woundText} ${sickText}</div>
-      <div class="trait-row">${traitChips}</div>
-      ${bar('HP',p.hp,p.maxHp,'bar-hp')}
-      ${bar('Еда',p.food,p.maxFood,'bar-food')}
-      ${bar('Настр',p.mood,p.maxMood,'bar-mood')}
-      ${bar('Сила',p.energy,p.maxEnergy,'bar-energy')}
-      <div class="pawn-thoughts">${p.thoughts.slice(0,3).map(t=>`<span class="${t.neg?'thought-neg':'thought-pos'}">${t.text}</span>`).join(' ')}</div>
-    `;
-    // клик обрабатывается делегированно в bindPawnListOnce (через data-pawn-id)
-    list.appendChild(card);
+  bindPawnLists();
+  const lists = ['pawn-list', 'mobile-pawn-list'].map(id => document.getElementById(id)).filter(Boolean);
+  for (const list of lists) {
+    list.innerHTML = '';
+    for (const p of G.pawns) list.appendChild(createPawnCard(p));
   }
 }
 
@@ -3132,10 +3136,34 @@ function renderResearch() {
 }
 
 function renderLog() {
-  const el = document.getElementById('event-log');
-  el.innerHTML = G.log.slice(0,50).map(e=>
+  const html = G.log.slice(0,50).map(e=>
     `<div class="log-entry ${e.type}"><span class="log-time">${e.time}</span> ${e.msg}</div>`
   ).join('');
+  ['event-log', 'mobile-event-log'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
+}
+
+function setupMobileDrawer() {
+  const drawer = document.getElementById('mobile-drawer');
+  const toggle = document.getElementById('mobile-drawer-toggle');
+  if (!drawer || !toggle) return;
+
+  toggle.addEventListener('click', () => {
+    drawer.classList.toggle('open');
+  });
+
+  document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      drawer.classList.add('open');
+      document.querySelectorAll('.mobile-tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.mobile-tab-content').forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+      const panel = document.getElementById('mobile-tab-'+btn.dataset.mobileTab);
+      if (panel) panel.classList.add('active');
+    });
+  });
 }
 
 function showPriorityPanel(p) {
@@ -3667,6 +3695,8 @@ canvas.addEventListener('mouseleave', () => {
 
 // ==================== BUTTONS ====================
 function setupButtons() {
+  setupMobileDrawer();
+
   // Tab switching
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {

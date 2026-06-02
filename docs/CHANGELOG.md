@@ -2,6 +2,13 @@
 
 ## 2026-06-02
 
+### v1.57 - Mobile Pawn Drawer
+
+- Mobile builds now show a compact bottom-left drawer for pawns and the event log instead of losing that information with the hidden desktop sidebar.
+- The drawer starts collapsed, opens with a small pawns button, switches between `Пешки` and `Лог`, and reuses the same pawn-card click/focus behavior as desktop.
+- The drawer is sized to leave the 96px minimap clear on 390px mobile screens.
+- Local mobile browser smoke: 390x844, build 1.57, pawn drawer/log tabs, no minimap overlap, no horizontal overflow, no console errors.
+
 ### v1.56 - Building Repair
 
 - Builders now repair damaged completed buildings when there are no construction blueprints to build.

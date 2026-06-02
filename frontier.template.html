@@ -112,6 +112,8 @@
   .log-entry.danger { color: #c04444; }
   .log-entry.good { color: #7ca84e; }
 
+  #mobile-drawer { display: none; }
+
   /* Bottom bar */
   #bottombar {
     position: absolute; bottom: 0; left: 0; right: 0;
@@ -349,6 +351,34 @@
     #main { width: 100vw; height: calc(100dvh - 54px); display: block; }
     #sidebar { display: none !important; }
     #canvas-wrap { width: 100vw; height: calc(100dvh - 54px); min-width: 100vw; max-width: 100vw; }
+    #mobile-drawer {
+      display: block; position: absolute; left: 8px; right: 112px;
+      bottom: calc(var(--bottom-ui-height, 58px) + 10px + env(safe-area-inset-bottom, 0px));
+      z-index: 12; background: rgba(18,18,18,0.94); border: 1px solid #3a3120;
+      border-radius: 4px; box-shadow: 0 8px 22px rgba(0,0,0,0.45); overflow: hidden;
+      max-height: 34px;
+    }
+    #mobile-drawer.open { max-height: min(230px, calc(100dvh - 170px)); }
+    .mobile-drawer-head {
+      display: grid; grid-template-columns: 34px 1fr 1fr; gap: 4px;
+      padding: 4px; background: #111; border-bottom: 1px solid #2a2a2a;
+    }
+    .mobile-drawer-toggle, .mobile-tab-btn {
+      height: 26px; background: #1e1e1e; border: 1px solid #333; color: #aaa;
+      border-radius: 3px; font-family: inherit; font-size: 11px;
+    }
+    .mobile-drawer-toggle { color: #e8c97e; }
+    .mobile-tab-btn.active { color: #e8c97e; border-color: #e8c97e; background: #2a2515; }
+    .mobile-drawer-body { display: none; max-height: calc(min(230px, calc(100dvh - 170px)) - 35px); overflow: auto; padding: 5px; }
+    #mobile-drawer.open .mobile-drawer-body { display: block; }
+    .mobile-tab-content { display: none; }
+    .mobile-tab-content.active { display: block; }
+    #mobile-pawn-list .pawn-card { margin-bottom: 5px; padding: 5px; }
+    #mobile-pawn-list .pawn-name { font-size: 11px; margin-bottom: 2px; }
+    #mobile-pawn-list .pawn-status, #mobile-event-log .log-entry { font-size: 10px; }
+    #mobile-pawn-list .trait-row, #mobile-pawn-list .pawn-thoughts { display: none; }
+    #mobile-pawn-list .bar-wrap { margin-bottom: 2px; }
+    #mobile-pawn-list .bar-label { font-size: 9px; }
     #bottombar {
       max-height: 58px; overflow: visible; padding: 4px 6px calc(8px + env(safe-area-inset-bottom, 0px)); gap: 4px;
       right: 0; bottom: 0;
@@ -407,7 +437,7 @@
         <button class="menu-btn-big" id="mm-diag">🐞 Скачать лог диагностики</button>
         <button class="menu-btn-big" id="mm-resume" style="display:none">✖ Закрыть меню</button>
       </div>
-      <p class="menu-ver">PRE-ALPHA • build 1.56 • план: docs/ROADMAP_MONTH.md</p>
+      <p class="menu-ver">PRE-ALPHA • build 1.57 • план: docs/ROADMAP_MONTH.md</p>
     </div>
     <div class="menu-right" id="menu-panel">
       <div id="menu-panel-content"></div>
@@ -502,6 +532,22 @@
 
     <div id="minimap-wrap">
       <canvas id="minimap" width="180" height="135"></canvas>
+    </div>
+
+    <div id="mobile-drawer" class="mobile-drawer">
+      <div class="mobile-drawer-head">
+        <button class="mobile-drawer-toggle" id="mobile-drawer-toggle">👥</button>
+        <button class="mobile-tab-btn active" data-mobile-tab="pawns">Пешки</button>
+        <button class="mobile-tab-btn" data-mobile-tab="log">Лог</button>
+      </div>
+      <div class="mobile-drawer-body">
+        <div class="mobile-tab-content active" id="mobile-tab-pawns">
+          <div id="mobile-pawn-list"></div>
+        </div>
+        <div class="mobile-tab-content" id="mobile-tab-log">
+          <div id="mobile-event-log"></div>
+        </div>
+      </div>
     </div>
 
     <div id="zoom-controls">
