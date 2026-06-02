@@ -6,9 +6,11 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.33 - Menu Scroll Fix + Clear Roadmap + Agent Coordination`.
+- Последний локальный срез: `v1.34 - Combat Depth: Downed State` (старт Недели 2).
+- Harness: Scenarios A-AA pass (27 сценариев), guard OK, 0 mojibake.
 - НОВОЕ: `docs/WIP.md` — «замок» текущих задач. Перед работой читать его; см. правила в AGENTS.md.
-- v1.32 - Pre-Week-2 Audit Pass.
+- НОВОЕ: `GAME_VERSION` в _core.js — бампить при каждом срезе + `menu-ver` в шаблоне.
+- Следующее в очереди (WIP): 🐴 лошади и ранчо.
 - Последний harness: Scenarios A-Z pass + encoding/sync guard OK, 0 FAIL, 0 mojibake, git clean.
 - v1.29: Gold Rush claim raids (X). v1.30: sidebar pawn select fix (Y). v1.31: caravan route +20% (Z). v1.32: аудит + фикс версии в меню.
 - ПЕРЕХОД НА НЕДЕЛЮ 2. Готово из Недели 1: логистика, крафт, стены+ворота+A*, частицы/береговая.

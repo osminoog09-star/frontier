@@ -2,6 +2,16 @@
 
 ## 2026-06-02
 
+### v1.34 - Combat Depth: Downed State (Week 2 start)
+
+- Pawns no longer die instantly at 0 HP — they fall **unconscious (downed)** and bleed out over time.
+- A downed pawn can be **rescued**: another cowboy healing them with medicine raises HP; at 25+ HP they recover.
+- No rescue → they bleed out and die; a second lethal hit **finishes off** a downed pawn immediately.
+- Enemies ignore downed pawns and target standing cowboys instead.
+- Downed pawns are drawn lying with a blood pool + red cross; sidebar shows "🩸 Без сознания".
+- Added `GAME_VERSION` constant; roadmap panel badge reads it.
+- Harness: Scenario AA validates down/rescue/finish-off/bleed-out. A-AA green; Scenario A (raid) still passes.
+
 ### v1.33 - Menu Scroll Fix + Clear Roadmap + Agent Coordination
 
 - FIX: the main-menu left column was not scrollable — bottom buttons (site, diagnostics) were cut off on

@@ -1,5 +1,6 @@
 
 // ==================== CONFIG ====================
+const GAME_VERSION = '1.34';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -546,6 +547,7 @@ function updatePawns() {
   G._claims = {}; // reset per-tick job reservations (workplace key -> count)
   for (const p of G.pawns) {
     if (!p.alive) continue;
+    if (p.downed) { updateDowned(p); continue; } // лежит без сознания — обычный ИИ не работает
     p._wt = null; // reset current work tag before schedule/combat can branch away
     p.attackCooldown = Math.max(0, p.attackCooldown - 1);
 
@@ -555,7 +557,7 @@ function updatePawns() {
       const dE = (p.state==='sleeping' ? 3 : -0.3);
       p.energy = clamp(p.energy + dE, 0, p.maxEnergy);
       if (p.food <= 0) p.hp = Math.max(0, p.hp - 2);
-      if (p.hp <= 0) killPawn(p);
+      if (p.hp <= 0) downPawn(p);
     }
 
     // Eat if hungry
@@ -665,7 +667,7 @@ function updateIllness(p) {
       // worsening
       if (p.sick.timer > 600 && p.sick.severity < 3) { p.sick.severity++; p.sick.timer=0; }
       if (p.sick.severity >= 3 && G.tick % 60 === 0) p.hp = Math.max(0, p.hp - 1);
-      if (p.hp <= 0) killPawn(p);
+      if (p.hp <= 0) downPawn(p);
     }
     // sick pawns work slower
   }
@@ -1184,7 +1186,7 @@ function applyHit(target, dmg, friendly) {
     }
   } else {
     // target is pawn — random wound
-    if (target.hp <= 0) killPawn(target);
+    if (target.hp <= 0) downPawn(target);
     else if (Math.random()<0.3) {
       target.woundSeverity = Math.min(3, (target.woundSeverity||0)+1);
       addThought(target, '🩸 Ранен пулей', 8, false);
@@ -1210,8 +1212,10 @@ function updateEnemies() {
   G.enemies = G.enemies.filter(e=>e.alive);
   for (const e of G.enemies) {
     e.attackCooldown = Math.max(0, e.attackCooldown-1);
-    // Find nearest alive pawn
-    const target = G.pawns.filter(p=>p.alive).sort((a,b)=>dist(e,a)-dist(e,b))[0];
+    // Find nearest standing pawn (лежачих без сознания враги не добивают)
+    const standing = G.pawns.filter(p=>p.alive && !p.downed);
+    const target = (standing.length ? standing : G.pawns.filter(p=>p.alive))
+      .sort((a,b)=>dist(e,a)-dist(e,b))[0];
     if (!target) continue;
     const d = Math.hypot(e.x-target.x, e.y-target.y) / TILE;
     const range = e.range || 1.5;
@@ -1465,10 +1469,42 @@ function wander(p, range) {
   }
 }
 
+// Падение в «без сознания» (downed) вместо мгновенной смерти.
+// Повторный смертельный урон по уже лежащему — добивает. Иначе пешка истекает кровью
+// (downedTimer), но её может стабилизировать другой ковбой медикаментами.
+// Лежачая пешка: истекает кровью; стабилизируется, если другой ковбой лечит её медикаментами.
+function updateDowned(p) {
+  p.downedTimer = (p.downedTimer || 0) - 1;
+  // спасение: если HP подняли (медиком через tryHeal) выше порога — приходит в себя
+  if (p.hp >= 25) {
+    p.downed = false;
+    p.state = 'idle';
+    p.downedTimer = 0;
+    addLog(`💚 ${p.name} пришёл в себя.`, 'good');
+    return;
+  }
+  // без помощи — истекает кровью и гибнет
+  if (p.downedTimer <= 0) { killPawn(p); return; }
+  if (G.tick % 240 === 0) addSplat(p.x, p.y);
+}
+
+function downPawn(p) {
+  if (!p.alive) return;
+  if (p.downed) { killPawn(p); return; }   // добили лежачего
+  p.downed = true;
+  p.hp = Math.max(1, Math.min(p.hp, 1));
+  p.downedTimer = 1500;                     // ~истекает кровью за это время без помощи
+  p.state = 'downed';
+  p.manualTarget = null;
+  addLog(`🩸 ${p.name} потерял сознание! Нужна помощь.`, 'danger');
+  addSplat(p.x, p.y);
+}
+
 function killPawn(p) {
   if (!p.alive) return;
   p.alive = false;
   p.dead = true;
+  p.downed = false;
   addLog(`💀 ${p.name} погиб!`, 'danger');
   addSplat(p.x, p.y);
   const alivePawns = G.pawns.filter(q=>q.alive);
@@ -2215,7 +2251,18 @@ function drawPawn(p) {
   ctx.fillStyle = 'rgba(0,0,0,0.22)';
   ctx.beginPath(); ctx.ellipse(x, y+8, 7, 3, 0, 0, Math.PI*2); ctx.fill();
 
-  if (p.state==='sleeping') {
+  if (p.downed) {
+    // лежит без сознания — кровь + красный крест-призыв о помощи
+    ctx.fillStyle = 'rgba(150,30,30,0.4)';
+    ctx.beginPath(); ctx.ellipse(x, y+2, 11, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = shirt;
+    ctx.fillRect(x-8, y-1, 16, 6);
+    ctx.fillStyle = '#d8a878';
+    ctx.beginPath(); ctx.arc(x-10, y+2, 3, 0, Math.PI*2); ctx.fill(); // голова
+    ctx.fillStyle = '#c03030';
+    ctx.font = '10px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('✚', x+4, y-9);
+  } else if (p.state==='sleeping') {
     // lying down
     ctx.fillStyle = shirt;
     ctx.fillRect(x-8, y-2, 16, 6);
@@ -2513,7 +2560,7 @@ function renderPawns() {
     const card = document.createElement('div');
     card.dataset.pawnId = p.id;
     card.className = 'pawn-card' + (G.selectedPawnId===p.id?' selected':'') + (p.dead?' dead':'');
-    const stateNames = {idle:'Отдыхает',working:'Работает',sleeping:'Спит',fighting:'Сражается',joy:'Развлекается',breakdown:'Срыв!'};
+    const stateNames = {idle:'Отдыхает',working:'Работает',sleeping:'Спит',fighting:'Сражается',joy:'Развлекается',breakdown:'Срыв!',downed:'🩸 Без сознания'};
     const woundText = p.hp < p.maxHp*0.5 ? '🤕 Ранен' : '';
     const sickText = p.sick ? `🤒 ${p.sick.name}` : '';
     const traitChips = (p.traits||[]).map(t=>{
@@ -3363,12 +3410,12 @@ function showRoadmapPanel(panel) {
     ['done','v1.13–1.20','Логистика и торговля: фильтры складов, диагностика, лимиты крафта, торговый пост, караваны.'],
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
-    ['now', 'v1.32–1.33','Аудит перед Неделей 2: фикс версии в меню, прокрутка меню, понятный роадмап, координация с Codex.'],
+    ['now', 'v1.32–1.34','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение).'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
     <div style="background:#1a1610;border:1px solid #3a3320;border-radius:6px;padding:8px 10px;margin-bottom:12px">
-      <b style="color:#e8c97e">🚩 Стадия: PRE-ALPHA · сборка 1.33</b>
+      <b style="color:#e8c97e">🚩 Стадия: PRE-ALPHA · сборка ${GAME_VERSION}</b>
       <div style="color:#999;font-size:11px;margin-top:3px">Ядро и контент Недели 1 готовы. Идёт Неделя 2. Цель месяца — ALPHA (онлайн + кооп). Полная документация: папка <b>docs/</b>.</div>
     </div>
     <h3 style="margin-top:0">📅 Месячный план</h3>

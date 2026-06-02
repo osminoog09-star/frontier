@@ -552,6 +552,26 @@ const test = `
   const noteOk = caravanTradeHtml(crPost).includes('+20% к выдаче');
   console.log('SCENARIO Z (caravan route trade bonus):');
   console.log('   route +20%:', routeOk?'OK':'FAIL', '| route food', routeFood, 'vs base', baseFood, '| UI note:', noteOk?'OK':'FAIL');
+
+  // Scenario AA: combat downed state — incapacitated instead of instant death, finish-off, rescue, bleed-out
+  newGame('settlers');
+  const dp = G.pawns.find(p => p.alive);
+  // смертельный урон → без сознания, но жив
+  dp.hp = 5; downPawn(dp);
+  const downedOk = dp.alive && dp.downed && !dp.dead && dp.hp <= 1 && dp.downedTimer > 0;
+  // спасение: подняли HP и тикнули → пришёл в себя
+  dp.hp = 30; updateDowned(dp);
+  const rescuedOk = dp.alive && !dp.downed && dp.state === 'idle';
+  // добивание лежачего
+  const dp2 = G.pawns.filter(p => p.alive)[1] || G.pawns.find(p=>p.alive&&p.id!==dp.id);
+  downPawn(dp2); const wasDowned = dp2.downed && dp2.alive;
+  downPawn(dp2); const finishedOff = dp2.dead && !dp2.alive;
+  // истечение кровью без помощи
+  const dp3 = G.pawns.find(p => p.alive && !p.downed);
+  downPawn(dp3); dp3.downedTimer = 1; updateDowned(dp3);
+  const bledOut = dp3.dead && !dp3.alive;
+  console.log('SCENARIO AA (combat downed/rescue/bleed-out):');
+  console.log('   downed not dead:', downedOk?'OK':'FAIL', '| rescued:', rescuedOk?'OK':'FAIL', '| finish-off:', (wasDowned&&finishedOff)?'OK':'FAIL', '| bleed-out:', bledOut?'OK':'FAIL');
 })();
 `;
 try {
