@@ -1062,6 +1062,26 @@ const test = `
   console.log('SCENARIO AY (floors build+demolish):');
   console.log('   placed:', placedOk?'OK':'FAIL', '| water reject:', waterRejectOk?'OK':'FAIL', '| built:', builtOk?'OK':'FAIL', '(ticks '+fguard+') | demolish:', demolishOk?'OK':'FAIL', '|', ayOk?'OK':'FAIL');
   if (!ayOk) throw new Error('Scenario AY failed');
+
+  // Scenario AZ: material walls block movement, form room walls, stone is tougher
+  newGame('settlers');
+  const azWoodHp = getBuildingMaxHp('fence');
+  const azWallHp = getBuildingMaxHp('wall');
+  const azStoneHp = getBuildingMaxHp('wall_stone');
+  const azHpOk = azWallHp > azWoodHp && azStoneHp > azWallHp;
+  const wtx = 22, wty = 22;
+  G.map[wty][wtx] = { type: TERRAIN.GRASS, v:0, obj:null };
+  const azWalkBefore = isWalkableTile(wtx, wty);
+  G.buildings.push({ type:'wall', tx:wtx, ty:wty, done:true, blueprint:false, hp:azWallHp, maxHp:azWallHp });
+  const azBlocksOk = azWalkBefore === true && isWalkableTile(wtx, wty) === false;
+  const azRoomWallOk = isRoomWallAt(wtx, wty) === true;
+  G.map[wty][wtx+1] = { type: TERRAIN.GRASS, v:0, obj:null };
+  G.buildings.push({ type:'wall_stone', tx:wtx+1, ty:wty, done:true, blueprint:false, hp:azStoneHp, maxHp:azStoneHp });
+  const azStoneOk = isWalkableTile(wtx+1, wty) === false && isRoomWallAt(wtx+1, wty) === true;
+  const azOk = azHpOk && azBlocksOk && azRoomWallOk && azStoneOk;
+  console.log('SCENARIO AZ (material walls):');
+  console.log('   hp fence/wall/stone:', azWoodHp+'/'+azWallHp+'/'+azStoneHp, azHpOk?'OK':'FAIL', '| blocks:', azBlocksOk?'OK':'FAIL', '| room wall:', azRoomWallOk?'OK':'FAIL', '| stone:', azStoneOk?'OK':'FAIL', '|', azOk?'OK':'FAIL');
+  if (!azOk) throw new Error('Scenario AZ failed');
 })();
 `;
 try {

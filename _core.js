@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.63';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.64';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -23,6 +23,8 @@ const BUILDS = {
   stockpile:{ name:'Склад',   icon:'▣', cost:{wood:0},             size:2, prod:'storage',rate:0 },
   fence:  { name:'Забор',    icon:'🪵', cost:{wood:5},            size:1, prod:null,   hp:100 },
   gate:   { name:'Ворота',   icon:'▫', cost:{wood:8},            size:1, prod:null,   hp:120, passable:true },
+  wall:      { name:'Стена',        icon:'🧱', cost:{wood:6},     size:1, prod:null, wall:true },
+  wall_stone:{ name:'Каменная стена',icon:'🪨', cost:{ore:6},     size:1, prod:null, wall:true },
   tower:  { name:'Вышка',    icon:'🗼', cost:{wood:20,ore:10},   size:1, prod:null,   range:12 },
   saloon: { name:'Салун',    icon:'🍺', cost:{wood:30,gold:10},  size:2, prod:'mood',  rate:0.1 },
   tradepost:{ name:'Торг. пост',icon:'🧳', cost:{wood:35,gold:20}, size:2, prod:'trade', rate:0 },
@@ -897,7 +899,7 @@ function homesteadComfortLabel() {
 }
 function isRoomWallAt(tx, ty) {
   return !!(G && G.buildings && G.buildings.some(b => {
-    if (!b.done || b.blueprint || !['fence','gate'].includes(b.type)) return false;
+    if (!b.done || b.blueprint || !(['fence','gate'].includes(b.type) || BUILDS[b.type]?.wall)) return false;
     const size = BUILDS[b.type]?.size || 1;
     return tx >= b.tx && ty >= b.ty && tx < b.tx + size && ty < b.ty + size;
   }));
@@ -1732,7 +1734,7 @@ function isBlockingBuildingAt(tx, ty) {
   return G.buildings.some(b => {
     if (!b.done || b.blueprint || !BUILDS[b.type] || BUILDS[b.type].passable) return false;
     const size = buildingSize(b.type);
-    return tx>=b.tx && ty>=b.ty && tx<b.tx+size && ty<b.ty+size && b.type==='fence';
+    return tx>=b.tx && ty>=b.ty && tx<b.tx+size && ty<b.ty+size && (b.type==='fence' || BUILDS[b.type].wall);
   });
 }
 
@@ -1990,7 +1992,10 @@ function updateParticles() {
 }
 
 function getBuildingMaxHp(type) {
-  return hasResearch('walls') ? 300 : 200;
+  const base = hasResearch('walls') ? 300 : 200;
+  if (type === 'wall') return base + 80;
+  if (type === 'wall_stone') return base * 2;
+  return base;
 }
 
 function hasResearch(id) {
@@ -2577,6 +2582,27 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.fillStyle = '#7a5530';
       ctx.fillRect(x+3, y+4, 3, S-8); ctx.fillRect(x+S-6, y+4, 3, S-8);
       ctx.lineWidth = 1;
+      break;
+    }
+    case 'wall': {
+      ctx.fillStyle = '#7a5836'; ctx.fillRect(x+1, y+1, S-2, S-2);
+      ctx.fillStyle = '#8d6a44'; ctx.fillRect(x+1, y+1, S-2, 3); // верхняя фаска
+      ctx.fillStyle = 'rgba(0,0,0,0.28)'; ctx.fillRect(x+1, y+S-4, S-2, 3);
+      ctx.strokeStyle = 'rgba(40,24,10,0.55)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x+1, cy); ctx.lineTo(x+S-1, cy); ctx.stroke(); // доски
+      break;
+    }
+    case 'wall_stone': {
+      ctx.fillStyle = '#8a8780'; ctx.fillRect(x+1, y+1, S-2, S-2);
+      ctx.fillStyle = '#9c998f'; ctx.fillRect(x+1, y+1, S-2, 3);
+      ctx.fillStyle = 'rgba(0,0,0,0.30)'; ctx.fillRect(x+1, y+S-4, S-2, 3);
+      ctx.strokeStyle = 'rgba(30,30,30,0.45)'; ctx.lineWidth = 1; // кладка
+      ctx.beginPath();
+      ctx.moveTo(x+1, cy); ctx.lineTo(x+S-1, cy);
+      ctx.moveTo(cx, y+1); ctx.lineTo(cx, cy);
+      ctx.moveTo(x+S*0.3, cy); ctx.lineTo(x+S*0.3, y+S-1);
+      ctx.moveTo(x+S*0.7, cy); ctx.lineTo(x+S*0.7, y+S-1);
+      ctx.stroke();
       break;
     }
     case 'gate': {
@@ -3924,7 +3950,7 @@ function setupButtons() {
 
   // Build buttons
   const buildMap = {
-    'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
+    'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-wall-btn':'wall','build-wallstone-btn':'wall_stone','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-barrel-btn':'barrel','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
@@ -4191,7 +4217,7 @@ function showHowtoPanel(panel) {
 
 function updateBuildButtons() {
   const buildMap = {
-    'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
+    'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-wall-btn':'wall','build-wallstone-btn':'wall_stone','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-barrel-btn':'barrel','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
