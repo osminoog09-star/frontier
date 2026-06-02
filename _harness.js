@@ -780,6 +780,20 @@ const test = `
   console.log('SCENARIO AK (housing progression bed->house):');
   console.log('   lone bed:', loneComfort, '| bed in room:', roomComfort, '| sleep rates ordered:', rateOk?'OK':'FAIL', '|', houseOk?'OK':'FAIL');
   if (!houseOk) throw new Error('Scenario AK failed');
+
+  // Scenario AL: mood music profile (deterministic) + setMusic smoke (no audio in Node)
+  newGame('settlers');
+  G.enemies = []; G.hour = 12; const mCalm = musicProfile();
+  G.hour = 23; const mNight = musicProfile();
+  G.enemies = [{ alive:true, x:0, y:0 }]; G.hour = 12; const mCombat = musicProfile();
+  G.hour = 23; const mCombat2 = musicProfile();   // бой важнее ночи
+  const musicOk = mCalm==='calm' && mNight==='night' && mCombat==='combat' && mCombat2==='combat';
+  let mSmokeOk = true;
+  try { ['calm','night','combat','calm'].forEach(p => Sfx.setMusic(p)); } catch(e) { mSmokeOk = false; }
+  const musicProfileSet = Sfx.music && Sfx.music.profile === 'calm';
+  console.log('SCENARIO AL (mood music profile):');
+  console.log('   profile select:', musicOk?'OK':'FAIL', '(' + [mCalm,mNight,mCombat].join('/') + ') | setMusic smoke:', (mSmokeOk&&musicProfileSet)?'OK':'FAIL');
+  if (!musicOk || !mSmokeOk || !musicProfileSet) throw new Error('Scenario AL failed');
 })();
 `;
 try {

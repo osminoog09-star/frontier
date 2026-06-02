@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.46';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.47';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -558,6 +558,15 @@ function spawnEnemy(count) {
       alive: true,
     });
   }
+}
+
+// Какое музыкальное настроение сейчас (чистая функция — тестируемо): бой важнее ночи важнее дня.
+function musicProfile() {
+  if (!G) return 'calm';
+  if (G.enemies && G.enemies.some(e => e.alive)) return 'combat';
+  const h = G.hour;
+  if (h < 6 || h >= 21) return 'night';
+  return 'calm';
 }
 
 // Какой эмбиент-слой играть сейчас (чистая функция от состояния — тестируемо).
@@ -2740,7 +2749,7 @@ miniCanvas.addEventListener('mousedown', (e) => {
 // ==================== UI UPDATE ====================
 function updateUI() {
   if (!G) return;
-  if (Sfx.on) Sfx.setAmbient(ambientProfile());   // эмбиент по времени/погоде (сам не дёргается зря)
+  if (Sfx.on) { Sfx.setAmbient(ambientProfile()); Sfx.setMusic(musicProfile()); } // эмбиент + музыка (рестарт только при смене)
   document.getElementById('res-food').textContent = Math.floor(G.res.food);
   document.getElementById('res-wood').textContent = Math.floor(G.res.wood);
   document.getElementById('res-ore').textContent = Math.floor(G.res.ore);
@@ -3550,6 +3559,7 @@ function setupButtons() {
   document.getElementById('sound-btn').addEventListener('click', () => {
     Sfx.on = !Sfx.on;
     if (Sfx.on) { Sfx.init(); Sfx.resume(); Sfx.click(); }
+    else { Sfx._stopAmbient(); Sfx._stopMusic(); Sfx.ambient.profile = null; Sfx.music.profile = null; } // глушим фон
     document.getElementById('sound-btn').textContent = Sfx.on ? '🔊' : '🔇';
     Diag.action('Звук ' + (Sfx.on?'ВКЛ':'ВЫКЛ'));
   });
@@ -3694,7 +3704,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.46','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья (кровать в доме лучше палатки).'],
+    ['now', 'v1.36–1.47','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений (спокойно/ночь/бой).'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
@@ -4020,6 +4030,42 @@ const Sfx = {
       src.connect(filter); filter.connect(g); g.connect(this.master);
       src.start();
       this.ambient.src = src; this.ambient.gain = g; this.ambient.filter = filter;
+    } catch(e) {}
+  },
+  // ---- music (тихий пад: спокойно/ночь/бой) ----
+  music: { profile: null, oscs: null, gain: null },
+  setMusic(profile) {
+    if (this.music.profile === profile && (this.music.oscs || !this.ctx)) { this.music.profile = profile; return; }
+    this.music.profile = profile;
+    if (!this.on || !this.ctx) return;
+    this._stopMusic();
+    this._startMusic(profile);
+  },
+  _stopMusic() {
+    try { if (this.music.oscs) this.music.oscs.forEach(o => { try { o.stop(); o.disconnect(); } catch(e){} }); } catch(e) {}
+    this.music.oscs = null;
+  },
+  _startMusic(profile) {
+    if (!this.ctx) return;
+    try {
+      const ctx = this.ctx;
+      const chords = {
+        calm:   { notes: [261.63, 329.63, 392.00], gain: 0.025, type: 'sine' },     // C-dur, спокойно
+        night:  { notes: [196.00, 233.08, 293.66], gain: 0.018, type: 'sine' },     // тихий тёмный аккорд
+        combat: { notes: [196.00, 277.18, 311.13], gain: 0.035, type: 'triangle' }, // напряжённый
+      };
+      const cfg = chords[profile] || chords.calm;
+      const g = ctx.createGain(); g.gain.value = cfg.gain;
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+      g.connect(lp); lp.connect(this.master);
+      const oscs = [];
+      for (const f of cfg.notes) {
+        const o = ctx.createOscillator(); o.type = cfg.type;
+        o.frequency.value = f * (0.999 + Math.random()*0.002); // лёгкая расстройка для «живости»
+        o.connect(g); o.start();
+        oscs.push(o);
+      }
+      this.music.oscs = oscs; this.music.gain = g;
     } catch(e) {}
   },
   // game sounds

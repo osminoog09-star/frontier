@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.47 - Mood Music (finishes the audio pass)
+
+- Added a quiet mood music pad layered under ambient: calm (day), darker (night), tense (combat — when
+  enemies are alive). Generative sustained chord via WebAudio, very low gain, restarts only on change.
+- `musicProfile()` pure selector (combat > night > calm); `Sfx.setMusic()` safe no-op without audio.
+- Sound 🔊 toggle now also stops ambient + music when turned off.
+- Harness: Scenario AL (profile selection + setMusic smoke). A-AL (38) green.
+
 ### v1.46 - Housing Progression (beds make tents make sense)
 
 - Fixed a design redundancy: with beds, the tent/camp felt pointless. Now there is a clear progression:
