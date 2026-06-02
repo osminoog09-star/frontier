@@ -408,6 +408,25 @@ const test = `
   const caravanGoalOk = caravanTrade.traded && G.stats.caravanDeals === beforeDeals + 1 && caravanGoal.target === 3 && caravanGoal.value === 1;
   console.log('SCENARIO R (scenario goals):');
   console.log('   settlers:', settlersGoalOk?'OK':'FAIL', '| goldrush:', goldrushGoalOk?'OK':'FAIL', '| fort:', fortGoalOk?'OK':'FAIL', '| caravan:', caravanGoalOk?'OK':'FAIL');
+
+  // Scenario S: scenario-specific event pressure
+  newGame('goldrush');
+  G.day = 2; G.res.food = 50;
+  const goldPressure = triggerScenarioDayEvent();
+  const goldPressureOk = goldPressure && goldPressure.type === 'goldrush_food_pressure' && G.res.food === 42;
+  newGame('fort');
+  G.day = 2; G.enemies = [];
+  const fortPressure = triggerScenarioDayEvent();
+  const fortPressureOk = fortPressure && fortPressure.type === 'fort_raid_pressure' && G.enemies.length === fortPressure.count;
+  newGame('caravan');
+  G.day = 2; G.eventTimer = 400;
+  const caravanPressure = triggerScenarioDayEvent();
+  const caravanPressureOk = caravanPressure && caravanPressure.type === 'caravan_cadence' && G.eventTimer <= 80;
+  newGame('caravan');
+  const delays = Array.from({length:20}, () => scenarioEventDelay());
+  const caravanDelayOk = delays.every(v => v >= 220 && v <= 480);
+  console.log('SCENARIO S (scenario event pressure):');
+  console.log('   goldrush:', goldPressureOk?'OK':'FAIL', '| fort:', fortPressureOk?'OK':'FAIL', '| caravan:', caravanPressureOk?'OK':'FAIL', '| caravan delay:', caravanDelayOk?'OK':'FAIL');
 })();
 `;
 try {

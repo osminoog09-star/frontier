@@ -127,6 +127,37 @@ function isScenarioGoalMet() {
   return goal.value >= goal.target;
 }
 
+function scenarioEventDelay() {
+  if (!G) return 500 + randInt(0, 700);
+  if (G.scenario === 'caravan') return 220 + randInt(0, 260);
+  if (G.scenario === 'fort') return 360 + randInt(0, 320);
+  if (G.scenario === 'goldrush') return 420 + randInt(0, 420);
+  return 500 + randInt(0, 700);
+}
+
+function triggerScenarioDayEvent() {
+  if (!G || G.gameOver) return null;
+  if (G.scenario === 'goldrush' && G.day >= 2 && G.day <= 5) {
+    const loss = Math.min(G.res.food, 8);
+    G.res.food -= loss;
+    addLog(`💰 Золотая лихорадка давит на припасы: старатели съели ${loss} еды.`, 'warn');
+    return { type:'goldrush_food_pressure', loss };
+  }
+  if (G.scenario === 'fort' && G.day >= 2 && G.day <= 4 && G.day % 2 === 0) {
+    const count = 1 + Math.floor(G.day / 2);
+    spawnEnemy(count);
+    Sfx.alarm();
+    addLog(`🛡️ Форт проверяют на прочность: разведотряд бандитов (${count}) идёт к стенам.`, 'danger');
+    return { type:'fort_raid_pressure', count };
+  }
+  if (G.scenario === 'caravan' && G.day >= 2 && G.day % 2 === 0) {
+    G.eventTimer = Math.min(G.eventTimer || 999, 80);
+    addLog('🐎 Караванный путь оживлён: следующий караван придёт быстрее.', 'good');
+    return { type:'caravan_cadence', eventTimer:G.eventTimer };
+  }
+  return null;
+}
+
 function newGame(scenarioId='settlers') {
   const map = generateMap();
   G = {
@@ -1571,6 +1602,7 @@ function onNewDay() {
   }
 
   checkAchievements();
+  triggerScenarioDayEvent();
 
   // Win condition
   if (isScenarioGoalMet()) { gameOver('win'); }
@@ -3427,7 +3459,7 @@ function gameLoop(ts) {
       G.eventTimer--;
       if (G.eventTimer <= 0) {
         triggerEvent(G.day < 2);
-        G.eventTimer = 500 + randInt(0, 700);
+        G.eventTimer = scenarioEventDelay();
       }
     }
 

@@ -344,5 +344,17 @@
 - [x] Regression harness green: Scenarios A-R pass, expected Scenario K anomaly is detected, no runtime errors.
 
 ### Next Autonomous Target
-- [ ] Scenario-specific event pressure.
+- [x] Scenario-specific event pressure.
+- [ ] Caravan profiles: food caravan, medicine caravan, building-material caravan.
+
+## Update 2026-06-02 - v1.23 Scenario Event Pressure Slice
+- [x] Created `versions/frontier-v1.23.html` from the current playable build.
+- [x] Added `scenarioEventDelay()` for scenario-aware event cadence.
+- [x] Gold Rush gets early food pressure.
+- [x] Fort Defense gets early scouting raids.
+- [x] Caravan Route gets faster caravan/event cadence.
+- [x] Extended `_harness.js` with Scenario S: scenario event pressure.
+- [x] Regression harness green: Scenarios A-S pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
 - [ ] Caravan profiles: food caravan, medicine caravan, building-material caravan.

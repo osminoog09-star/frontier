@@ -223,3 +223,11 @@
 
 ### Next Architecture Work
 - Add small scenario event modifiers: Gold Rush economic pressure, Fort raid cadence, Caravan trade cadence.
+
+## Update 2026-06-02 - Scenario Event Pressure Architecture Notes
+- `scenarioEventDelay()` provides scenario-aware event cadence without duplicating the main loop.
+- `triggerScenarioDayEvent()` applies small daily modifiers for Gold Rush, Fort Defense, and Caravan Route.
+- Scenario S validates food pressure, fort raid pressure, caravan cadence, and caravan delay range.
+
+### Next Architecture Work
+- Split caravan trades into explicit profiles while keeping `runCaravanTrade()` deterministic for harness coverage.

@@ -6,8 +6,8 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.22 - Scenario Goals`.
-- Последний harness: Scenarios A-R pass.
+- Последний локальный срез: `v1.23 - Scenario Event Pressure`.
+- Последний harness: Scenarios A-S pass.
 - Ожидаемая anomaly в harness: Scenario K специально создает заблокированный `meat` stack и проверяет диагностику.
 
 ## Последние изменения
@@ -26,24 +26,29 @@
   - `caravan`: провести 3 караванные сделки.
 - HUD, статистика пешек, справка и победа используют `scenarioGoalStatus()`.
 - Караванные сделки пишутся в `stats.caravanDeals`.
+- Добавлены сценарные события:
+  - `goldrush`: раннее давление по еде.
+  - `fort`: разведывательные налёты на 2 и 4 день.
+  - `caravan`: более частое окно караванов/событий.
+- Event cadence вынесен в `scenarioEventDelay()`.
 - Public `index.html` полностью на русском и показывает roadmap/status.
 - Добавлен `docs/TECH_ROADMAP.md`.
 - Добавлены `AGENTS.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
 
 ## Что делать дальше
 
-Приоритет 1: сценарные события и давление.
-
-- Gold Rush: больше экономического давления, риск засухи/налётов на добытчиков.
-- Fort Defense: ранний/регулярный raid pressure.
-- Caravan Route: более частые караваны и торговые бонусы.
-
-Приоритет 2: расширить караваны.
+Приоритет 1: расширить караваны.
 
 - Food caravan.
 - Medicine caravan.
 - Building materials caravan.
 - Harness для каждого профиля сделки.
+
+Приоритет 2: углубить сценарные события.
+
+- Gold Rush: риск засухи/налётов на добытчиков.
+- Fort Defense: более читаемые волны и награды за удержание.
+- Caravan Route: торговые бонусы и выбор сделки.
 
 Приоритет 3: улучшить UX сценариев.
 
@@ -66,7 +71,7 @@ node _harness.js
 
 - `_core.js` - игровая логика.
 - `frontier.html` - публичная сборка, должна быть синхронизирована с `_core.js`.
-- `_harness.js` - автотесты A-R.
+- `_harness.js` - автотесты A-S.
 - `index.html` - публичный русский сайт/roadmap.
 - `ROADMAP.md` - общий roadmap.
 - `docs/TECH_ROADMAP.md` - технический roadmap для агентов.

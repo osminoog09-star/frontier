@@ -2,6 +2,15 @@
 
 ## 2026-06-02
 
+### v1.23 - Scenario Event Pressure
+
+- Added scenario-specific event modifiers.
+- Gold Rush loses a small amount of food on early days to create economic pressure.
+- Fort Defense spawns early scouting raids on days 2 and 4.
+- Caravan Route shortens the next caravan/event timer on even days.
+- Added `scenarioEventDelay()` so Caravan/Fort/Gold Rush can use different event cadence.
+- Harness: Scenario S.
+
 ### v1.22 - Scenario Goals
 
 - Added scenario-specific objective logic.

@@ -283,4 +283,14 @@
 - Done: `_harness.js` includes Scenario R for scenario goals.
 
 ### Next Step
-- Add scenario-specific event pressure and caravan deal profiles.
+- Add caravan deal profiles.
+
+## Update 2026-06-02 - Scenario Event Pressure Status
+- Done: scenario event pressure slice implemented as `versions/frontier-v1.23.html`.
+- Done: Gold Rush applies early food pressure.
+- Done: Fort Defense spawns early scouting raids.
+- Done: Caravan Route accelerates the next caravan/event window.
+- Done: `_harness.js` includes Scenario S for scenario event modifiers.
+
+### Next Step
+- Add food, medicine, and building-material caravan profiles.

@@ -152,3 +152,10 @@
 - Fort Defense is about holding out until day 5.
 - Caravan Route is about completing trade deals.
 - The top objective HUD now tells the player what to do without opening documentation.
+
+## Update 2026-06-02 - Scenario Event Pressure Design Status
+- Scenarios now affect early pacing, not only starting resources.
+- Gold Rush creates pressure through food drain.
+- Fort Defense adds early danger through scouting raids.
+- Caravan Route makes trade events feel more frequent.
+- The next design step is giving caravan trades clear profiles and player-readable choices.
