@@ -2,6 +2,11 @@
 
 ## 2026-06-02
 
+### v1.55 - Marksman Research (combat)
+
+- New research «Меткость»: +0.1 pawn hit chance and +6 shot damage. Extracted pawnHitChance()/pawnShotDamage() pure helpers used by fightEnemy.
+- Harness: Scenario AS (research present, hit and damage rise with it). A-AS (45) green.
+
 ### v1.54 - Work Skill Leveling
 
 - Pawns gain work XP while working and level up (cap 10); each level adds +4% work speed via wmul (up to +40%).

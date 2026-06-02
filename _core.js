@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.54';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.55';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -72,6 +72,7 @@ const RESEARCHES = [
   { id:'walls',   name:'Укрепления',         desc:'+50% HP строений', cost:100, done:false, effect:'walls' },
   { id:'hunting', name:'Следопытство',       desc:'Охотники убивают быстрее, +30% мяса', cost:80, done:false, effect:'hunting' },
   { id:'trading', name:'Торговля',           desc:'Торговцы приносят больше', cost:70,   done:false, effect:'trading' },
+  { id:'marksman',name:'Меткость',           desc:'Ковбои метче и больнее стреляют', cost:90, done:false, effect:'marksman' },
 ];
 
 // ==================== STATE ====================
@@ -1320,6 +1321,16 @@ function dropItem(res, amount, tx, ty) {
 }
 
 // Pawns are gunslingers: shoot from range, keep distance
+// Шанс попадания и урон ковбоя (чистые функции — тестируемо; «Меткость» усиливает обе).
+function pawnHitChance(d, cover) {
+  let hc = 0.95 - d*0.07 - cover;
+  if (hasResearch('marksman')) hc += 0.1;
+  return clamp(hc, 0.2, 0.98);
+}
+function pawnShotDamage() {
+  return (14 + randInt(0,8)) + (hasResearch('marksman') ? 6 : 0);
+}
+
 function fightEnemy(p, e) {
   p.state = 'fighting';
   const d = Math.hypot(p.x-e.x, p.y-e.y) / TILE;
@@ -1342,8 +1353,8 @@ function fightEnemy(p, e) {
     p.attackCooldown = hasResearch('tools') ? 45 : 60; // fire rate
     // accuracy falls with distance and target cover
     const cover = getCover(e.x, e.y);
-    let hitChance = clamp(0.95 - d*0.07 - cover, 0.2, 0.95);
-    const dmg = 14 + randInt(0,8);
+    const hitChance = pawnHitChance(d, cover);
+    const dmg = pawnShotDamage();
     fireProjectile(p.x, p.y-4, e, true, Math.random()<hitChance ? dmg : 0);
   }
 }
@@ -3851,7 +3862,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.54','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом, враг «Поджигатель», навыки работы (опыт→уровни).'],
+    ['now', 'v1.36–1.54','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом, враг «Поджигатель», навыки работы, исследование «Меткость».'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>

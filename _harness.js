@@ -901,6 +901,20 @@ const test = `
   console.log('SCENARIO AR (work skill leveling):');
   console.log('   level up:', leveledUp?'OK':'FAIL', '| faster:', fasterWithSkill?'OK':'FAIL', '| cap 10:', capped?'OK':'FAIL');
   if (!skillOk) throw new Error('Scenario AR failed');
+
+  // Scenario AS: Marksman research boosts pawn hit chance and shot damage
+  newGame('settlers');
+  const hasMarksDef = RESEARCHES.some(r => r.id === 'marksman');
+  G.researches.forEach(r => { if (r.id === 'marksman') r.done = false; });
+  const hc0 = pawnHitChance(3, 0);
+  let minDmg0 = 999; for (let i=0;i<60;i++) minDmg0 = Math.min(minDmg0, pawnShotDamage());
+  G.researches.forEach(r => { if (r.id === 'marksman') r.done = true; });
+  const hc1 = pawnHitChance(3, 0);
+  let minDmg1 = 999; for (let i=0;i<60;i++) minDmg1 = Math.min(minDmg1, pawnShotDamage());
+  const marksOk = hasMarksDef && Math.abs(hc1 - hc0 - 0.1) < 1e-9 && minDmg0 === 14 && minDmg1 === 20;
+  console.log('SCENARIO AS (marksman research):');
+  console.log('   exists:', hasMarksDef?'OK':'FAIL', '| hit', hc0.toFixed(2)+'->'+hc1.toFixed(2), '| dmg-min', minDmg0+'->'+minDmg1, '|', marksOk?'OK':'FAIL');
+  if (!marksOk) throw new Error('Scenario AS failed');
 })();
 `;
 try {

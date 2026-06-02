@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.55 - Marksman Research. Исследование «Меткость»: точнее/больнее стрельба ковбоев. Scenario AS. Harness A-AS (45) green.
+
 - v1.54 - Work Skill. Опыт за труд → уровни (до 10) ускоряют работу (+4%/ур). Scenario AR. Harness A-AR (44) green.
 
 - v1.53 - Arsonist Enemy. Поджигатель атакует и уничтожает постройки (брешь в обороне); в крупных налётах (6+). Scenario AQ. Harness A-AQ (43) green.
