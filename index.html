@@ -3,616 +3,170 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FRONTIER — Дикий Запад • Проект</title>
+<title>FRONTIER - статус разработки</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' font-size='48'%3E%F0%9F%A4%A0%3C/text%3E%3C/svg%3E">
 <style>
   :root {
-    --gold:#e8c97e; --gold-dim:#b89a5a; --bg:#14110c; --bg2:#1d1810;
-    --card:#1f1a12; --border:#3a3320; --text:#c9bfa8; --muted:#8a7f68;
-    --green:#7ca84e; --blue:#5a8fbf; --red:#c05858;
+    --bg:#101010; --panel:#171717; --panel2:#1f1b13; --line:#342d1d;
+    --gold:#e8c97e; --muted:#9a927f; --text:#d8d2c4; --green:#83bd5a;
+    --blue:#6aa6e0; --red:#d06b6b;
   }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  html { scroll-behavior:smooth; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:Segoe UI, system-ui, sans-serif; }
   body {
     background:
-      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(120,90,40,0.18), transparent 70%),
-      linear-gradient(180deg, var(--bg) 0%, #0d0b07 100%);
-    color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; line-height:1.6;
-    min-height:100vh;
+      linear-gradient(180deg, rgba(232,201,126,.09), transparent 260px),
+      radial-gradient(circle at 18% 0%, rgba(106,166,224,.11), transparent 280px),
+      #101010;
   }
   a { color:var(--gold); text-decoration:none; }
-  .wrap { max-width:1060px; margin:0 auto; padding:0 20px; }
-
-  /* NAV */
-  nav {
-    position:sticky; top:0; z-index:50; backdrop-filter:blur(10px);
-    background:rgba(20,17,12,0.8); border-bottom:1px solid var(--border);
+  a:hover { text-decoration:underline; }
+  .wrap { width:min(1120px, calc(100% - 28px)); margin:0 auto; }
+  header {
+    position:sticky; top:0; z-index:5;
+    background:rgba(16,16,16,.88); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
   }
-  .nav-inner { display:flex; align-items:center; gap:24px; height:56px; }
-  .nav-logo { font-size:20px; font-weight:800; color:var(--gold); letter-spacing:1px; }
-  .nav-links { display:flex; gap:20px; margin-left:auto; flex-wrap:wrap; }
-  .nav-links a { color:var(--muted); font-size:14px; transition:color .15s; }
-  .nav-links a:hover { color:var(--gold); }
-  .btn-play {
-    background:var(--gold); color:#1a1408 !important; padding:8px 18px; border-radius:6px;
-    font-weight:700; font-size:14px; transition:transform .12s, box-shadow .12s;
+  .nav { height:58px; display:flex; align-items:center; gap:18px; }
+  .brand { font-weight:800; color:var(--gold); letter-spacing:.08em; }
+  .nav small { color:var(--muted); }
+  .nav-links { margin-left:auto; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .btn {
+    border:1px solid var(--line); background:#1b1b1b; color:var(--text);
+    padding:9px 13px; border-radius:6px; font-weight:650; display:inline-flex; align-items:center; gap:8px;
   }
-  .btn-play:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(232,201,126,0.3); }
-
-  /* HERO */
-  header.hero { padding:80px 0 60px; text-align:center; }
-  .hero h1 { font-size:64px; font-weight:900; color:var(--gold); letter-spacing:3px;
-    text-shadow:0 4px 24px rgba(0,0,0,0.6); }
-  .hero .tag { font-size:18px; color:var(--muted); margin:14px 0 30px; }
-  .hero-badges { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:34px; }
-  .badge { background:var(--card); border:1px solid var(--border); padding:6px 14px; border-radius:20px;
-    font-size:13px; color:var(--gold-dim); }
-  .hero-cta { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
-  .cta-big {
-    background:var(--gold); color:#1a1408; padding:14px 36px; border-radius:8px;
-    font-weight:800; font-size:17px; transition:transform .12s, box-shadow .12s;
+  .btn.primary { background:var(--gold); color:#1b1305; border-color:var(--gold); }
+  main { padding:22px 0 48px; }
+  .hero {
+    display:grid; grid-template-columns:minmax(0, 1fr) 360px; gap:18px; align-items:stretch;
+    min-height:calc(100vh - 116px);
   }
-  .cta-big:hover { transform:translateY(-2px); box-shadow:0 8px 26px rgba(232,201,126,0.35); }
-  .cta-ghost { background:transparent; color:var(--gold); border:1px solid var(--border);
-    padding:14px 30px; border-radius:8px; font-weight:600; font-size:17px; }
-  .cta-ghost:hover { border-color:var(--gold); }
-
-  /* SECTIONS */
-  section { padding:54px 0; border-top:1px solid rgba(58,51,32,0.4); }
-  .sec-title { font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-dim); margin-bottom:8px; }
-  .sec-h2 { font-size:32px; color:var(--gold); margin-bottom:8px; font-weight:800; }
-  .sec-sub { color:var(--muted); margin-bottom:30px; max-width:640px; }
-
-  /* STATUS CARDS */
-  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; }
-  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; }
-  .stat-num { font-size:34px; font-weight:900; color:var(--gold); }
-  .stat-label { font-size:13px; color:var(--muted); margin-top:4px; }
-
-  /* PROGRESS */
-  .prog-wrap { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:22px; margin-top:18px; }
-  .prog-bar { height:14px; background:#0e0c08; border-radius:8px; overflow:hidden; margin:10px 0; }
-  .prog-fill { height:100%; background:linear-gradient(90deg,#7a6a2a,var(--gold)); border-radius:8px; }
-  .prog-meta { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); }
-
-  /* ROADMAP */
-  .rm-list { display:flex; flex-direction:column; gap:12px; }
-  .rm-item { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px;
-    display:flex; gap:18px; align-items:flex-start; transition:border-color .15s; }
-  .rm-item:hover { border-color:var(--gold-dim); }
-  .rm-item.now { border-color:var(--gold); background:linear-gradient(90deg,rgba(232,201,126,0.06),var(--card)); }
-  .rm-ver { font-size:22px; font-weight:900; min-width:60px; color:var(--gold); }
-  .rm-body { flex:1; }
-  .rm-name { font-size:17px; font-weight:700; color:var(--text); margin-bottom:3px; }
-  .rm-desc { font-size:14px; color:var(--muted); }
-  .rm-status { font-size:11px; font-weight:700; padding:4px 12px; border-radius:14px; white-space:nowrap; }
-  .st-done { background:rgba(124,168,78,0.16); color:var(--green); }
-  .st-now { background:rgba(232,201,126,0.16); color:var(--gold); }
-  .st-soon { background:rgba(120,120,120,0.14); color:var(--muted); }
-  .rm-checks { margin-top:10px; display:flex; flex-direction:column; gap:4px; }
-  .rm-check { font-size:13px; color:var(--muted); }
-  .rm-check.ok { color:var(--green); }
-
-  /* FEATURES / HOW IT WORKS */
-  .feat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
-  .feat-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:22px; }
-  .feat-icon { font-size:30px; margin-bottom:10px; }
-  .feat-card h3 { font-size:17px; color:var(--gold); margin-bottom:8px; }
-  .feat-card p { font-size:14px; color:var(--muted); }
-  .feat-card ul { margin:8px 0 0 18px; }
-  .feat-card li { font-size:13px; color:var(--muted); margin:3px 0; }
-
-  /* CHANGELOG */
-  .log-list { position:relative; padding-left:24px; }
-  .log-list::before { content:''; position:absolute; left:6px; top:6px; bottom:6px; width:2px; background:var(--border); }
-  .log-entry { position:relative; padding:0 0 24px 8px; }
-  .log-entry::before { content:''; position:absolute; left:-23px; top:5px; width:12px; height:12px;
-    border-radius:50%; background:var(--gold); border:2px solid var(--bg); }
-  .log-entry.minor::before { background:var(--gold-dim); }
-  .log-ver { font-size:16px; font-weight:800; color:var(--gold); }
-  .log-date { font-size:12px; color:var(--muted); margin-left:8px; }
-  .log-entry ul { margin:8px 0 0 18px; }
-  .log-entry li { font-size:14px; color:var(--text); margin:4px 0; }
-  .log-entry li span.t { color:var(--muted); }
-
-  /* DOWNLOADS / VERSIONS */
-  .ver-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
-  .ver-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px;
-    transition:transform .12s, border-color .12s; display:block; }
-  .ver-card:hover { transform:translateY(-2px); border-color:var(--gold); }
-  .ver-card.latest { border-color:var(--gold); }
-  .ver-title { font-size:18px; font-weight:800; color:var(--gold); }
-  .ver-tag { font-size:11px; color:var(--muted); }
-  .ver-desc { font-size:13px; color:var(--muted); margin-top:8px; }
-
-  footer { padding:40px 0; text-align:center; color:var(--muted); font-size:13px;
-    border-top:1px solid var(--border); }
-
-  @media(max-width:640px){
-    .hero h1 { font-size:42px; }
-    .nav-links { display:none; }
+  .panel {
+    background:linear-gradient(180deg, rgba(31,27,19,.96), rgba(18,18,18,.96));
+    border:1px solid var(--line); border-radius:8px; padding:18px;
+  }
+  .game-frame {
+    padding:0; overflow:hidden; min-height:560px; position:relative;
+  }
+  .game-frame iframe { width:100%; height:100%; min-height:560px; border:0; display:block; background:#111; }
+  .frame-cover {
+    position:absolute; inset:auto 12px 12px 12px; display:flex; gap:8px; justify-content:flex-end; pointer-events:none;
+  }
+  .frame-cover .btn { pointer-events:auto; background:rgba(16,16,16,.9); }
+  h1 { margin:0 0 8px; font-size:34px; line-height:1.05; color:var(--gold); }
+  h2 { color:var(--gold); font-size:18px; margin:0 0 12px; }
+  h3 { margin:16px 0 8px; color:#f0dca0; font-size:14px; }
+  p { color:#c7beaa; line-height:1.55; }
+  .status-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin:14px 0; }
+  .stat { background:#151515; border:1px solid #292312; border-radius:6px; padding:10px; }
+  .stat b { display:block; color:var(--green); font-size:15px; }
+  .stat span { color:var(--muted); font-size:12px; }
+  .list { display:grid; gap:8px; margin:10px 0 0; }
+  .item { border-left:3px solid var(--line); background:#151515; padding:9px 10px; border-radius:4px; }
+  .item.done { border-left-color:var(--green); }
+  .item.now { border-left-color:var(--gold); }
+  .item.next { border-left-color:var(--blue); }
+  .item b { display:block; color:#ead7a8; }
+  .item span { display:block; color:var(--muted); font-size:13px; margin-top:2px; }
+  .sections { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:18px; margin-top:18px; }
+  .tag { display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid #40361f; color:#d8c89a; margin:2px 4px 2px 0; }
+  .links { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  code { background:#0d0d0d; border:1px solid #2c2c2c; border-radius:4px; padding:2px 5px; color:#e9d18d; }
+  footer { color:var(--muted); padding:24px 0; border-top:1px solid var(--line); }
+  @media (max-width:900px) {
+    .hero, .sections { grid-template-columns:1fr; }
+    .game-frame { min-height:520px; }
+  }
+  @media (max-width:640px) {
+    .nav { height:auto; padding:10px 0; align-items:flex-start; }
+    .nav-links { width:100%; margin-left:0; }
+    h1 { font-size:28px; }
+    .status-grid { grid-template-columns:1fr; }
+    .game-frame { min-height:520px; }
   }
 </style>
 </head>
 <body>
-
-<nav>
-  <div class="wrap nav-inner">
-    <span class="nav-logo">🤠 FRONTIER</span>
+<header>
+  <div class="wrap nav">
+    <div>
+      <div class="brand">FRONTIER</div>
+      <small>Дикий Запад, colony sim, public web build</small>
+    </div>
     <div class="nav-links">
-      <a href="#status">Статус</a>
-      <a href="#roadmap">Роадмап</a>
-      <a href="#how">Как работает</a>
-      <a href="#changelog">Чейнджлог</a>
-      <a href="#versions">Версии</a>
-    </div>
-    <a class="btn-play" href="frontier.html">▶ Играть</a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <h1>FRONTIER</h1>
-    <p class="tag">Стратегия выживания на Диком Западе в стиле RimWorld</p>
-    <div class="hero-badges">
-      <span class="badge">🤠 Ковбои-колонисты</span>
-      <span class="badge">🧠 ИИ пешек</span>
-      <span class="badge">📅 Расписание и приоритеты</span>
-      <span class="badge">⚔️ Бой</span>
-      <span class="badge">🌦️ Живой мир</span>
-    </div>
-    <div class="hero-cta">
-      <a class="cta-big" href="frontier.html">▶ Запустить игру</a>
-      <a class="cta-ghost" href="#roadmap">🗺️ Смотреть роадмап</a>
+      <a class="btn primary" href="frontier.html">Играть</a>
+      <a class="btn" href="ROADMAP.md">Roadmap.md</a>
+      <a class="btn" href="docs/PHONE_ACCESS.md">Phone access</a>
     </div>
   </div>
 </header>
 
-<!-- STATUS -->
-<section id="status">
-  <div class="wrap">
-    <div class="sec-title">Текущее состояние</div>
-    <h2 class="sec-h2">Статус проекта</h2>
-    <p class="sec-sub">Игра в активной разработке. Каждая версия — отдельный играбельный файл.</p>
-
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-num">v1.7.2</div><div class="stat-label">Текущая версия</div></div>
-      <div class="stat-card"><div class="stat-num">11</div><div class="stat-label">Выпущено сборок</div></div>
-      <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">Типов построек</div></div>
-      <div class="stat-card"><div class="stat-num">8</div><div class="stat-label">Типов работ</div></div>
-      <div class="stat-card"><div class="stat-num">6</div><div class="stat-label">Технологий науки</div></div>
-      <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">Случайных событий</div></div>
-    </div>
-
-    <div class="prog-wrap">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <b style="color:var(--gold)">Общий прогресс разработки</b>
-        <span style="color:var(--muted);font-size:13px">8 из 8 этапов — базовый релиз готов! 🎉</span>
-      </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
-      <div class="prog-meta"><span>Старт</span><span>100%</span><span>Релиз 1.0 ✅</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ROADMAP -->
-<section id="roadmap">
-  <div class="wrap">
-    <div class="sec-title">План разработки</div>
-    <h2 class="sec-h2">Роадмап</h2>
-    <p class="sec-sub">Что уже сделано, над чем работаю сейчас и что впереди.</p>
-
-    <div class="rm-list">
-      <div class="rm-item">
-        <span class="rm-ver">v1.0</span>
-        <div class="rm-body">
-          <div class="rm-name">Фундамент</div>
-          <div class="rm-desc">Базовый движок игры и все ключевые системы.</div>
-          <div class="rm-checks">
-            <span class="rm-check ok">✓ Карта с биомами, ИИ пешек, расписание дня</span>
-            <span class="rm-check ok">✓ Приоритеты работ, постройки, ресурсы</span>
-            <span class="rm-check ok">✓ Наука, животные, погода, сезоны, события</span>
-            <span class="rm-check ok">✓ Сохранение/загрузка</span>
-          </div>
-        </div>
-        <span class="rm-status st-done">ГОТОВО</span>
-      </div>
-
-      <div class="rm-item">
-        <span class="rm-ver">v1.1</span>
-        <div class="rm-body">
-          <div class="rm-name">Графика</div>
-          <div class="rm-desc">Полностью рисованная графика вместо эмодзи.</div>
-          <div class="rm-checks">
-            <span class="rm-check ok">✓ Ковбои с анимацией ходьбы, шляпами, цветными жилетами</span>
-            <span class="rm-check ok">✓ Нарисованные здания (ферма, салун, кузня, колодец…)</span>
-            <span class="rm-check ok">✓ Деревья и камни с тенями и объёмом</span>
-            <span class="rm-check ok">✓ Цикл день/ночь с освещением и свечением окон</span>
-          </div>
-        </div>
-        <span class="rm-status st-done">ГОТОВО</span>
-      </div>
-
-      <div class="rm-item">
-        <span class="rm-ver">v1.2</span>
-        <div class="rm-body">
-          <div class="rm-name">Играбельность</div>
-          <div class="rm-desc">Понятность и комфорт для игрока.</div>
-          <div class="rm-checks">
-            <span class="rm-check ok">✓ Цель с прогресс-баром по центру</span>
-            <span class="rm-check ok">✓ Стартовый туториал</span>
-            <span class="rm-check ok">✓ Пауза и скорости x1/x2/x4</span>
-            <span class="rm-check ok">✓ Спокойный первый день без бандитов</span>
-          </div>
-        </div>
-        <span class="rm-status st-done">ГОТОВО</span>
-      </div>
-
-      <div class="rm-item">
-        <span class="rm-ver">v1.3</span>
-        <div class="rm-body">
-          <div class="rm-name">Меню и фикс боя</div>
-          <div class="rm-desc">Главное меню и починенный автобой.</div>
-          <div class="rm-checks">
-            <span class="rm-check ok">✓ Починен автобой (ковбои сами нападают на налётчиков)</span>
-            <span class="rm-check ok">✓ Правый клик = постоянная цель преследования</span>
-            <span class="rm-check ok">✓ Главное меню с роадмапом и справкой</span>
-            <span class="rm-check ok">✓ Отдельная страница-сайт (эта)</span>
-          </div>
-        </div>
-        <span class="rm-status st-done">ГОТОВО</span>
-      </div>
-
-      <div class="rm-item">
-        <span class="rm-ver">v1.4</span>
-        <div class="rm-body">
-          <div class="rm-name">Бой</div>
-          <div class="rm-desc">Полноценная боевая система вестерна с огнестрелом.</div>
-          <div class="rm-checks">
-            <span class="rm-check ok">✓ Огнестрел: пули летят, точность падает с дистанцией</span>
-            <span class="rm-check ok">✓ Укрытия за стенами, камнями и деревьями</span>
-            <span class="rm-check ok">✓ Типы врагов: Головорез, Стрелок, Главарь</span>
-            <span class="rm-check ok">✓ Самозащита + кайтинг (ковбои держат дистанцию)</span>
-          </div>
-        </div>
-        <span class="rm-status st-done">ГОТОВО</span>
-      </div>
-
-      <div class="rm-item">
-        <span class="rm-ver">v1.5</span>
-        <div class="rm-body">
-          <div class="rm-name">Камера и удобство</div>
-          <div class="rm-desc">Качество жизни: навигация по карте и интерфейс.</div>
-          <div class="rm-checks">
-            <span class="rm-check ok">✓ Миникарта с врагами, пешками, зданиями и кликом-переходом</span>
-            <span class="rm-check ok">✓ Зум колесом мыши (к курсору) и кнопками ＋／－／⊙</span>
-            <span class="rm-check ok">✓ Полноэкранный режим</span>
-            <span class="rm-check ok">✓ Обычный курсор вместо крестика</span>
-          </div>
-        </div>
-        <span class="rm-status st-done">ГОТОВО</span>
-      </div>
-
-      <div class="rm-item">
-        <span class="rm-ver">v1.6</span>
-        <div class="rm-body">
-          <div class="rm-name">Жизнь колонии</div>
-          <div class="rm-desc">Характеры, отношения и здоровье колонистов.</div>
-          <div class="rm-checks">
-            <span class="rm-check ok">✓ 10 характеров (трейтов), влияющих на работу и настроение</span>
-            <span class="rm-check ok">✓ Отношения: общение, дружба, ссоры</span>
-            <span class="rm-check ok">✓ Болезни с лечением медикаментами в клинике</span>
-            <span class="rm-check ok">✓ v1.6.1: диагностика/логи + фиксы (энергия, работы, стройка)</span>
-          </div>
-        </div>
-        <span class="rm-status st-done">ГОТОВО</span>
-      </div>
-
-      <div class="rm-item now">
-        <span class="rm-ver">v1.7</span>
-        <div class="rm-body">
-          <div class="rm-name">Полировка</div>
-          <div class="rm-desc">Звук, баланс, мобильное управление, достижения.</div>
-          <div class="rm-checks">
-            <span class="rm-check ok">✓ Процедурный звук (WebAudio): выстрелы, рубка, монеты, фанфары</span>
-            <span class="rm-check ok">✓ 9 достижений с всплывашками и экраном в меню</span>
-            <span class="rm-check ok">✓ Тач-управление: палец-камера, два пальца-зум, тап-выбор</span>
-            <span class="rm-check ok">✓ Растущие волны бандитов (баланс по дням)</span>
-          </div>
-        </div>
-        <span class="rm-status st-now">ТЕКУЩАЯ</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section id="how">
-  <div class="wrap">
-    <div class="sec-title">Документация</div>
-    <h2 class="sec-h2">Как всё работает</h2>
-    <p class="sec-sub">Главный принцип — непрямое управление, как в RimWorld. Ты задаёшь правила, ковбои действуют сами.</p>
-
-    <div class="feat-grid">
-      <div class="feat-card">
-        <div class="feat-icon">🧠</div>
-        <h3>ИИ пешек</h3>
-        <p>Каждый ковбой каждый тик решает, что делать, по системе приоритетов и расписанию:</p>
-        <ul>
-          <li>Сначала проверяет бой (если враг рядом)</li>
-          <li>Потом расписание: сон / работа / отдых</li>
-          <li>В работе берёт задачу с высшим приоритетом</li>
-        </ul>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">⚙️</div>
-        <h3>Приоритеты работ</h3>
-        <p>8 типов: Рубка, Фермерство, Добыча, Строительство, Охота, Уход, Охрана, Перевозка.</p>
-        <ul>
-          <li>1 = высший приоритет, 4 = низший, ❌ = не делать</li>
-          <li>У каждого ковбоя — своя специализация</li>
-          <li>Клик по пешке открывает редактор</li>
-        </ul>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">📅</div>
-        <h3>Расписание</h3>
-        <p>Сетка 24 часа на каждого ковбоя. Клик по ячейке меняет режим:</p>
-        <ul>
-          <li>🟢 Свободно — работа или отдых по нужде</li>
-          <li>🟫 Работа — только труд</li>
-          <li>🟦 Сон — восстановление сил и лечение</li>
-          <li>🟪 Досуг — настроение в салуне</li>
-        </ul>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">😊</div>
-        <h3>Нужды и настроение</h3>
-        <p>4 шкалы: HP, Еда, Настроение, Сила. Мысли влияют на настроение.</p>
-        <ul>
-          <li>Голод → урон по HP, при 0 еды — смерть</li>
-          <li>Низкое настроение → срыв, отказ работать</li>
-          <li>Холод зимой и непогода портят настрой</li>
-        </ul>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">⚔️</div>
-        <h3>Бой</h3>
-        <p>Два режима управления отрядом в схватке:</p>
-        <ul>
-          <li><b>Авт.Бой ВКЛ</b> — все сами стреляют по врагам в радиусе</li>
-          <li><b>Правый клик</b> по врагу — выбранный ковбой преследует цель</li>
-          <li>Победа над бандитом даёт золото</li>
-        </ul>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">🐞</div>
-        <h3>Диагностика</h3>
-        <p>Встроенный инструмент контроля качества:</p>
-        <ul>
-          <li>Пишет журнал действий игрока</li>
-          <li>Каждые 2 сек сканирует игру на аномалии</li>
-          <li>Ловит: шкалы за пределами, NaN, скучивание, стоящие чертежи</li>
-          <li>Кнопка 🐞 скачивает лог в JSON</li>
-        </ul>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">🌦️</div>
-        <h3>Живой мир</h3>
-        <p>Мир меняется сам по себе:</p>
-        <ul>
-          <li>4 сезона: летом рост быстрый, зимой снег</li>
-          <li>Погода: дождь, гроза, песчаная буря, метель</li>
-          <li>Животные бродят, бандиты нападают, события</li>
-        </ul>
+<main class="wrap">
+  <section class="hero">
+    <div class="panel game-frame">
+      <iframe src="frontier.html" title="FRONTIER playable build"></iframe>
+      <div class="frame-cover">
+        <a class="btn primary" href="frontier.html">Открыть игру</a>
       </div>
     </div>
 
-    <h3 style="color:var(--gold);font-size:20px;margin:34px 0 14px;">🎯 Цель игры</h3>
-    <div class="feat-card">
-      <p>Накопить <b style="color:var(--gold)">500 золота</b> 💰, не дав колонии погибнуть. Золото приносят: кузня, добыча руды, убийство бандитов и удачные события. Если все ковбои погибнут — поражение.</p>
-    </div>
-  </div>
-</section>
+    <aside class="panel">
+      <h1>FRONTIER</h1>
+      <p>Текущая публичная сборка уже доступна через GitHub Pages. Ее можно открыть с телефона по интернету без локального сервера.</p>
+      <div class="links">
+        <a class="btn primary" href="frontier.html">Играть с телефона</a>
+        <a class="btn" href="https://github.com/osminoog09-star/frontier">GitHub repo</a>
+      </div>
 
-<!-- CHANGELOG -->
-<section id="changelog">
-  <div class="wrap">
-    <div class="sec-title">История изменений</div>
-    <h2 class="sec-h2">Чейнджлог</h2>
-    <p class="sec-sub">Полный лог разработки — что и когда сделано.</p>
+      <div class="status-grid">
+        <div class="stat"><b>v1.16 public mobile</b><span>Pages, mobile CSS, full-width canvas</span></div>
+        <div class="stat"><b>A-M green</b><span>Harness covers combat, save/load, logistics, production</span></div>
+        <div class="stat"><b>GitHub Pages</b><span><code>main / root</code></span></div>
+        <div class="stat"><b>Next</b><span>v1.17 production output limits</span></div>
+      </div>
 
-    <div class="log-list">
-      <div class="log-entry">
-        <span class="log-ver">v1.7.2 — Фикс работ + умная диагностика</span><span class="log-date">текущая</span>
-        <ul>
-          <li>⛏️ <b>Фикс простоя добычи</b> <span class="t">— при большом проекте стройки (длинный забор) ВСЕ пешки, включая горняка, бросали работу и строили, из-за чего камень/дерево не добывались. Теперь строит ограниченная бригада (≈треть колонии, до 4), остальные продолжают добычу/ферму</span></li>
-          <li>🐞 <b>Умные сторожа в диагностике</b> <span class="t">— ловят «помеченные камни/деревья не добываются» (только при реальном простое, не во время подхода пешки) и «массовый простой» (>60% пешек без дела при наличии работы)</span></li>
-          <li>🧪 <b>Регрессионный авто-тест</b> <span class="t">— сценарий «40 заборов + помеченные камни» проверяет, что добыча не застревает; пойман и закрыт по логу игрока (день 9)</span></li>
-        </ul>
+      <h2>Latest Slices</h2>
+      <div class="list">
+        <div class="item done"><b>v1.13 Stockpile filters</b><span>Склады принимают только выбранные ресурсы, haulers это уважают.</span></div>
+        <div class="item done"><b>v1.14 Logistics diagnostics</b><span>Диагностика ловит ресурсы, которые некуда везти из-за фильтров.</span></div>
+        <div class="item done"><b>v1.15 Station toggles</b><span>Кухню/кузню можно включать и выключать из карточки здания.</span></div>
+        <div class="item done"><b>v1.16 Public mobile web</b><span>Публичный URL и мобильный layout для телефона.</span></div>
+        <div class="item now"><b>v1.17 Output limits</b><span>Лимиты производства на станциях: не жечь ресурсы бесконечно.</span></div>
       </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.7.1 — Фиксы и удобство</span>
-        <ul>
-          <li>💾 <b>Фикс сохранения карты</b> <span class="t">— карта не сохранялась: при «Продолжить» генерировалась новая, и здания из сейва попадали на воду. Теперь террейн, объекты, животные, камера и ID сохраняются и восстанавливаются</span></li>
-          <li>🖱️ <b>Забор кистью</b> <span class="t">— зажми ЛКМ и веди мышь, чтобы поставить цепочку заборов; снос работает так же перетаскиванием</span></li>
-          <li>👉 <b>Прыжок к пешке</b> <span class="t">— клик по карточке ковбоя в правой панели центрирует камеру на нём</span></li>
-          <li>⛺ <b>Вместимость лагеря</b> <span class="t">— максимум 3 ковбоя на палатку; лишние спят на месте (раньше все лезли в одну)</span></li>
-          <li>✅ Новый авто-тест save/load: карта идентична после загрузки, 0 зданий на воде</li>
-        </ul>
-      </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.7 — Полировка</span>
-        <ul>
-          <li>🔊 <b>Звук</b> <span class="t">— процедурный WebAudio (без файлов): выстрелы, рубка леса, стук стройки, звон монет, тревога при налёте, фанфары победы и марш поражения; кнопка 🔊 вкл/выкл</span></li>
-          <li>🏅 <b>Достижения</b> <span class="t">— 9 ачивок: Первый дом, Шериф, Гроза прерий, Лесопилка, Богач, Городок, Старожил, Учёный, Король Запада. Всплывают тостом, сохраняются, отдельный экран в меню</span></li>
-          <li>📱 <b>Тач-управление</b> <span class="t">— для телефона: один палец двигает камеру, два пальца — пинч-зум, короткий тап — выбор/постройка</span></li>
-          <li>⚔️ <b>Баланс</b> <span class="t">— волны бандитов растут со временем (каждые 6 дней +1 враг в налёте)</span></li>
-          <li>✅ Авто-тесты зелёные: 0 аномалий, стройка работает, энергия в норме</li>
-        </ul>
-      </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.6.1 — Диагностика и фиксы</span>
-        <ul>
-          <li>🐞 <b>Система диагностики/логов</b> <span class="t">— записывает действия игрока и автоматически ловит аномалии: шкалы за пределами макс, NaN в ресурсах, скучивание пешек, чертежи без строителей. Кнопка 🐞 скачивает полный лог в JSON</span></li>
-          <li>🔧 <b>Фикс энергии</b> <span class="t">— «Сила» уходила за 100/100 (445!) из-за дыры в восстановлении во сне; теперь ограничена максимумом</span></li>
-          <li>🔧 <b>Фикс распределения работ</b> <span class="t">— пешки больше не толпятся на одной ферме/шахте; лимит рабочих на место, разные цели для рубки/добычи</span></li>
-          <li>🔧 <b>Фикс строительства</b> <span class="t">— заложенные постройки раньше игнорировались; теперь стройка срочная — чертёж строится сразу (до 2 строителей)</span></li>
-          <li>✅ Аномалия «никто не строит» была поймана самим инструментом диагностики в авто-тесте</li>
-        </ul>
-      </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.6 — Жизнь колонии</span>
-        <ul>
-          <li>🧬 <b>Характеры</b> <span class="t">— 10 трейтов: Работяга (+25% работы), Лентяй, Храбрец, Трус, Оптимист, Пессимист, Выпивоха, Добряк, Жадина, Крепкий (+30 HP)</span></li>
-          <li>❤️ <b>Отношения</b> <span class="t">— ковбои периодически общаются; рождаются дружба и вражда, влияя на настроение; ссоры попадают в лог</span></li>
-          <li>🤒 <b>Болезни</b> <span class="t">— Лихорадка, Простуда, Дизентерия, Инфекция; лечатся медикаментами при наличии клиники, без лечения усиливаются и бьют по HP</span></li>
-          <li>🏷️ Трейты видны в карточке пешки с подсказкой по наведению</li>
-          <li>✅ Прогон в Node: бой + 20k тиков с социалкой и болезнями — без ошибок; старые сохранения совместимы</li>
-        </ul>
-      </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.5 — Камера и удобство</span>
-        <ul>
-          <li>🗺️ <b>Миникарта</b> <span class="t">— в углу карты; показывает террейн, здания (золото), пешек (голубой), врагов (красный); клик переносит камеру</span></li>
-          <li>🔍 <b>Зум</b> <span class="t">— колесо мыши приближает к курсору; кнопки ＋／－／⊙ (сброс)</span></li>
-          <li>⛶ <b>Полный экран</b> <span class="t">— кнопка в верхней панели</span></li>
-          <li>🖱️ <b>Обычный курсор</b> <span class="t">— вместо крестика; перетаскивание двигает камеру с учётом масштаба</span></li>
-          <li>✅ Протестировано прогоном в Node — рендер с зумом и миникартой без ошибок</li>
-        </ul>
-      </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.4 — Бой</span>
-        <ul>
-          <li>🔫 <b>Огнестрел</b> <span class="t">— ковбои и бандиты стреляют пулями; точность падает с дистанцией</span></li>
-          <li>🛡️ <b>Укрытия</b> <span class="t">— у стен, камней и деревьев врага труднее подстрелить (до −40% шанса)</span></li>
-          <li>👥 <b>Типы врагов</b> <span class="t">— Головорез (нож, быстрый), Стрелок (револьвер), Главарь (толстый, +30💰)</span></li>
-          <li>🤠 <b>Самозащита</b> <span class="t">— ковбои отстреливаются от близких врагов даже с выключенным автобоем</span></li>
-          <li>🎯 <b>Кайтинг</b> <span class="t">— ковбои держат дистанцию и не лезут в упор</span></li>
-          <li>✅ Протестировано: 3 ковбоя на автобое чисто отбивают налёт из 4 (с Главарём)</li>
-        </ul>
-      </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.3 — Меню и фикс боя</span>
-        <ul>
-          <li>🐛 <b>Починен автобой</b> <span class="t">— ковбои застревали в состоянии боя и не атаковали; теперь бой вынесен поверх расписания</span></li>
-          <li>⚔️ Правый клик по врагу <span class="t">— назначает постоянную цель, ковбой преследует до победы</span></li>
-          <li>☰ Главное меню <span class="t">— новая игра, продолжить, роадмап, справка</span></li>
-          <li>🌐 Отдельная страница-сайт <span class="t">— роадмап, документация, чейнджлог (эта страница)</span></li>
-        </ul>
-      </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.2 — Играбельность</span>
-        <ul>
-          <li>🎯 Цель с прогресс-баром по центру экрана</li>
-          <li>📖 Стартовый туториал для новых игроков</li>
-          <li>⏸️ Пауза + скорости x1/x2/x4</li>
-          <li>🕊️ Первый день без бандитов и эпидемий — спокойный старт</li>
-        </ul>
-      </div>
-      <div class="log-entry">
-        <span class="log-ver">v1.1 — Графика</span>
-        <ul>
-          <li>🤠 Рисованные ковбои <span class="t">— тело, жилет, шляпа, анимация ног и рук при ходьбе</span></li>
-          <li>🏠 Рисованные здания <span class="t">— ферма с грядками, салун с крышей, кузня с горном и т.д.</span></li>
-          <li>🌲 Деревья и камни с тенями и объёмом, надгробия</li>
-          <li>🌅 Цикл день/ночь с плавным освещением и тёплым свечением окон ночью</li>
-        </ul>
-      </div>
-      <div class="log-entry minor">
-        <span class="log-ver">v1.0 — Фундамент</span>
-        <ul>
-          <li>🗺️ Плавная генерация карты с биомами (вместо «соли с перцем»)</li>
-          <li>🐛 Фикс смещения постройки при клике (учёт отступа канваса)</li>
-          <li>✨ Подсветка клетки и превью постройки (зелёный/красный)</li>
-          <li>🧱 Базовый движок: пешки, ИИ, постройки, наука, события, сохранение</li>
-        </ul>
+    </aside>
+  </section>
+
+  <section class="sections">
+    <div class="panel">
+      <h2>Roadmap Now</h2>
+      <div class="list">
+        <div class="item now"><b>Production Control</b><span>Лимиты выпуска, очереди, пауза станций, видимые причины простоя.</span></div>
+        <div class="item next"><b>Logistics UX</b><span>Больше информации по ground stacks, складам, фильтрам и перевозке.</span></div>
+        <div class="item next"><b>Scenario Content</b><span>Биомы, стартовые сценарии, караваны и торговые цепочки.</span></div>
+        <div class="item next"><b>Cloud/Multiplayer Track</b><span>После стабилизации offline core: команды, save schema, backend skeleton.</span></div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- VERSIONS -->
-<section id="versions">
-  <div class="wrap">
-    <div class="sec-title">Сборки</div>
-    <h2 class="sec-h2">Версии для игры</h2>
-    <p class="sec-sub">Можешь играть в любую версию. Главный файл всегда = последняя стабильная.</p>
-
-    <div class="ver-grid">
-      <a class="ver-card latest" href="frontier.html">
-        <div class="ver-title">frontier.html</div>
-        <div class="ver-tag">★ Последняя (v1.7.2)</div>
-        <div class="ver-desc">Всегда самая свежая стабильная сборка.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.7.2.html">
-        <div class="ver-title">v1.7.2</div>
-        <div class="ver-tag">Фикс работ + диагностика</div>
-        <div class="ver-desc">Добыча не застревает; сторожа простоя.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.7.1.html">
-        <div class="ver-title">v1.7.1</div>
-        <div class="ver-tag">Фиксы и удобство</div>
-        <div class="ver-desc">Фикс сейва, забор-кистью, прыжок к пешке.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.7.html">
-        <div class="ver-title">v1.7</div>
-        <div class="ver-tag">Полировка</div>
-        <div class="ver-desc">Звук, достижения, тач, баланс.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.6.1.html">
-        <div class="ver-title">v1.6.1</div>
-        <div class="ver-tag">Диагностика и фиксы</div>
-        <div class="ver-desc">Логи, фикс энергии, работ и стройки.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.6.html">
-        <div class="ver-title">v1.6</div>
-        <div class="ver-tag">Жизнь колонии</div>
-        <div class="ver-desc">Характеры, отношения, болезни.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.5.html">
-        <div class="ver-title">v1.5</div>
-        <div class="ver-tag">Камера и удобство</div>
-        <div class="ver-desc">Миникарта, зум, полный экран.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.4.html">
-        <div class="ver-title">v1.4</div>
-        <div class="ver-tag">Бой</div>
-        <div class="ver-desc">Огнестрел, укрытия, типы врагов.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.3.html">
-        <div class="ver-title">v1.3</div>
-        <div class="ver-tag">Меню + фикс боя</div>
-        <div class="ver-desc">Главное меню, починенный автобой.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.2.html">
-        <div class="ver-title">v1.2</div>
-        <div class="ver-tag">Играбельность</div>
-        <div class="ver-desc">Цель, туториал, пауза, скорости.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.1.html">
-        <div class="ver-title">v1.1</div>
-        <div class="ver-tag">Графика</div>
-        <div class="ver-desc">Рисованные ковбои и здания, день/ночь.</div>
-      </a>
-      <a class="ver-card" href="versions/frontier-v1.0.html">
-        <div class="ver-title">v1.0</div>
-        <div class="ver-tag">Фундамент</div>
-        <div class="ver-desc">Базовая игра + фиксы карты.</div>
-      </a>
+    <div class="panel">
+      <h2>Tech Notes</h2>
+      <p>Проект сейчас статический: GitHub Pages отдаёт `frontier.html`, а локальный `server.js` нужен только для LAN-тестов.</p>
+      <span class="tag">single-file game build</span>
+      <span class="tag">Node harness</span>
+      <span class="tag">GitHub Pages</span>
+      <span class="tag">mobile smoke</span>
+      <span class="tag">diagnostics log</span>
+      <div class="links">
+        <a class="btn" href="docs/ARCHITECTURE.md">Architecture</a>
+        <a class="btn" href="docs/DESIGN.md">Design</a>
+        <a class="btn" href="docs/ROADMAP_MONTH.md">Month roadmap</a>
+        <a class="btn" href="DEPLOY_GITHUB_PAGES.md">Deploy notes</a>
+      </div>
     </div>
-
-    <div style="text-align:center;margin-top:40px;">
-      <a class="cta-big" href="frontier.html">▶ Играть в последнюю версию</a>
-    </div>
-  </div>
-</section>
+  </section>
+</main>
 
 <footer>
-  <div class="wrap">
-    🤠 FRONTIER — стратегия выживания на Диком Западе • в разработке<br>
-    <span style="font-size:11px;">Сделано с помощью Claude • данные роадмапа: ROADMAP.md</span>
-  </div>
+  <div class="wrap">FRONTIER public build: <a href="frontier.html">frontier.html</a></div>
 </footer>
-
 </body>
 </html>

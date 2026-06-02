@@ -113,3 +113,12 @@
 - Phone access now has a dedicated narrow-screen layout instead of squeezing the desktop sidebar beside the map.
 - The first mobile pass prioritizes playability: full-width map, compact topbar, hidden sidebar.
 - Deeper mobile panels can come later; the goal here is reliable public access from a phone browser.
+
+## Update 2026-06-02 - Production Output Limits Design Status
+- Recipe stations no longer have to run forever just because resources exist.
+- The player can set a simple output cap from the station panel.
+- This keeps early production understandable while opening the path toward richer queues and desired-stock rules.
+
+## Update 2026-06-02 - Public Site Status
+- The project root page now shows the playable build, current roadmap status, latest slices, and documentation links.
+- This makes the GitHub Pages root useful instead of forcing players to know the direct `frontier.html` URL.

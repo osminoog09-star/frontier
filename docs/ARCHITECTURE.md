@@ -167,3 +167,13 @@
 
 ### Next Architecture Work
 - Keep public URL smoke checks as part of release validation.
+
+## Update 2026-06-02 - Production Output Limits Architecture Notes
+- Recipe stations now support `craftLimit`.
+- `normalizeRecipeStation()` keeps old saves compatible by defaulting missing/invalid limits to `0` (no limit).
+- `tryCraft()` checks `craftLimit` before starting a new recipe but allows an already-running craft to finish.
+- `showBuildingInfo()` exposes limit state and limit controls.
+- Scenario M validates that limits block new consumption and raised limits resume crafting.
+
+### Next Architecture Work
+- Convert limit controls into presets/queue depth once the simple numeric limit is stable.

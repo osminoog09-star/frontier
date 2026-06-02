@@ -262,3 +262,17 @@
 ### Next Autonomous Target
 - [ ] Public GitHub Pages mobile smoke after deployment cache refresh.
 - [ ] Continue production queues/output limits after public access is stable.
+
+## Update 2026-06-02 - v1.17 Production Output Limits + Site Refresh
+- [x] Created `versions/frontier-v1.17.html` from the current playable build.
+- [x] Added `craftLimit` for recipe stations.
+- [x] `tryCraft()` now skips starting a new craft when station output already reached its limit.
+- [x] Station panel now shows current limit, "no limit", or "limit reached".
+- [x] Station panel now has `+ limit`, `- limit`, and infinity controls.
+- [x] Extended `_harness.js` with Scenario M: output limit blocks production, raising the limit resumes crafting.
+- [x] Rebuilt `index.html` into a public status/roadmap page with embedded game, latest slices, docs links, and phone play button.
+- [x] Regression harness green: Scenarios A-M pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
+- [ ] Public GitHub Pages smoke for refreshed `index.html` and `frontier.html`.
+- [ ] Next gameplay slice: production queue depth / desired output presets.

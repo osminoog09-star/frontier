@@ -307,6 +307,35 @@ const test = `
   const resumedCrafts = G.res.food >= RECIPES.kitchen.outAmount && G.res.meat < 20;
   console.log('SCENARIO L (recipe station toggle):');
   console.log('   paused no consume:', pausedNoConsume?'OK':'FAIL', '| resumed crafts:', resumedCrafts?'OK':'FAIL');
+
+  // Scenario M: recipe station output limit blocks new production
+  newGame();
+  const limitCook = G.pawns[0];
+  const lx = Math.floor(80/2)+5, ly = Math.floor(60/2)+5;
+  for (const [tx, ty] of [[lx,ly],[lx+1,ly],[lx,ly+1],[lx+1,ly+1]]) {
+    G.map[ty][tx].type = 1;
+    G.map[ty][tx].obj = null;
+  }
+  const limitedKitchen = {type:'kitchen',tx:lx,ty:ly,blueprint:false,done:true,progress:1,hp:200,maxHp:200,selected:false,craftEnabled:true,craftLimit:14};
+  G.buildings.push(limitedKitchen);
+  limitCook.x = (lx+1)*TILE + TILE/2;
+  limitCook.y = ly*TILE + TILE/2;
+  G.res.meat = 20; G.res.wood = 20; G.res.food = 14;
+  for (let i=0; i<260; i++) {
+    G._claims = {};
+    tryCraft(limitCook);
+    moveTowardsTarget(limitCook, 2.0);
+  }
+  const limitNoConsume = G.res.meat === 20 && G.res.wood === 20 && G.res.food === 14 && !limitedKitchen.craft;
+  limitedKitchen.craftLimit = 28;
+  for (let i=0; i<520; i++) {
+    G._claims = {};
+    tryCraft(limitCook);
+    moveTowardsTarget(limitCook, 2.0);
+  }
+  const limitRaisedCrafts = G.res.food >= 28 && G.res.meat < 20;
+  console.log('SCENARIO M (recipe output limit):');
+  console.log('   limit blocks:', limitNoConsume?'OK':'FAIL', '| raised limit crafts:', limitRaisedCrafts?'OK':'FAIL');
 })();
 `;
 try {

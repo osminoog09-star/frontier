@@ -701,6 +701,7 @@ function tryCraft(p) {
     .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty));
   for (const station of stations) {
     const recipe = RECIPES[station.type];
+    if (station.craftLimit > 0 && (G.res[recipe.out] || 0) >= station.craftLimit && !station.craft) continue;
     if (!station.craft && !hasResources(recipe.in)) continue;
     claimSpot('craft_'+station.tx+'_'+station.ty);
     p._wt = 'craft_'+station.tx+'_'+station.ty;
@@ -745,6 +746,12 @@ function recipeStatusLines(b) {
   const lines = [`Рецепт: <b>${inputs}</b> → <b>${recipe.outAmount} ${recipe.out}</b>`];
   if (b.craftEnabled === false) {
     lines.push('Станция: <b>выключена</b>');
+    return lines;
+  }
+  if (b.craftLimit > 0) lines.push(`Лимит: <b>${b.craftLimit} ${recipe.out}</b>`);
+  else lines.push('Лимит: <b>без лимита</b>');
+  if (b.craftLimit > 0 && (G.res[recipe.out] || 0) >= b.craftLimit && !b.craft) {
+    lines.push('Станция: <b>лимит достигнут</b>');
     return lines;
   }
   if (b.craft) {
@@ -874,6 +881,7 @@ function normalizeStockpileFilters(b) {
 function normalizeRecipeStation(b) {
   if (!b || !RECIPES[b.type]) return;
   if (typeof b.craftEnabled !== 'boolean') b.craftEnabled = true;
+  if (typeof b.craftLimit !== 'number' || isNaN(b.craftLimit) || b.craftLimit < 0) b.craftLimit = 0;
 }
 
 function stockpileAllows(b, res) {
@@ -2712,7 +2720,15 @@ function showBuildingInfo(b, cx, cy) {
 function recipeControlHtml(b) {
   if (!b || !RECIPES[b.type]) return '';
   const on = b.craftEnabled !== false;
-  return `<div class="filter-row"><button class="filter-chip ${on?'on':'off'}" data-recipe-toggle="1">${on?'✓ Вкл':'× Выкл'}</button></div>`;
+  const recipe = RECIPES[b.type];
+  const step = Math.max(recipe.outAmount, 5);
+  const limit = b.craftLimit || 0;
+  return `<div class="filter-row">
+    <button class="filter-chip ${on?'on':'off'}" data-recipe-toggle="1">${on?'✓ Вкл':'× Выкл'}</button>
+    <button class="filter-chip" data-limit-delta="${-step}">− лимит</button>
+    <button class="filter-chip" data-limit-delta="${step}">+ лимит</button>
+    <button class="filter-chip ${limit===0?'on':''}" data-limit-clear="1">∞</button>
+  </div>`;
 }
 
 function bindRecipeControlButtons(b) {
@@ -2725,6 +2741,23 @@ function bindRecipeControlButtons(b) {
     b.craftEnabled = b.craftEnabled === false;
     showBuildingInfo(b, parseInt(overlay.style.left,10)||0, Math.max(0, (parseInt(overlay.style.top,10)||0)-10));
   });
+  overlay.querySelectorAll('.filter-chip[data-limit-delta]').forEach(limitBtn => {
+    limitBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      normalizeRecipeStation(b);
+      const delta = parseInt(limitBtn.dataset.limitDelta, 10) || 0;
+      b.craftLimit = Math.max(0, (b.craftLimit || 0) + delta);
+      showBuildingInfo(b, parseInt(overlay.style.left,10)||0, Math.max(0, (parseInt(overlay.style.top,10)||0)-10));
+    });
+  });
+  const clearBtn = overlay.querySelector('.filter-chip[data-limit-clear]');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      b.craftLimit = 0;
+      showBuildingInfo(b, parseInt(overlay.style.left,10)||0, Math.max(0, (parseInt(overlay.style.top,10)||0)-10));
+    });
+  }
 }
 
 function stockpileInfoHtml(b) {

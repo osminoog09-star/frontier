@@ -227,3 +227,13 @@
 
 ### Next Step
 - Confirm public mobile URL after Pages cache refresh, then continue gameplay roadmap.
+
+## Update 2026-06-02 - Production Output Limits Status
+- Done: production output limit slice implemented as `versions/frontier-v1.17.html`.
+- Done: recipe stations can stop when target output is reached.
+- Done: station panel has limit controls.
+- Done: `_harness.js` includes Scenario M for blocked/resumed production by output limit.
+- Done: public `index.html` was rebuilt into a status/roadmap page instead of an outdated shell.
+
+### Next Step
+- Add queue depth or desired output presets, then continue toward richer scenarios/trade.
