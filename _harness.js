@@ -1011,6 +1011,27 @@ const test = `
   console.log('SCENARIO AW (room details panel rows):');
   console.log('   rows:', rows.length, '| bedroom:', awBedroom ? awBedroom.furniture : 'missing', '| dining:', awDining ? awDining.furniture : 'missing', '|', awOk?'OK':'FAIL');
   if (!awOk) throw new Error('Scenario AW failed');
+
+  // Scenario AX: herd details panel rows expose taming, speed, and ranch yield
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['stable','ranch'].includes(b.type));
+  G.herd = { wild:3, tamed:0, tameProgress:0 };
+  const noStableRows = herdDetailRows();
+  const noStableHerdOk = noStableRows.some(r => r.label.includes('Приручение') && r.value.includes('нужна конюшня')) &&
+    noStableRows.some(r => r.label.includes('Доход') && r.value.includes('нет дохода'));
+  G.buildings.push({ type:'stable', tx:12, ty:12, done:true, blueprint:false, hp:200, maxHp:200 });
+  G.buildings.push({ type:'ranch', tx:15, ty:12, done:true, blueprint:false, hp:200, maxHp:200 });
+  G.herd = { wild:2, tamed:2, tameProgress:35 };
+  const herdRows = herdDetailRows();
+  const axOk = noStableHerdOk &&
+    herdRows.some(r => r.label.includes('Табун') && r.value.includes('2 приручено') && r.value.includes('2 диких')) &&
+    herdRows.some(r => r.label.includes('Приручение') && r.value.includes('35/100') && r.value.includes('+45/день')) &&
+    herdRows.some(r => r.label.includes('Постройки') && r.value.includes('конюшни: 1') && r.value.includes('ранчо: 1')) &&
+    herdRows.some(r => r.label.includes('Скорость') && r.value.includes('+25%')) &&
+    herdRows.some(r => r.label.includes('Доход') && r.value.includes('12 еды') && r.value.includes('4 золота'));
+  console.log('SCENARIO AX (herd details panel rows):');
+  console.log('   no stable:', noStableHerdOk?'OK':'FAIL', '| rows:', herdRows.map(r=>r.label+'='+r.value).join(' | '), '|', axOk?'OK':'FAIL');
+  if (!axOk) throw new Error('Scenario AX failed');
 })();
 `;
 try {

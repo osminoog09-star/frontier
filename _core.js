@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.60';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.61';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -639,6 +639,21 @@ function ranchDailyYield() {
   const food = ranches * 8 + herdBonus * 2;
   const gold = ranches * Math.min(stables, 3) * 2 + herdBonus;
   return { food, gold };
+}
+function herdDetailRows() {
+  const herd = ensureHerd();
+  const stables = (G && G.buildings ? G.buildings : []).filter(b=>b.type==='stable' && b.done && !b.blueprint).length;
+  const ranches = (G && G.buildings ? G.buildings : []).filter(b=>b.type==='ranch' && b.done && !b.blueprint).length;
+  const rate = horseTamingRate();
+  const y = ranchDailyYield();
+  const speedBonus = Math.round((mountSpeedMul() - 1) * 100);
+  return [
+    { label:'Табун', value:`${herd.tamed} приручено / ${herd.wild} диких` },
+    { label:'Приручение', value:rate ? `${herd.tameProgress}/100 · +${rate}/день` : 'нужна конюшня' },
+    { label:'Постройки', value:`конюшни: ${stables}, ранчо: ${ranches}` },
+    { label:'Скорость', value:`+${speedBonus}% к движению` },
+    { label:'Доход ранчо', value:y.food || y.gold ? `${y.food} еды / ${y.gold} золота в день` : 'нет дохода' }
+  ];
 }
 
 // ==================== AI ====================
@@ -3202,6 +3217,14 @@ function renderResearch() {
 
   // Stats
   const goal = scenarioGoalStatus();
+  const herdRows = herdDetailRows();
+  const herdPanelHtml = `
+    <div style="margin-top:6px;display:grid;gap:4px;padding:5px;border:1px solid #2d2a22;background:#151412;border-radius:3px">
+      ${herdRows.map(r => `
+        <div><span style="color:#7a6a4a">${r.label}:</span> <b style="color:#aaa">${r.value}</b></div>
+      `).join('')}
+    </div>
+  `;
   const roomRows = roomDetailRows();
   const roomPanelHtml = roomRows.length ? `
     <div style="margin-top:6px;display:grid;gap:5px">
@@ -3227,6 +3250,7 @@ function renderResearch() {
     <div>💰 Золота заработано: <b style="color:#aaa">${Math.floor(G.stats.goldEarned)}</b></div>
     <div>🐎 Караванных сделок: <b style="color:#aaa">${Math.floor(G.stats.caravanDeals || 0)}</b></div>
     <div>🐴 Лошади: <b style="color:#aaa">${ensureHerd().tamed} приручено / ${ensureHerd().wild} диких</b></div>
+    ${herdPanelHtml}
     <div>🏠 Комфорт усадьбы: <b style="color:#aaa">${homesteadComfortLabel()} (${homesteadComfortScore()}/3)</b></div>
     <div>🧱 Комнаты: <b style="color:#aaa">${roomComfortLabel()} (${roomComfortScore()}/3)</b> · ${roomTypeSummary()}</div>
     ${roomPanelHtml}

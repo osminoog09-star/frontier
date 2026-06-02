@@ -6,11 +6,17 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.60 - Room Details Panel`.
+- Последний локальный срез: `v1.61 - Herd Details Panel`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.60`. Наука: tools/medicine/cooking/walls/hunting/trading/marksman.
-- Harness: Scenarios A-AW (49) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
+- Текущий `GAME_VERSION`: `1.61`. Наука: tools/medicine/cooking/walls/hunting/trading/marksman.
+- Harness: Scenarios A-AX (50) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
+
+## Что изменилось в v1.61
+
+- PC stats/наука теперь показывает компактную herd/animal-панель: табун, приручение, конюшни/ранчо, бонус скорости и доход ранчо.
+- `herdDetailRows()` собирает данные панели отдельно от DOM, чтобы следующий агент мог безопасно расширять animal UI.
+- Scenario AX проверяет no-stable feedback и активные строки конюшни/ранчо; полный harness A-AX (50) зелёный.
 
 ## Что изменилось в v1.60
 
@@ -123,7 +129,7 @@
 
 Брать маленький проверяемый срез из Недели 2:
 
-1. Развитие лошадей/ранчо: загоны, скот, компактная animal-панель.
+1. Развитие лошадей/ранчо: загоны, скот, ресурсы животноводства.
 2. Или PC-полировка: автотайлинг биомов/берегов, более аккуратные панели/иконки.
 3. Каждый gameplay-срез закрыть новым scenario в `_harness.js`.
 

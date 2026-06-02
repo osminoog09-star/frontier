@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.61 - Herd Details Panel. PC stats показывает компактную animal-панель: табун, приручение, конюшни/ранчо, бонус скорости и доход ранчо. Добавлен `herdDetailRows()` и Scenario AX. Harness A-AX (50) green.
+
 - v1.60 - Room Details Panel. PC stats показывает компактную room-панель: тип, уют, качество стен, размер и мебель по каждой найденной комнате. Добавлен `roomDetailRows()` и Scenario AW. Harness A-AW (49) green.
 
 - v1.59 - Room Wall Quality. Комнаты показывают качество стен/формы (тесная защита/крепкие стены/широкая комната), overlay/stats обновлены, Scenario AV. Harness A-AV (48) green.

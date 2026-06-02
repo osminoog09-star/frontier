@@ -224,6 +224,15 @@
 ### Next Step
 - Continue PC roadmap: animal pens/livestock, animal panel, autotiling, or desktop UI polish.
 
+## Update 2026-06-02 - v1.61 Herd Details Panel
+
+- Done: PC stats now has a compact herd panel with tamed/wild horses, taming progress, stable/ranch counts, movement bonus, and ranch yield.
+- Done: `herdDetailRows()` keeps herd panel data testable and reusable.
+- Done: `_harness.js` includes Scenario AX; full harness A-AX is green.
+
+### Next Step
+- Continue PC roadmap: animal pens/livestock, autotiling, or desktop UI polish.
+
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.
 - Done: fences are real blockers; gates are passable; A* routes around blockers and through gates.

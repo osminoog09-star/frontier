@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.61 - Herd Details Panel
+
+- PC-first ranch/horse UX slice: the stats panel now shows a compact herd panel with tamed/wild horses, taming progress, stable/ranch counts, movement bonus, and daily ranch yield.
+- Added `herdDetailRows()` so herd-panel data is testable and reusable without tying the scenario to DOM.
+- Harness: Scenario AX validates no-stable feedback plus stable/ranch/tamed-horse speed and yield rows. A-AX (50) green.
+
 ### v1.60 - Room Details Panel
 
 - PC-first room UX slice: the stats panel now shows a compact list of detected rooms with type, comfort, wall quality, size, and furniture counts.
