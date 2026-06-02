@@ -170,6 +170,15 @@
 ### Next Step
 - Продолжить маленький срез Недели 2: комнаты/стены жилья, загоны/скот, audio-pass или визуальная читаемость.
 
+## Update 2026-06-02 - v1.44 Basic Room Comfort
+- Done: первый room-recognition для мебели внутри замкнутой зоны из забора/ворот.
+- Done: room-score виден в stats и даёт небольшой mood-бонус.
+- Done: overlay кровати/стола/декора показывает, закрыта ли мебель стенами.
+- Done: `_harness.js` включает Scenario AI; полный harness A-AI зелёный.
+
+### Next Step
+- Продолжить Неделю 2 маленьким срезом: загоны/скот, compact animal panel, audio-pass или расширение типов комнат.
+
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.
 - Done: fences are real blockers; gates are passable; A* routes around blockers and through gates.

@@ -711,6 +711,37 @@ const test = `
   console.log('SCENARIO AH (horse taming):');
   console.log('   no stable:', noStableOk2?'OK':'FAIL', '| tamed:', G.herd.tamed, '| yield:', boostedYield.food + ' food / ' + boostedYield.gold + ' gold', '| boost:', boostOk?'OK':'FAIL');
   if (!noStableOk2 || !tamingOk || !boostOk) throw new Error('Scenario AH failed');
+
+  // Scenario AI: fenced room around furniture gives a visible room comfort bonus
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['bed','table','decor','fence','gate'].includes(b.type));
+  for (let y=24; y<=32; y++) for (let x=24; x<=32; x++) forceDry(x, y, 1);
+  const pRoom = G.pawns[0];
+  pRoom.x = 28*TILE; pRoom.y = 28*TILE; pRoom.food = 80; pRoom.energy = 80; pRoom.hp = pRoom.maxHp; pRoom.sick = null;
+  G.buildings.push({ type:'bed', tx:28, ty:28, done:true, blueprint:false, hp:120, maxHp:120 });
+  G.buildings.push({ type:'table', tx:29, ty:28, done:true, blueprint:false, hp:100, maxHp:100 });
+  G.buildings.push({ type:'decor', tx:28, ty:29, done:true, blueprint:false, hp:100, maxHp:100 });
+  const openScore = roomComfortScore();
+  const openBonus = roomComfortBonus();
+  const openDelta = calcMoodDelta(pRoom);
+  for (let x=26; x<=31; x++) {
+    G.buildings.push({ type:'fence', tx:x, ty:26, done:true, blueprint:false, hp:100, maxHp:100 });
+    G.buildings.push({ type:'fence', tx:x, ty:31, done:true, blueprint:false, hp:100, maxHp:100 });
+  }
+  for (let y=27; y<=30; y++) {
+    G.buildings.push({ type:'fence', tx:26, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+    G.buildings.push({ type:'fence', tx:31, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+  }
+  const room = enclosedRoomAt(28, 28);
+  const closedScore = roomComfortScore();
+  const closedBonus = roomComfortBonus();
+  const closedDelta = calcMoodDelta(pRoom);
+  updateThoughts(pRoom);
+  const roomThought = pRoom.thoughts.some(t => t.text.includes('Хорошая комната'));
+  const roomOk = openScore === 0 && openBonus === 0 && room && room.tiles > 0 && closedScore === 3 && closedBonus > 0 && closedDelta > openDelta && roomThought && roomComfortLabel() === 'хорошая комната';
+  console.log('SCENARIO AI (basic room comfort):');
+  console.log('   score:', openScore + '->' + closedScore, '| tiles:', room ? room.tiles : 0, '| bonus:', openBonus.toFixed(2) + '->' + closedBonus.toFixed(2), '| thought:', roomThought?'OK':'FAIL');
+  if (!roomOk) throw new Error('Scenario AI failed');
 })();
 `;
 try {

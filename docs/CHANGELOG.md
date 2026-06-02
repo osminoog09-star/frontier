@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.44 - Basic Room Comfort
+
+- Added first room recognition pass: furniture inside a small fenced/gated enclosure counts as room comfort.
+- Room comfort contributes a small mood bonus and can add the "Хорошая комната" thought.
+- Research/stats panel now shows room quality: label and 0-3 score.
+- Furniture info overlays show whether the furniture is inside a closed room or not.
+- Harness: Scenario AI validates open furniture vs enclosed room score, bonus, label, and thought.
+
 ### v1.43 - Build Bar Groups + Minimap Clearance
 
 - Reviewed the latest screenshot from `fix/`: minimap overlapped the build area and the build bar took too much space.

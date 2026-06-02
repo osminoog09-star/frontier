@@ -39,6 +39,10 @@
 
 ## Последний завершённый срез
 
+- v1.44 - Basic Room Comfort.
+- Мебель внутри замкнутой зоны из забора/ворот даёт первый room-score, mood-бонус и мысль.
+- Harness A-AI green.
+
 - v1.43 - Build Bar Groups + Minimap Clearance.
 - По скрину из fix/: стройка сгруппирована в папки, миникарта отступает от реальной высоты bottom bar.
 - Harness A-AH green, desktop/mobile browser smoke green.

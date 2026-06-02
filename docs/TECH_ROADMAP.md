@@ -64,6 +64,15 @@
 - Browser smoke covers desktop 1600x900 and mobile 390x844.
 - Future UI slices should keep checking `fix/` screenshots before selecting roadmap work.
 
+## v1.44 basic room comfort
+
+- Added first room recognition over small fence/gate enclosures.
+- `enclosedRoomAt()` flood-fills from a furniture tile, rejects open/edge/oversized areas, and treats fence/gate/water/rock as boundaries.
+- `roomComfortScore()` counts bed/table/decor inside closed rooms and adds a small mood bonus.
+- Stats and furniture overlays expose room quality to the player.
+- Scenario AI validates open furniture vs enclosed room score, bonus, label, and thought.
+- Next room work can split room types (bedroom/dining), wall quality, or a compact room panel.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -77,7 +86,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-AH покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, ранчо и приручение лошадей.
+- Автотесты: `_harness.js`, сценарии A-AI покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо и приручение лошадей.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза

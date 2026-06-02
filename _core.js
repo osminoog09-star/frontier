@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.43';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.44';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -754,6 +754,7 @@ function calcMoodDelta(p) {
   if (p.state === 'sleeping' && sleepComfortAt(p) >= 2) delta += 0.15;
   if (nearBeautyDecor(p)) delta += 0.2;
   delta += homesteadComfortBonus();
+  delta += roomComfortBonus();
 
   // Traits
   if (p.traits.includes('optimist')) delta += 0.15;
@@ -784,6 +785,7 @@ function updateThoughts(p) {
   if (sleepComfortAt(p) >= 2 && p.energy > 50) p.thoughts.push({text:'🛏️ Спал в кровати', neg:false});
   if (nearBeautyDecor(p)) p.thoughts.push({text:'🪴 Красивый уголок', neg:false});
   if (homesteadComfortScore() >= 3) p.thoughts.push({text:'🏠 Уютная усадьба', neg:false});
+  if (roomComfortScore() >= 2) p.thoughts.push({text:'🏠 Хорошая комната', neg:false});
 }
 
 function addThought(p, text, duration, positive) {
@@ -829,6 +831,56 @@ function homesteadComfortLabel() {
   if (score >= 3) return 'уютная';
   if (score >= 2) return 'обживается';
   if (score >= 1) return 'зачатки';
+  return 'нет';
+}
+function isRoomWallAt(tx, ty) {
+  return !!(G && G.buildings && G.buildings.some(b => {
+    if (!b.done || b.blueprint || !['fence','gate'].includes(b.type)) return false;
+    const size = BUILDS[b.type]?.size || 1;
+    return tx >= b.tx && ty >= b.ty && tx < b.tx + size && ty < b.ty + size;
+  }));
+}
+function enclosedRoomAt(tx, ty, maxTiles=80) {
+  if (!G || !G.map || tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H) return null;
+  if (isRoomWallAt(tx, ty)) return null;
+  const seen = new Set();
+  const q = [[tx, ty]];
+  let walls = 0;
+  let reachedEdge = false;
+  while (q.length) {
+    const [x, y] = q.shift();
+    const key = x + ',' + y;
+    if (seen.has(key)) continue;
+    if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) { reachedEdge = true; continue; }
+    if (isRoomWallAt(x, y)) { walls++; continue; }
+    const tile = G.map[y][x];
+    if (!tile || tile.type === TERRAIN.WATER || tile.type === TERRAIN.ROCK) { walls++; continue; }
+    seen.add(key);
+    if (x === 0 || y === 0 || x === MAP_W-1 || y === MAP_H-1) reachedEdge = true;
+    if (seen.size > maxTiles) return null;
+    q.push([x+1,y], [x-1,y], [x,y+1], [x,y-1]);
+  }
+  if (reachedEdge || seen.size < 4 || walls < 8) return null;
+  return { tiles: seen.size, walls };
+}
+function isFurnitureInRoom(type) {
+  return !!(G && G.buildings && G.buildings.some(b => b.type === type && b.done && !b.blueprint && enclosedRoomAt(b.tx, b.ty)));
+}
+function roomComfortScore() {
+  return (isFurnitureInRoom('bed') ? 1 : 0) + (isFurnitureInRoom('table') ? 1 : 0) + (isFurnitureInRoom('decor') ? 1 : 0);
+}
+function roomComfortBonus() {
+  const score = roomComfortScore();
+  if (score >= 3) return 0.12;
+  if (score >= 2) return 0.06;
+  if (score >= 1) return 0.03;
+  return 0;
+}
+function roomComfortLabel() {
+  const score = roomComfortScore();
+  if (score >= 3) return 'хорошая комната';
+  if (score >= 2) return 'жилая комната';
+  if (score >= 1) return 'укрытый угол';
   return 'нет';
 }
 function doSleep(p) {
@@ -2860,6 +2912,7 @@ function renderResearch() {
   });
 
   // Stats
+  const goal = scenarioGoalStatus();
   const stats = document.createElement('div');
   stats.style.cssText = 'margin-top:10px;padding:6px;background:#1a1a1a;border-radius:3px;font-size:10px;color:#666';
   stats.innerHTML = `
@@ -2872,6 +2925,7 @@ function renderResearch() {
     <div>🐎 Караванных сделок: <b style="color:#aaa">${Math.floor(G.stats.caravanDeals || 0)}</b></div>
     <div>🐴 Лошади: <b style="color:#aaa">${ensureHerd().tamed} приручено / ${ensureHerd().wild} диких</b></div>
     <div>🏠 Комфорт усадьбы: <b style="color:#aaa">${homesteadComfortLabel()} (${homesteadComfortScore()}/3)</b></div>
+    <div>🧱 Комнаты: <b style="color:#aaa">${roomComfortLabel()} (${roomComfortScore()}/3)</b></div>
     <div style="margin-top:4px;color:#7a6a4a">🏆 ${SCENARIOS[G.scenario]?.name || SCENARIOS.settlers.name}: ${goal.sidebar}</div>
   `;
   list.appendChild(stats);
@@ -3230,9 +3284,12 @@ function showBuildingInfo(b, cx, cy) {
 
 function furnitureInfoHtml(b) {
   if (!b || b.blueprint || !b.done) return '';
-  if (b.type === 'bed') return `<div class="inf-line">Комфорт: <b>сон быстрее, настроение выше</b></div>`;
-  if (b.type === 'table') return `<div class="inf-line">Комфорт: <b>еда за столом даёт настроение</b></div>`;
-  if (b.type === 'decor') return `<div class="inf-line">Красота: <b>рядом настроение растёт</b></div>`;
+  const roomLine = ['bed','table','decor'].includes(b.type)
+    ? `<div class="inf-line">Комната: <b>${enclosedRoomAt(b.tx, b.ty) ? roomComfortLabel() : 'не закрыта стенами'}</b></div>`
+    : '';
+  if (b.type === 'bed') return `<div class="inf-line">Комфорт: <b>сон быстрее, настроение выше</b></div>${roomLine}`;
+  if (b.type === 'table') return `<div class="inf-line">Комфорт: <b>еда за столом даёт настроение</b></div>${roomLine}`;
+  if (b.type === 'decor') return `<div class="inf-line">Красота: <b>рядом настроение растёт</b></div>${roomLine}`;
   if (b.type === 'stable') {
     const herd = ensureHerd();
     const rate = horseTamingRate();
@@ -3621,7 +3678,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.42','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун и приручение лошадей.'],
+    ['now', 'v1.36–1.44','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки и первые room-бонусы.'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
