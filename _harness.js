@@ -845,6 +845,26 @@ const test = `
   console.log('SCENARIO AO (sniper enemy type):');
   console.log('   def:', defOk?'OK':'FAIL', '| big raid has sniper:', bigOk?'OK':'FAIL', '| small raid none:', smallOk?'OK':'FAIL');
   if (!sniperOk) throw new Error('Scenario AO failed');
+
+  // Scenario AP: powder barrel trap — explodes when an enemy approaches, AoE damage, consumed
+  newGame('settlers'); G.enemies = [];
+  // бочка на суше у центра
+  const bx0 = 40, by0 = 30; G.map[by0][bx0].type = TERRAIN.GRASS; G.map[by0][bx0].obj = null;
+  G.buildings.push({ type:'barrel', tx:bx0, ty:by0, done:true, blueprint:false, hp:20, maxHp:20 });
+  // враг далеко — взрыва нет
+  G.enemies.push({ id:G.nextId++, type:'knifer', x:(bx0+8)*TILE, y:by0*TILE, tx:bx0+8, ty:by0, hp:55, maxHp:70, speed:1.5, atk:10, range:1.5, ranged:false, reload:55, attackCooldown:0, path:[], targetX:0, targetY:0, alive:true });
+  updateBarrels();
+  const noEarlyBoom = G.buildings.some(b => b.type==='barrel' && b.done) && G.enemies[0].hp === 55;
+  // три врага рядом — взрыв
+  const near = [];
+  for (let i=0;i<3;i++){ const e={ id:G.nextId++, type:'knifer', x:(bx0+i)*TILE, y:by0*TILE, tx:bx0+i, ty:by0, hp:55, maxHp:70, speed:1.5, atk:10, range:1.5, ranged:false, reload:55, attackCooldown:0, path:[], targetX:0, targetY:0, alive:true }; G.enemies.push(e); near.push(e); }
+  updateBarrels();
+  const barrelGone = !G.buildings.some(b => b.type==='barrel');
+  const damaged = near.every(e => !e.alive || e.hp < 55);
+  const trapOk = noEarlyBoom && barrelGone && damaged;
+  console.log('SCENARIO AP (powder barrel trap):');
+  console.log('   no early boom:', noEarlyBoom?'OK':'FAIL', '| exploded+consumed:', barrelGone?'OK':'FAIL', '| AoE damage:', damaged?'OK':'FAIL');
+  if (!trapOk) throw new Error('Scenario AP failed');
 })();
 `;
 try {

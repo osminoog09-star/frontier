@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.51';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.52';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -36,6 +36,7 @@ const BUILDS = {
   well:   { name:'Колодец',  icon:'🪣', cost:{wood:10,ore:5},    size:1, prod:'water', rate:0.1 },
   stable: { name:'Конюшня',  icon:'🐴', cost:{wood:25,ore:10},   size:2, prod:'horses',rate:0 },
   ranch:  { name:'Ранчо',    icon:'🤠', cost:{wood:35,ore:8},    size:2, prod:'ranch', rate:0 },
+  barrel: { name:'Бочка с порохом', icon:'🛢️', cost:{wood:5,gold:5}, size:1, prod:'trap', rate:0 },
 };
 
 const RECIPES = {
@@ -1405,6 +1406,39 @@ function getCover(wx, wy) {
   return Math.min(cover, 0.4);
 }
 
+// Бочки с порохом: взрываются, когда враг подходит вплотную, и бьют по площади.
+const BARREL_TRIGGER = 1.6;   // тайлов — на каком расстоянии враг поджигает бочку
+const BARREL_BLAST = 3.2;     // тайлов — радиус взрыва
+const BARREL_DMG = 55;        // урон в эпицентре (спадает к краю)
+function updateBarrels() {
+  if (!G || !G.buildings || !G.enemies) return;
+  const barrels = G.buildings.filter(b => b.type === 'barrel' && b.done && !b.blueprint);
+  if (!barrels.length) return;
+  for (const b of barrels) {
+    const bx = b.tx + 0.5, by = b.ty + 0.5;
+    const trigger = G.enemies.some(e => e.alive && Math.hypot((e.x/TILE) - bx, (e.y/TILE) - by) <= BARREL_TRIGGER);
+    if (!trigger) continue;
+    // взрыв: урон всем врагам в радиусе, спад по расстоянию
+    for (const e of G.enemies) {
+      if (!e.alive) continue;
+      const d = Math.hypot((e.x/TILE) - bx, (e.y/TILE) - by);
+      if (d <= BARREL_BLAST) {
+        const dmg = Math.round(BARREL_DMG * (1 - d / BARREL_BLAST));
+        applyHit(e, dmg, true);
+      }
+    }
+    const px = bx * TILE, py = by * TILE;
+    if (typeof FX !== 'undefined' && FX.build) FX.spark && FX.spark(px, py);
+    spawnParticles(px, py, { count: 22, colors:['#ff9030','#ffd060','#888','#553'], speed: 2.2, life: 26, size: 3 });
+    addSplat(px, py);
+    if (Sfx && Sfx.alarm) Sfx.alarm();
+    addLog(`🛢️ Бочка с порохом взорвалась среди налётчиков!`, 'good');
+    b.done = false; b.blueprint = false; b._spent = true;   // бочка израсходована
+  }
+  // убрать израсходованные бочки
+  G.buildings = G.buildings.filter(b => !(b.type === 'barrel' && b._spent));
+}
+
 function updateEnemies() {
   G.enemies = G.enemies.filter(e=>e.alive);
   for (const e of G.enemies) {
@@ -2346,6 +2380,18 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.fillStyle = '#caa45a'; ctx.fillRect(cx-4, y+S*0.58, 3, S*0.36); ctx.fillRect(cx+1, y+S*0.58, 3, S*0.36);
       ctx.font = `${S*0.32}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('🐴', cx, y+S*0.2);
+      break;
+    }
+    case 'barrel': {
+      ctx.fillStyle = '#5a3a1c'; ctx.beginPath();                        // деревянная бочка
+      ctx.ellipse(cx, cy, S*0.28, S*0.36, 0, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#2a1a0c'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(cx-S*0.26, cy-S*0.1); ctx.lineTo(cx+S*0.26, cy-S*0.1); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx-S*0.26, cy+S*0.12); ctx.lineTo(cx+S*0.26, cy+S*0.12); ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#222'; ctx.beginPath(); ctx.moveTo(cx, cy-S*0.36); ctx.lineTo(cx+3, cy-S*0.5); ctx.stroke(); // фитиль
+      ctx.fillStyle = (((G&&G.tick)||0)>>3)%2 ? '#ffd060' : '#ff8030';
+      ctx.beginPath(); ctx.arc(cx+3, cy-S*0.5, 1.6, 0, Math.PI*2); ctx.fill(); // искра
       break;
     }
     case 'ranch': {
@@ -3562,7 +3608,7 @@ function setupButtons() {
   // Build buttons
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-barrel-btn':'barrel','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
   };
@@ -3759,7 +3805,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.51','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер».'],
+    ['now', 'v1.36–1.52','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом (ловушка).'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
@@ -3828,7 +3874,7 @@ function showHowtoPanel(panel) {
 function updateBuildButtons() {
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-barrel-btn':'barrel','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
   };
@@ -3985,6 +4031,7 @@ function gameLoop(ts) {
       updatePawns();
       updateAnimals();
       updateEnemies();
+      updateBarrels();
       updateProjectiles();
       updateParticles();
 

@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.52 - Powder Barrel Trap. Бочка с порохом: взрыв по площади при подходе врага, потом расходуется. Scenario AP. Harness A-AP (42) green.
+
 - v1.51 - Sniper Enemy. Дальнобойный опасный враг в крупных налётах (5+), награда 14. Scenario AO. Harness A-AO (41) green.
 
 - v1.50 - Queued-Work Counter + site refresh. Панель статистики показывает очередь работ (🪓/⛏️/🎯); сайт обновлён до текущего состояния. Scenario AN расширен. Harness A-AN (40) green.

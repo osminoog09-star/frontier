@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.52 - Powder Barrel Trap (defense)
+
+- New building «Бочка с порохом» (🛢️, defense group): explodes when an enemy comes within ~1.6 tiles, dealing area damage (radius ~3.2, up to 55, falling off with distance), then is consumed.
+- updateBarrels() hooked into the sim loop; particles + alarm + log on detonation.
+- Harness: Scenario AP (no early boom far away, explodes+consumed when enemies are close, AoE damage). A-AP (42) green.
+
 ### v1.51 - Sniper Enemy Type (combat depth)
 
 - New enemy «Снайпер»: long range (11 tiles), high damage, slow reload, fragile. Joins big raids (a sniper covers raids of 5+, alongside the boss); not in small raids. Kill reward 14.
