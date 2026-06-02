@@ -6,96 +6,55 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.35 - Horses: Stable & Mount Speed` (Неделя 2).
-- Harness: Scenarios A-AB pass (28 сценариев), guard OK, 0 mojibake.
-- НОВОЕ: `docs/WIP.md` — «замок» текущих задач. Перед работой читать его; см. правила в AGENTS.md.
-- НОВОЕ: `GAME_VERSION` в _core.js — бампить при каждом срезе + `menu-ver` в шаблоне.
-- Следующее в очереди (WIP): 🛏️ мебель и комнаты (кровати/столы, бонусы настроения).
-- Последний harness: Scenarios A-Z pass + encoding/sync guard OK, 0 FAIL, 0 mojibake, git clean.
-- v1.29: Gold Rush claim raids (X). v1.30: sidebar pawn select fix (Y). v1.31: caravan route +20% (Z). v1.32: аудит + фикс версии в меню.
-- ПЕРЕХОД НА НЕДЕЛЮ 2. Готово из Недели 1: логистика, крафт, стены+ворота+A*, частицы/береговая.
-  Отложено (опционально, заберём в визуал-пассах): рефакторинг в модули, автотайлинг террейна.
-- Неделя 2 (следующее): аудио-пасс (эмбиент/музыка), визуал-пасс 2 (анимации работ, UI), лошади/ранчо, мебель/комнаты, боевая глубина.
-- СБОРКА: `frontier.html` собирается ТОЛЬКО через `node build.js` (template + `_core.js`, UTF-8, mojibake-guard).
-  Никаких ручных PowerShell `Get-Content -Raw` синхронизаций — они портят кириллицу.
-- Ожидаемая anomaly в harness: Scenario K специально создает заблокированный `meat` stack и проверяет диагностику.
+- Последний локальный срез: `v1.36 - Public Site + Mobile Map Fix`.
+- Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
+- Текущий `GAME_VERSION`: `1.36`.
+- Harness: Scenarios A-AB должны быть зелёные; перед push обязательно `node _harness.js`.
 
-## Последние изменения
+## Что изменилось в v1.36
 
-- Добавлены стартовые сценарии:
-  - `settlers`
-  - `goldrush`
-  - `fort`
-  - `caravan`
-- Добавлено меню сценариев.
-- Save/load сохраняет `scenario`.
-- Добавлены сценарные цели:
-  - `settlers`: накопить 500 золота.
-  - `goldrush`: накопить 700 золота.
-  - `fort`: удержать форт до дня 5.
-  - `caravan`: провести 3 караванные сделки.
-- HUD, статистика пешек, справка и победа используют `scenarioGoalStatus()`.
-- Караванные сделки пишутся в `stats.caravanDeals`.
-- Добавлены сценарные события:
-  - `goldrush`: раннее давление по еде.
-  - `fort`: разведывательные налёты на 2 и 4 день.
-  - `caravan`: более частое окно караванов/событий.
-- Event cadence вынесен в `scenarioEventDelay()`.
-- Добавлены профили караванов:
-  - `mixed`
-  - `food`
-  - `medicine`
-  - `materials`
-- `runCaravanTrade(profileId)` поддерживает детерминированный профиль для harness и будущего UI.
-- Торговый пост показывает кнопки профилей сделок, цену и tooltip с результатом.
-- Исправлен телефонный layout:
-  - игра скрывает desktop sidebar на touch/mobile;
-  - canvas занимает viewport без горизонтального overflow;
-  - topbar desktop-кнопки не торчат над картой;
-  - публичный сайт на телефоне не встраивает игру iframe, а даёт fullscreen-кнопку.
-- Public `index.html` полностью на русском и показывает roadmap/status.
-- Добавлен `docs/TECH_ROADMAP.md`.
-- Добавлены `AGENTS.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+- Публичный `index.html` переделан из технической страницы в понятный русский статус проекта.
+- На сайте теперь видно: что уже сделано, что будет дальше, план по неделям, ссылки на документы.
+- Старые кнопки/лейблы `Roadmap.md` и `Phone access` убраны из первого экрана.
+- Добавлен визуальный preview игры: `assets/site-game-preview.png`.
+- Мобильная игра: миникарта уменьшена до 96x72 и поднята над нижней панелью.
+- Мобильная игра: zoom-кнопки и keyboard hints скрыты, sidebar остаётся скрытым.
+- Локальный smoke 390x844: сайт без horizontal overflow, игра без horizontal overflow, sidebar hidden, console errors = 0.
 
-## Что делать дальше
+## Следующая задача по roadmap
 
-Приоритет 1 (ГОТОВО в v1.27): полировка UI караванной сделки.
+Брать маленький проверяемый срез из Недели 2:
 
-- [x] Вывод ресурсов виден в строке, не только tooltip.
-- [x] Недоступные сделки затемнены + показывают нехватку золота.
-- [x] Короткая подсказка "выбери сделку" + строка последней сделки.
-- [x] Harness Scenario V.
+1. Мебель и комнаты: кровати/столы, красота, бонусы настроения.
+2. Или развитие лошадей/ранчо: приручение, доход, ресурсный цикл.
+3. Каждый gameplay-срез закрыть новым scenario в `_harness.js`.
 
-Приоритет 2 (в работе): углубить сценарные события.
+## Координация Codex + Cloud
 
-- [x] Fort Defense: нумерованные волны 1/3–3/3 + награда за удержание (v1.28).
-- [ ] Gold Rush: риск засухи/налётов на добытчиков.
-- [ ] Caravan Route: торговые бонусы и выбор сделки.
+- Перед стартом читать `docs/WIP.md`.
+- Если задача уже `IN PROGRESS` у другого агента, брать другую.
+- При старте вписывать свою задачу в `docs/WIP.md`.
+- После завершения и commit убирать задачу из WIP.
+- Если работа оборвалась, оставить `PAUSED` с файлами, что сделано и что осталось.
 
-Приоритет 3: улучшить UX сценариев.
+## Критичные правила сборки
 
-- Показ текущего сценария уже есть в stats panel и objective HUD.
-- Следующий UX-шаг: компактная карточка сценария в стартовом меню/паузе с прогрессом и подсказкой.
-
-## Проверки перед релизом
-
-```powershell
-node _harness.js
-```
-
-Публичный smoke:
-
-- Проверить root содержит актуальную версию.
-- Проверить `frontier.html` на mobile viewport.
-- Проверить отсутствие console errors.
+- Если менялся `_core.js`, запускать только `node build.js`.
+- Не синхронизировать `frontier.html` вручную через PowerShell `Get-Content -Raw` / `Set-Content`.
+- Перед push: `node _harness.js`.
+- После push проверить:
+  - https://osminoog09-star.github.io/frontier/
+  - https://osminoog09-star.github.io/frontier/frontier.html
 
 ## Важные файлы
 
 - `_core.js` - игровая логика.
-- `frontier.html` - публичная сборка, должна быть синхронизирована с `_core.js`.
-- `_harness.js` - автотесты A-U.
-- `index.html` - публичный русский сайт/roadmap.
-- `ROADMAP.md` - общий roadmap.
-- `docs/TECH_ROADMAP.md` - технический roadmap для агентов.
-- `docs/CHANGELOG.md` - журнал срезов.
-- `AGENTS.md` - правила совместной работы агентов.
+- `frontier.template.html` - HTML/CSS оболочка.
+- `frontier.html` - собранная публичная игра.
+- `index.html` - публичный сайт/status.
+- `_harness.js` - автотесты и guards.
+- `ROADMAP.md` - понятный roadmap.
+- `docs/TECH_ROADMAP.md` - технический roadmap.
+- `docs/CHANGELOG.md` - история срезов.
+- `docs/WIP.md` - замок задач.
+- `AGENTS.md` - правила агентов.

@@ -334,14 +334,18 @@
     #sidebar { display: none !important; }
     #canvas-wrap { width: 100vw; height: calc(100dvh - 54px); min-width: 100vw; max-width: 100vw; }
     #bottombar {
-      max-height: 104px; overflow-y: auto; padding: 4px 6px 8px; gap: 4px;
+      max-height: 104px; overflow-y: auto; padding: 4px 6px calc(8px + env(safe-area-inset-bottom, 0px)); gap: 4px;
       right: 0; bottom: 0; -webkit-overflow-scrolling: touch;
     }
     .action-btn { padding: 4px 7px; font-size: 10px; white-space: nowrap; }
     #objective-hud { top: 8px; left: 50%; transform: translateX(-50%); width: min(280px, calc(100vw - 20px)); min-width: 0; }
-    #minimap-wrap { width: 112px; height: 84px; right: 8px; bottom: 112px; }
-    #minimap { width: 112px; height: 84px; }
-    #zoom-controls { right: 8px; bottom: 204px; }
+    #keyhints { display: none; }
+    #minimap-wrap {
+      width: 96px; height: 72px; right: 8px;
+      bottom: calc(124px + env(safe-area-inset-bottom, 0px));
+    }
+    #minimap { width: 96px; height: 72px; }
+    #zoom-controls { display: none; }
     #info-overlay { max-width: min(270px, calc(100vw - 20px)); left: 8px !important; }
     #priority-panel { right: 8px; left: 8px; min-width: 0; max-height: calc(100dvh - 90px); overflow: auto; }
     #help-popup {
@@ -384,7 +388,7 @@
         <button class="menu-btn-big" id="mm-diag">🐞 Скачать лог диагностики</button>
         <button class="menu-btn-big" id="mm-resume" style="display:none">✖ Закрыть меню</button>
       </div>
-      <p class="menu-ver">PRE-ALPHA • build 1.35 • план: docs/ROADMAP_MONTH.md</p>
+      <p class="menu-ver">PRE-ALPHA • build 1.36 • план: docs/ROADMAP_MONTH.md</p>
     </div>
     <div class="menu-right" id="menu-panel">
       <div id="menu-panel-content"></div>
@@ -527,7 +531,6 @@ __CORE__
   </script>
 </body>
 </html>
-
 
 
 

@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.36 - Public Site + Mobile Map Fix
+
+- Rebuilt the public `index.html` into a clear Russian project/status page: playable link, done/next sections, weekly plan, and document links.
+- Removed the old first-screen `Roadmap.md` / `Phone access` style navigation from the public site.
+- Added `assets/site-game-preview.png` as a real gameplay preview for the site hero.
+- Mobile game layout: minimap is smaller and raised above the bottom build bar; zoom buttons and keyboard hints are hidden on touch/mobile.
+- Local Chrome smoke: 390x844 site and game have no horizontal overflow; game sidebar is hidden; console errors = 0.
+
 ### v1.35 - Horses: Stable & Mount Speed
 
 - Added the **Stable (Конюшня 🐴)** building. Each completed stable gives the colony horses that speed up

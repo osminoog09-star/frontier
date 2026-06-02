@@ -2,6 +2,13 @@
 
 Дата обновления: 2026-06-02
 
+## v1.36 public/mobile quality gate
+
+- Public site is now a player-facing Russian status page, not a raw technical roadmap dump.
+- Mobile smoke must stay part of any UI release: 390x844, no horizontal overflow, desktop sidebar hidden, minimap not overlapping the bottom build bar.
+- Keep `index.html` readable for a player; keep deep agent details in `docs/HANDOFF.md`, `docs/WIP.md`, and this file.
+- Next gameplay slice remains Week 2 content: furniture/rooms or deeper ranch systems, with harness coverage.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:

@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.35';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.36';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -3917,5 +3917,4 @@ function startLoop() {
   });
 }
 startLoop();
-
 
