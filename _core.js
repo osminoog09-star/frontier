@@ -2193,10 +2193,20 @@ function drawPawn(p) {
 
   // Selection ring
   if (isSelected) {
+    // пульсирующее кольцо
+    const pulse = 2 + Math.sin((G.tick||0) * 0.18) * 1.5;
     ctx.strokeStyle = '#e8c97e';
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.ellipse(x, y+7, 11, 5, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(232,201,126,0.5)';
+    ctx.beginPath(); ctx.ellipse(x, y+7, 11+pulse, 5+pulse*0.5, 0, 0, Math.PI*2); ctx.stroke();
     ctx.lineWidth = 1;
+    // прыгающая стрелка-указатель над головой — пешку сразу видно
+    const ay = y - 26 - Math.abs(Math.sin((G.tick||0) * 0.15)) * 4;
+    ctx.fillStyle = '#e8c97e';
+    ctx.beginPath();
+    ctx.moveTo(x, ay + 8); ctx.lineTo(x - 5, ay); ctx.lineTo(x + 5, ay);
+    ctx.closePath(); ctx.fill();
   }
 
   // Shadow
@@ -2468,12 +2478,38 @@ function updateUI() {
   renderSchedule();
 }
 
+function focusPawn(id) {
+  const p = G.pawns.find(q => q.id === id && !q.dead);
+  if (!p) return;
+  G.selectedPawnId = id;
+  jumpToPawn(p);            // центрируем камеру на пешке
+  showPriorityPanel(p);
+  renderPawns();            // мгновенно подсветить выбранную карточку
+}
+
+let _pawnListBound = false;
+function bindPawnListOnce() {
+  if (_pawnListBound) return;
+  const list = document.getElementById('pawn-list');
+  if (!list) return;
+  // Делегирование: один слушатель на контейнере. Переживает пересборку innerHTML,
+  // поэтому клик не теряется, даже если карточки перерисовались между mousedown/mouseup.
+  list.addEventListener('click', (e) => {
+    const card = e.target.closest && e.target.closest('.pawn-card[data-pawn-id]');
+    if (!card) return;
+    focusPawn(parseInt(card.dataset.pawnId, 10));
+  });
+  _pawnListBound = true;
+}
+
 function renderPawns() {
   const list = document.getElementById('pawn-list');
+  bindPawnListOnce();
   const goal = scenarioGoalStatus();
   list.innerHTML = '';
   for (const p of G.pawns) {
     const card = document.createElement('div');
+    card.dataset.pawnId = p.id;
     card.className = 'pawn-card' + (G.selectedPawnId===p.id?' selected':'') + (p.dead?' dead':'');
     const stateNames = {idle:'Отдыхает',working:'Работает',sleeping:'Спит',fighting:'Сражается',joy:'Развлекается',breakdown:'Срыв!'};
     const woundText = p.hp < p.maxHp*0.5 ? '🤕 Ранен' : '';
@@ -2492,13 +2528,7 @@ function renderPawns() {
       ${bar('Сила',p.energy,p.maxEnergy,'bar-energy')}
       <div class="pawn-thoughts">${p.thoughts.slice(0,3).map(t=>`<span class="${t.neg?'thought-neg':'thought-pos'}">${t.text}</span>`).join(' ')}</div>
     `;
-    if (!p.dead) {
-      card.addEventListener('click', () => {
-        G.selectedPawnId = p.id;
-        jumpToPawn(p);          // центрируем камеру на пешке — найти её на карте
-        showPriorityPanel(p);
-      });
-    }
+    // клик обрабатывается делегированно в bindPawnListOnce (через data-pawn-id)
     list.appendChild(card);
   }
 }

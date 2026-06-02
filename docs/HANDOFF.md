@@ -6,8 +6,9 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.28 - Fort Defense Waves + Hold Reward`.
-- Последний harness: Scenarios A-W pass + encoding/sync guard OK.
+- Последний локальный срез: `v1.30 - Reliable Sidebar Pawn Selection`.
+- Последний harness: Scenarios A-Y pass + encoding/sync guard OK.
+- v1.29: Gold Rush claim-jumper raids (Scenario X). v1.30: sidebar pawn select fix (Scenario Y).
 - СБОРКА: `frontier.html` собирается ТОЛЬКО через `node build.js` (template + `_core.js`, UTF-8, mojibake-guard).
   Никаких ручных PowerShell `Get-Content -Raw` синхронизаций — они портят кириллицу.
 - Ожидаемая anomaly в harness: Scenario K специально создает заблокированный `meat` stack и проверяет диагностику.

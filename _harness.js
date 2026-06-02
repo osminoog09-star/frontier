@@ -517,6 +517,23 @@ const test = `
   const raid6Ok = grRaid6 && grRaid6.type==='goldrush_claim_raid' && grRaid6.count>grRaid.count && G.enemies.length===grRaid6.count;
   console.log('SCENARIO X (gold rush economic risk):');
   console.log('   early food pressure:', earlyOk?'OK':'FAIL', '| claim raid day4:', raidOk?'OK':'FAIL', '| raid escalates day6:', raid6Ok?'OK':'FAIL');
+
+  // Scenario Y: focusPawn selects a pawn from the sidebar and centers the camera on it
+  newGame('settlers');
+  const target = G.pawns.find(p => p.alive);
+  // переместим пешку подальше, камеру — в другое место, чтобы проверить центрирование
+  target.x = 70 * 24; target.y = 50 * 24;
+  G.camera.x = 0; G.camera.y = 0; G.camera.zoom = 1;
+  focusPawn(target.id);
+  const selectedOkY = G.selectedPawnId === target.id;
+  // после центрирования пешка должна попасть в видимую область камеры
+  const zY = G.camera.zoom;
+  const cwY = 1280, chY = 720; // размеры из заглушки canvas
+  const psxY = (target.x - G.camera.x) * zY, psyY = (target.y - G.camera.y) * zY;
+  const inViewY = psxY > 0 && psxY < cwY && psyY > 0 && psyY < chY;
+  const centeredY = Math.abs(psxY - cwY/2) < 2 && Math.abs(psyY - chY/2) < 2;
+  console.log('SCENARIO Y (sidebar pawn select + camera focus):');
+  console.log('   selected:', selectedOkY?'OK':'FAIL', '| in view:', inViewY?'OK':'FAIL', '| centered:', centeredY?'OK':'FAIL');
 })();
 `;
 try {

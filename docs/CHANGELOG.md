@@ -2,6 +2,15 @@
 
 ## 2026-06-02
 
+### v1.30 - Reliable Sidebar Pawn Selection
+
+- FIX: clicking a pawn card in the right sidebar sometimes did nothing — `renderPawns()` rebuilds the
+  list via `innerHTML` every few ticks, and a rebuild between mousedown/mouseup cancelled the `click`
+  (worse at x2/x4 speed). Now selection uses event delegation on `#pawn-list` (survives rebuilds).
+- Clicking a card selects the pawn, centers the camera on it (`focusPawn`), and opens its priority panel.
+- The selected pawn is now obvious on the map: a pulsing ring + a bobbing arrow above the head.
+- Harness: Scenario Y validates that `focusPawn` selects the pawn and centers the camera on it.
+
 ### v1.29 - Gold Rush Economic Risk
 
 - Gold Rush now escalates: early days (2-5) keep the food pressure; from day 4 (even days) claim-jumper raids spawn bandits drawn to the mine.
