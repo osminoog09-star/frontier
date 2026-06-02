@@ -127,3 +127,8 @@
 - Stockpiles now explain what is lying on the map and what cannot be hauled because no stockpile accepts it.
 - This makes filter mistakes visible in normal play, not only through downloaded diagnostics.
 - The UI stays compact: two lines in the stockpile panel instead of a heavy inventory screen.
+
+## Update 2026-06-02 - Production Limit Presets Design Status
+- Station output limits are now quick to set with x1/x3/x5 chips.
+- This keeps the control usable on both desktop and phone, where repeated tiny clicks are annoying.
+- Production/logistics controls are now stable enough to start adding more world content.

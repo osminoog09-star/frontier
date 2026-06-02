@@ -186,3 +186,11 @@
 
 ### Next Architecture Work
 - Reuse the same resource-summary helpers in diagnostics export and future storage panels.
+
+## Update 2026-06-02 - Production Limit Presets Architecture Notes
+- Recipe station controls now include x1/x3/x5 preset chips.
+- Presets set `craftLimit` to `recipe.outAmount * multiplier`.
+- Scenario O validates that preset controls are exposed and limit status reflects the preset.
+
+### Next Architecture Work
+- Add scenario/trade systems using the now-stable resource and production helpers.

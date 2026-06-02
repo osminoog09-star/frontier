@@ -2727,6 +2727,9 @@ function recipeControlHtml(b) {
     <button class="filter-chip ${on?'on':'off'}" data-recipe-toggle="1">${on?'✓ Вкл':'× Выкл'}</button>
     <button class="filter-chip" data-limit-delta="${-step}">− лимит</button>
     <button class="filter-chip" data-limit-delta="${step}">+ лимит</button>
+    <button class="filter-chip" data-limit-preset="${recipe.outAmount}">x1</button>
+    <button class="filter-chip" data-limit-preset="${recipe.outAmount*3}">x3</button>
+    <button class="filter-chip" data-limit-preset="${recipe.outAmount*5}">x5</button>
     <button class="filter-chip ${limit===0?'on':''}" data-limit-clear="1">∞</button>
   </div>`;
 }
@@ -2747,6 +2750,13 @@ function bindRecipeControlButtons(b) {
       normalizeRecipeStation(b);
       const delta = parseInt(limitBtn.dataset.limitDelta, 10) || 0;
       b.craftLimit = Math.max(0, (b.craftLimit || 0) + delta);
+      showBuildingInfo(b, parseInt(overlay.style.left,10)||0, Math.max(0, (parseInt(overlay.style.top,10)||0)-10));
+    });
+  });
+  overlay.querySelectorAll('.filter-chip[data-limit-preset]').forEach(presetBtn => {
+    presetBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      b.craftLimit = Math.max(0, parseInt(presetBtn.dataset.limitPreset, 10) || 0);
       showBuildingInfo(b, parseInt(overlay.style.left,10)||0, Math.max(0, (parseInt(overlay.style.top,10)||0)-10));
     });
   });

@@ -246,3 +246,11 @@
 
 ### Next Step
 - Add production queue depth or desired-stock presets.
+
+## Update 2026-06-02 - Production Limit Presets Status
+- Done: production limit preset slice implemented as `versions/frontier-v1.19.html`.
+- Done: recipe stations expose x1/x3/x5 output target chips.
+- Done: `_harness.js` includes Scenario O for preset controls/status.
+
+### Next Step
+- Move from economy controls into scenario/trade content.

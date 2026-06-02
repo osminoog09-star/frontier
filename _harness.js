@@ -350,6 +350,18 @@ const test = `
   const hasBlockedMeat = logisticsLines.includes('Без склада') && logisticsLines.includes('meat:7');
   console.log('SCENARIO N (stockpile logistics info):');
   console.log('   ground stacks:', hasGroundStacks?'OK':'FAIL', '| blocked meat:', hasBlockedMeat?'OK':'FAIL');
+
+  // Scenario O: recipe limit presets are exposed in station controls
+  newGame();
+  const presetKitchen = {type:'kitchen',tx:10,ty:10,blueprint:false,done:true,progress:1,hp:200,maxHp:200,selected:false,craftEnabled:true,craftLimit:0};
+  G.buildings.push(presetKitchen);
+  const controlsHtml = recipeControlHtml(presetKitchen);
+  presetKitchen.craftLimit = RECIPES.kitchen.outAmount * 3;
+  const presetLines = recipeStatusLines(presetKitchen).join(' | ');
+  const hasPresetButtons = controlsHtml.includes('data-limit-preset') && controlsHtml.includes('x3') && controlsHtml.includes('x5');
+  const presetStatus = presetLines.includes(String(RECIPES.kitchen.outAmount * 3)) && presetLines.includes('food');
+  console.log('SCENARIO O (recipe limit presets):');
+  console.log('   preset buttons:', hasPresetButtons?'OK':'FAIL', '| preset status:', presetStatus?'OK':'FAIL');
 })();
 `;
 try {

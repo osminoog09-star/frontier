@@ -288,3 +288,14 @@
 ### Next Autonomous Target
 - [ ] Production queue depth / desired output presets.
 - [ ] Then scenario/trade content once economy control is stable.
+
+## Update 2026-06-02 - v1.19 Production Limit Presets Slice
+- [x] Created `versions/frontier-v1.19.html` from the current playable build.
+- [x] Added x1/x3/x5 desired-output preset chips to recipe station controls.
+- [x] Presets are based on each recipe's output amount, so kitchen and smithy scale correctly.
+- [x] Extended `_harness.js` with Scenario O: preset buttons are exposed and preset status text reports the selected target.
+- [x] Regression harness green: Scenarios A-O pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
+- [ ] Start scenario/trade content now that core production/logistics controls are stable.
+- [ ] First candidate: caravan/trader event with clear UI/log feedback and harness coverage.
