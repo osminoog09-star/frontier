@@ -534,6 +534,24 @@ const test = `
   const centeredY = Math.abs(psxY - cwY/2) < 2 && Math.abs(psyY - chY/2) < 2;
   console.log('SCENARIO Y (sidebar pawn select + camera focus):');
   console.log('   selected:', selectedOkY?'OK':'FAIL', '| in view:', inViewY?'OK':'FAIL', '| centered:', centeredY?'OK':'FAIL');
+
+  // Scenario Z: Caravan Route scenario grants +20% trade outputs vs other scenarios
+  newGame('caravan'); G.res.gold = 100; G.res.food = 0; G.res.meat = 0;
+  G.researches.forEach(r => { if (r.id === 'trading') r.done = false; });
+  const crTrade = runCaravanTrade('food');
+  const routeFood = G.res.food;            // floor(62 * 1.2) = 74
+  newGame('settlers'); G.res.gold = 100; G.res.food = 0;
+  G.researches.forEach(r => { if (r.id === 'trading') r.done = false; });
+  G.buildings.push({ type:'tradepost', tx:10, ty:10, blueprint:false, done:true, hp:200, maxHp:200, selected:false });
+  const baseTrade = runCaravanTrade('food');
+  const baseFood = G.res.food;             // 62
+  const routeOk = crTrade.traded && baseTrade.traded && routeFood === 74 && baseFood === 62 && routeFood > baseFood;
+  // UI note appears only in caravan scenario
+  newGame('caravan');
+  const crPost = G.buildings.find(b => b.type === 'tradepost' && b.done);
+  const noteOk = caravanTradeHtml(crPost).includes('+20% к выдаче');
+  console.log('SCENARIO Z (caravan route trade bonus):');
+  console.log('   route +20%:', routeOk?'OK':'FAIL', '| route food', routeFood, 'vs base', baseFood, '| UI note:', noteOk?'OK':'FAIL');
 })();
 `;
 try {

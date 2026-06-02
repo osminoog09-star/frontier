@@ -1699,7 +1699,9 @@ function runCaravanTrade(profileId=null) {
     addLog('🐎 Караван пришёл, но золота для сделки не хватило.', 'warn');
     return { traded:false, reason:'no_gold', profile:selectedProfile, cost:profile.cost };
   }
-  const bonus = hasResearch('trading') ? 1.35 : 1;
+  // Бонус торговли + бонус сценария «Караванный путь» (маршрут даёт +20% к сделкам)
+  const routeBonus = (G.scenario === 'caravan') ? 1.2 : 1;
+  const bonus = (hasResearch('trading') ? 1.35 : 1) * routeBonus;
   G.res.gold -= profile.cost;
   const outputs = {};
   for (const [res, amount] of Object.entries(profile.out)) {
@@ -3017,7 +3019,10 @@ function caravanTradeHtml(b) {
   const last = G._lastCaravan
     ? `<div class="inf-line" style="color:#7ca84e">✓ Последняя сделка: ${G._lastCaravan}</div>`
     : '';
-  return `<div class="inf-line">🐎 Караванные сделки (золото: ${gold}💰):</div>`
+  const routeNote = (G.scenario === 'caravan')
+    ? `<div class="inf-line" style="color:#9cc06a;font-size:10px">🐎 Караванный путь: +20% к выдаче сделок</div>`
+    : '';
+  return `<div class="inf-line">🐎 Караванные сделки (золото: ${gold}💰):</div>${routeNote}`
     + `<div class="inf-line" style="color:#888;font-size:10px">Выбери сделку — золото в обмен на припасы</div>`
     + `<div class="filter-row" style="flex-direction:column">${buttons}</div>${last}`;
 }

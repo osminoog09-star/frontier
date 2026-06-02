@@ -2,6 +2,13 @@
 
 ## 2026-06-02
 
+### v1.31 - Caravan Route Trade Bonus
+
+- Caravan Route scenario now grants a +20% route bonus to all caravan deal outputs (stacks with `trading` research).
+- The tradepost panel shows a "+20% к выдаче сделок" note in the Caravan Route scenario.
+- Makes the scenario's caravan-deal goal feel rewarding and distinct.
+- Harness: Scenario Z validates the +20% bonus (74 vs 62 food) and the UI note; Scenarios T/U still green.
+
 ### v1.30 - Reliable Sidebar Pawn Selection
 
 - FIX: clicking a pawn card in the right sidebar sometimes did nothing — `renderPawns()` rebuilds the
