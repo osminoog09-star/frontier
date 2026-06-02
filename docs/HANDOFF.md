@@ -8,8 +8,8 @@
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
 - Последний локальный срез: `v1.44 - Basic Room Comfort` (+ Claude hotfix: детерминированный Scenario AC).
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.50`. Публичный index.html обновлён (структура .badge).
-- Harness: Scenarios A-AN (40) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
+- Текущий `GAME_VERSION`: `1.51`. Враги: головорез/стрелок/снайпер/главарь.
+- Harness: Scenarios A-AO (41) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
 
 ## Что изменилось в v1.44

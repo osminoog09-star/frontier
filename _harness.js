@@ -830,6 +830,21 @@ const test = `
   console.log('SCENARIO AN (marked readability):');
   console.log('   count:', JSON.stringify(c1), '| countOk:', countOk?'OK':'FAIL', '| summary:', summaryOk?'OK':'FAIL', '| render smoke:', anSmoke?'OK':'FAIL');
   if (!countOk || !anSmoke || !summaryOk) throw new Error('Scenario AN failed');
+
+  // Scenario AO: sniper enemy type — joins big raids, long range, not in small raids
+  const sniperDef = ENEMY_TYPES.sniper;
+  const defOk = sniperDef && sniperDef.range >= 11 && sniperDef.ranged === true && sniperDef.atk >= 20;
+  newGame('settlers'); G.enemies = [];
+  spawnEnemy(6);   // большой налёт: [0]=boss, [1]=sniper
+  const bigOk = G.enemies[0].type === 'boss' && G.enemies[1].type === 'sniper'
+    && G.enemies[1].range >= 11 && G.enemies[1].ranged === true;
+  newGame('settlers'); G.enemies = [];
+  spawnEnemy(2);   // мелкий налёт: без снайпера и без босса
+  const smallOk = !G.enemies.some(e => e.type === 'sniper') && !G.enemies.some(e => e.type === 'boss');
+  const sniperOk = defOk && bigOk && smallOk;
+  console.log('SCENARIO AO (sniper enemy type):');
+  console.log('   def:', defOk?'OK':'FAIL', '| big raid has sniper:', bigOk?'OK':'FAIL', '| small raid none:', smallOk?'OK':'FAIL');
+  if (!sniperOk) throw new Error('Scenario AO failed');
 })();
 `;
 try {

@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.50';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.51';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -526,6 +526,7 @@ const ENEMY_TYPES = {
   knifer: { name:'Головорез', hp:55, speed:1.6, atk:10, range:1.5,  ranged:false, color:'#8a2020', reload:55,  icon:'🔪' },
   gunner: { name:'Стрелок',   hp:65, speed:1.1, atk:9,  range:7.0,  ranged:true,  color:'#a04428', reload:110, icon:'🔫' },
   boss:   { name:'Главарь',   hp:160,speed:1.0, atk:16, range:6.0,  ranged:true,  color:'#6a1818', reload:90,  icon:'🤠' },
+  sniper: { name:'Снайпер',   hp:45, speed:0.9, atk:22, range:11.0, ranged:true,  color:'#7a5a2a', reload:170, icon:'🎯' },
 };
 
 function spawnEnemy(count) {
@@ -536,9 +537,10 @@ function spawnEnemy(count) {
     else if (side===1) { ex=MAP_W-1; ey=randInt(0,MAP_H-1); }
     else if (side===2) { ex=randInt(0,MAP_W-1); ey=MAP_H-1; }
     else { ex=0; ey=randInt(0,MAP_H-1); }
-    // pick type: one boss per big raid, rest mix of gunner/knifer
+    // pick type: boss ведёт крупный рейд, снайпер прикрывает большие налёты, остальные — стрелки/головорезы
     let type;
     if (i===0 && count>=4) type='boss';
+    else if (i===1 && count>=5) type='sniper';
     else type = Math.random()<0.5 ? 'gunner' : 'knifer';
     const def = ENEMY_TYPES[type];
     G.enemies.push({
@@ -1372,7 +1374,7 @@ function applyHit(target, dmg, friendly) {
     if (target.hp <= 0 && target.alive) {
       target.alive = false;
       G.stats.kills++;
-      const reward = target.type==='boss' ? 30 : 6;
+      const reward = target.type==='boss' ? 30 : target.type==='sniper' ? 14 : 6;
       G.res.gold += reward;
       G.stats.goldEarned += reward;
       Sfx.coin();
@@ -3757,7 +3759,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.50','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач в очереди.'],
+    ['now', 'v1.36–1.51','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер».'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>

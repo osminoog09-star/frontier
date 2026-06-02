@@ -2,6 +2,11 @@
 
 ## 2026-06-02
 
+### v1.51 - Sniper Enemy Type (combat depth)
+
+- New enemy «Снайпер»: long range (11 tiles), high damage, slow reload, fragile. Joins big raids (a sniper covers raids of 5+, alongside the boss); not in small raids. Kill reward 14.
+- Harness: Scenario AO (def params, big-raid sniper slot, small-raid absence). A-AO (41) green.
+
 ### v1.50 - Queued-Work Counter (visual pass 2)
 
 - Stats panel now shows what is queued for work: 🪓 trees / ⛏️ rocks / 🎯 animals via markedSummaryText().

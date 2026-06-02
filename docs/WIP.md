@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.51 - Sniper Enemy. Дальнобойный опасный враг в крупных налётах (5+), награда 14. Scenario AO. Harness A-AO (41) green.
+
 - v1.50 - Queued-Work Counter + site refresh. Панель статистики показывает очередь работ (🪓/⛏️/🎯); сайт обновлён до текущего состояния. Scenario AN расширен. Harness A-AN (40) green.
 
 - v1.49 - Marked Readability. Пульсирующая подсветка + иконки у помеченных деревьев/камней/животных; countMarked(). Scenario AN. Harness A-AN (40) green.
