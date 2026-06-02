@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.37';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.38';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -31,6 +31,7 @@ const BUILDS = {
   smithy: { name:'Кузня',    icon:'🔨', cost:{wood:20,ore:20},   size:2, prod:'gold',  rate:0.1 },
   camp:   { name:'Лагерь',   icon:'🏕️', cost:{wood:15},          size:2, prod:'rest',  rate:0.2 },
   bed:    { name:'Кровать',  icon:'🛏️', cost:{wood:12},          size:1, prod:'comfort',rate:0 },
+  table:  { name:'Стол',     icon:'🍽️', cost:{wood:10},          size:1, prod:'comfort',rate:0 },
   well:   { name:'Колодец',  icon:'🪣', cost:{wood:10,ore:5},    size:1, prod:'water', rate:0.1 },
   stable: { name:'Конюшня',  icon:'🐴', cost:{wood:25,ore:10},   size:2, prod:'horses',rate:0 },
 };
@@ -575,7 +576,12 @@ function updatePawns() {
     if (p.food < 40 && G.res.food >= 5) {
       G.res.food -= 5;
       p.food = Math.min(p.maxFood, p.food + 30);
-      addThought(p, '🍖 Поел', 5, true);
+      if (hasDiningTable()) {
+        p.mood = clamp(p.mood + 2, 0, 100);
+        addThought(p, '🍽️ Ел за столом', 6, true);
+      } else {
+        addThought(p, '🍖 Поел', 5, true);
+      }
     }
 
     // Update mood
@@ -746,6 +752,9 @@ function sleepEnergyRate(comfort) {
   if (comfort >= 2) return 4.4;
   if (comfort >= 1) return 3.2;
   return 2.4;
+}
+function hasDiningTable() {
+  return !!(G && G.buildings && G.buildings.some(b=>b.type==='table' && b.done && !b.blueprint));
 }
 function doSleep(p) {
   p.state = 'sleeping';
@@ -2223,6 +2232,13 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.strokeStyle = '#2a1a10'; ctx.strokeRect(x+3.5, y+4.5, S-7, S-8);
       break;
     }
+    case 'table': {
+      ctx.fillStyle = '#7a5430'; ctx.fillRect(x+4, y+6, S-8, S-10);
+      ctx.fillStyle = '#4a2f18'; ctx.fillRect(x+6, y+8, 3, S-14); ctx.fillRect(x+S-9, y+8, 3, S-14);
+      ctx.fillStyle = '#d8c08a'; ctx.beginPath(); ctx.arc(cx, cy, S*0.16, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#2a1a10'; ctx.strokeRect(x+4.5, y+6.5, S-9, S-11);
+      break;
+    }
     case 'well': {
       ctx.fillStyle = '#6a6560'; ctx.beginPath(); ctx.arc(cx, cy, S*0.32, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = '#2a4560'; ctx.beginPath(); ctx.arc(cx, cy, S*0.2, 0, Math.PI*2); ctx.fill();
@@ -3108,6 +3124,7 @@ function showBuildingInfo(b, cx, cy) {
 function furnitureInfoHtml(b) {
   if (!b || b.blueprint || !b.done) return '';
   if (b.type === 'bed') return `<div class="inf-line">Комфорт: <b>сон быстрее, настроение выше</b></div>`;
+  if (b.type === 'table') return `<div class="inf-line">Комфорт: <b>еда за столом даёт настроение</b></div>`;
   return '';
 }
 
@@ -3292,7 +3309,7 @@ function setupButtons() {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
-    'build-camp-btn':'camp','build-bed-btn':'bed','build-well-btn':'well',
+    'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-well-btn':'well',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     document.getElementById(id).addEventListener('click', () => {
@@ -3543,7 +3560,7 @@ function updateBuildButtons() {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
-    'build-camp-btn':'camp','build-bed-btn':'bed','build-well-btn':'well',
+    'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-well-btn':'well',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     const btn = document.getElementById(id);

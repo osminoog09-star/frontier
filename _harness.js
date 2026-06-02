@@ -617,6 +617,29 @@ const test = `
   console.log('SCENARIO AC (bed comfort sleep):');
   console.log('   comfort bonus:', comfortOk?'OK':'FAIL', '| energy:', roughEnergy.toFixed(1), '->', bedEnergy.toFixed(1), '| mood:', roughMood.toFixed(1), '->', bedMood.toFixed(1), '| prefers bed:', prefersBed?'OK':'FAIL');
   if (!comfortOk || !prefersBed) throw new Error('Scenario AC failed');
+
+  // Scenario AD: dining table gives a small comfort mood bonus when eating
+  const prepDining = (withTable) => {
+    newGame('settlers');
+    G.enemies = [];
+    G.res.food = 20;
+    G.buildings = G.buildings.filter(b => b.type !== 'table');
+    if (withTable) G.buildings.push({ type:'table', tx:12, ty:12, done:true, blueprint:false, hp:100, maxHp:100 });
+    G.pawns.forEach((q, i) => { q.food = i === 0 ? 35 : 100; q.mood = 50; q.energy = 80; q.socialTimer = 9999; q.state = 'idle'; });
+    return G.pawns[0];
+  };
+  let pEat = prepDining(false);
+  updatePawns();
+  const noTableMood = pEat.mood;
+  const noTableThought = pEat.thoughts.some(t => t.text.includes('Ел за столом'));
+  pEat = prepDining(true);
+  updatePawns();
+  const tableMood = pEat.mood;
+  const tableThought = pEat.thoughts.some(t => t.text.includes('Ел за столом'));
+  const diningOk = hasDiningTable() && tableMood > noTableMood + 1 && tableThought && !noTableThought;
+  console.log('SCENARIO AD (table dining comfort):');
+  console.log('   dining bonus:', diningOk?'OK':'FAIL', '| mood:', noTableMood.toFixed(1), '->', tableMood.toFixed(1), '| thought:', tableThought?'OK':'FAIL');
+  if (!diningOk) throw new Error('Scenario AD failed');
 })();
 `;
 try {

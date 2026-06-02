@@ -17,6 +17,13 @@
 - Scenario AC validates the comfort delta and bed preference.
 - Next furniture work should add tables/room beauty without turning it into a large refactor.
 
+## v1.38 furniture dining comfort
+
+- Added table as the second furniture slice.
+- Eating with a built table gives a small mood bonus and a positive thought.
+- Scenario AD validates table comfort against eating without a table.
+- Next furniture work should move from individual furniture bonuses toward room/beauty evaluation.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:

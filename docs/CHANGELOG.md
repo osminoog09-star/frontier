@@ -2,6 +2,13 @@
 
 ## 2026-06-02
 
+### v1.38 - Table Dining Comfort Slice
+
+- Added the **Table (Стол 🍽️)** as the second furniture/rooms slice.
+- Eating with a built table gives a small mood bonus and a positive "Ел за столом" thought.
+- Added a drawn table sprite, bottom build button, and building info line.
+- Harness: Scenario AD validates table dining comfort vs eating without a table.
+
 ### v1.37 - Beds Comfort Slice
 
 - Added the **Bed (Кровать 🛏️)** as the first furniture/rooms slice.

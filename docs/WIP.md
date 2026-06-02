@@ -39,6 +39,10 @@
 
 ## Последний завершённый срез
 
+- v1.38 - Table Dining Comfort Slice.
+- Добавлен стол как второй срез мебели: еда за столом даёт небольшой бонус настроения и мысль.
+- Harness A-AD green, local Chrome mobile smoke green.
+
 - v1.37 - Beds Comfort Slice.
 - Добавлена кровать как первый срез мебели: ковбои предпочитают её лагерю, быстрее отдыхают и получают комфорт сна.
 - Harness A-AC green, local Chrome mobile smoke green.
