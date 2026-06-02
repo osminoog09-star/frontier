@@ -427,6 +427,24 @@ const test = `
   const caravanDelayOk = delays.every(v => v >= 220 && v <= 480);
   console.log('SCENARIO S (scenario event pressure):');
   console.log('   goldrush:', goldPressureOk?'OK':'FAIL', '| fort:', fortPressureOk?'OK':'FAIL', '| caravan:', caravanPressureOk?'OK':'FAIL', '| caravan delay:', caravanDelayOk?'OK':'FAIL');
+
+  // Scenario T: caravan deal profiles
+  function setupTradeProfile() {
+    newGame('caravan');
+    G.res.gold = 100; G.res.food = 0; G.res.meat = 0; G.res.med = 0; G.res.wood = 0; G.res.ore = 0;
+    G.stats.caravanDeals = 0;
+  }
+  setupTradeProfile();
+  const foodTrade = runCaravanTrade('food');
+  const foodProfileOk = foodTrade.traded && foodTrade.profile === 'food' && G.res.gold === 88 && G.res.food >= 62 && G.res.meat >= 12 && G.stats.caravanDeals === 1;
+  setupTradeProfile();
+  const medTrade = runCaravanTrade('medicine');
+  const medProfileOk = medTrade.traded && medTrade.profile === 'medicine' && G.res.gold === 82 && G.res.med >= 18 && G.res.food >= 18 && G.stats.caravanDeals === 1;
+  setupTradeProfile();
+  const matTrade = runCaravanTrade('materials');
+  const matProfileOk = matTrade.traded && matTrade.profile === 'materials' && G.res.gold === 80 && G.res.wood >= 58 && G.res.ore >= 18 && G.stats.caravanDeals === 1;
+  console.log('SCENARIO T (caravan profiles):');
+  console.log('   food:', foodProfileOk?'OK':'FAIL', '| medicine:', medProfileOk?'OK':'FAIL', '| materials:', matProfileOk?'OK':'FAIL');
 })();
 `;
 try {

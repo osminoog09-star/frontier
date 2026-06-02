@@ -37,6 +37,13 @@ const RECIPES = {
   kitchen:{ out:'food', outAmount:14, in:{meat:8, wood:1}, work:180 },
 };
 
+const CARAVAN_PROFILES = {
+  mixed:    { name:'Смешанный караван', cost:15, out:{food:35, wood:18, med:5} },
+  food:     { name:'Продовольственный караван', cost:12, out:{food:62, meat:12} },
+  medicine: { name:'Медицинский караван', cost:18, out:{med:18, food:18} },
+  materials:{ name:'Стройматериалы', cost:20, out:{wood:58, ore:18} },
+};
+
 const TRAITS = {
   hardworking: { name:'Работяга',   icon:'💪', desc:'+25% скорость работы', good:true },
   lazy:        { name:'Лентяй',     icon:'😴', desc:'−20% скорость работы', good:false },
@@ -1640,30 +1647,47 @@ function triggerEvent(peaceful) {
   ev.fn();
 }
 
-function runCaravanTrade() {
+function pickCaravanProfile() {
+  if (G?.scenario === 'caravan') {
+    const keys = ['mixed', 'food', 'medicine', 'materials'];
+    return keys[randInt(0, keys.length-1)];
+  }
+  return 'mixed';
+}
+
+function caravanOutputText(outputs) {
+  return Object.entries(outputs)
+    .filter(([, amount]) => amount > 0)
+    .map(([res, amount]) => `+${amount} ${res}`)
+    .join(', ');
+}
+
+function runCaravanTrade(profileId=null) {
   const post = G.buildings.find(b=>b.done && !b.blueprint && b.type==='tradepost');
   if (!post) {
     G.res.food += 20;
     addLog('🐎 Малый караван оставил немного провианта. Построй торг. пост для сделок.', 'good');
     return { traded:false, reason:'no_tradepost', food:20 };
   }
-  if ((G.res.gold || 0) < 15) {
+  const selectedProfile = CARAVAN_PROFILES[profileId] ? profileId : pickCaravanProfile();
+  const profile = CARAVAN_PROFILES[selectedProfile] || CARAVAN_PROFILES.mixed;
+  if ((G.res.gold || 0) < profile.cost) {
     addLog('🐎 Караван пришёл, но золота для сделки не хватило.', 'warn');
-    return { traded:false, reason:'no_gold' };
+    return { traded:false, reason:'no_gold', profile:selectedProfile, cost:profile.cost };
   }
   const bonus = hasResearch('trading') ? 1.35 : 1;
-  G.res.gold -= 15;
-  const food = Math.floor(35 * bonus);
-  const wood = Math.floor(18 * bonus);
-  const med = hasResearch('trading') ? 8 : 5;
-  G.res.food += food;
-  G.res.wood += wood;
-  G.res.med += med;
+  G.res.gold -= profile.cost;
+  const outputs = {};
+  for (const [res, amount] of Object.entries(profile.out)) {
+    const finalAmount = Math.floor(amount * bonus);
+    outputs[res] = finalAmount;
+    G.res[res] = (G.res[res] || 0) + finalAmount;
+  }
   ensureScenarioStats();
   G.stats.caravanDeals++;
-  addLog(`🐎 Караванная сделка: -15 золота, +${food} еды, +${wood} дерева, +${med} медикаментов`, 'good');
-  Diag.action(`Караванная сделка @${post.tx},${post.ty}`);
-  return { traded:true, spentGold:15, food, wood, med };
+  addLog(`🐎 ${profile.name}: -${profile.cost} золота, ${caravanOutputText(outputs)}`, 'good');
+  Diag.action(`${profile.name} @${post.tx},${post.ty}`);
+  return { traded:true, profile:selectedProfile, spentGold:profile.cost, outputs, ...outputs };
 }
 
 function updateWeather() {

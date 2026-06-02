@@ -357,4 +357,16 @@
 - [x] Regression harness green: Scenarios A-S pass, expected Scenario K anomaly is detected, no runtime errors.
 
 ### Next Autonomous Target
-- [ ] Caravan profiles: food caravan, medicine caravan, building-material caravan.
+- [x] Caravan profiles: food caravan, medicine caravan, building-material caravan.
+
+## Update 2026-06-02 - v1.24 Caravan Profiles Slice
+- [x] Created `versions/frontier-v1.24.html` from the current playable build.
+- [x] Added `CARAVAN_PROFILES`: mixed, food, medicine, materials.
+- [x] `runCaravanTrade(profileId)` supports deterministic profile deals.
+- [x] Caravan Route can receive varied caravan profiles while the default route keeps the mixed trade.
+- [x] Trading research still boosts caravan outputs.
+- [x] Extended `_harness.js` with Scenario T: caravan profiles.
+- [x] Regression harness green: Scenarios A-T pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
+- [ ] Tradepost UI for choosing caravan deal profile.

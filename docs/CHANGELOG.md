@@ -2,6 +2,15 @@
 
 ## 2026-06-02
 
+### v1.24 - Caravan Profiles
+
+- Added `CARAVAN_PROFILES`: `mixed`, `food`, `medicine`, `materials`.
+- `runCaravanTrade(profileId)` can now run deterministic caravan deals.
+- Random caravan events choose profiles for Caravan Route and keep `mixed` for the default route.
+- Trading research still boosts caravan outputs.
+- Successful caravan profile trades increment `stats.caravanDeals`.
+- Harness: Scenario T.
+
 ### v1.23 - Scenario Event Pressure
 
 - Added scenario-specific event modifiers.

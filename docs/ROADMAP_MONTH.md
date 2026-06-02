@@ -293,4 +293,13 @@
 - Done: `_harness.js` includes Scenario S for scenario event modifiers.
 
 ### Next Step
-- Add food, medicine, and building-material caravan profiles.
+- Add tradepost UI for choosing caravan deal profile.
+
+## Update 2026-06-02 - Caravan Profiles Status
+- Done: caravan profile slice implemented as `versions/frontier-v1.24.html`.
+- Done: `mixed`, `food`, `medicine`, and `materials` profiles exist.
+- Done: `runCaravanTrade(profileId)` can execute deterministic profile deals.
+- Done: `_harness.js` includes Scenario T for caravan profiles.
+
+### Next Step
+- Show caravan profile cost/output in tradepost UI and let the player choose a deal.

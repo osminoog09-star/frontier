@@ -159,3 +159,8 @@
 - Fort Defense adds early danger through scouting raids.
 - Caravan Route makes trade events feel more frequent.
 - The next design step is giving caravan trades clear profiles and player-readable choices.
+
+## Update 2026-06-02 - Caravan Profiles Design Status
+- Caravan trades now have distinct identities: mixed supplies, food, medicine, and building materials.
+- This gives the tradepost a clearer role as a strategic supply tool.
+- The next design step is letting the player choose the profile before paying gold.

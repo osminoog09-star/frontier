@@ -231,3 +231,12 @@
 
 ### Next Architecture Work
 - Split caravan trades into explicit profiles while keeping `runCaravanTrade()` deterministic for harness coverage.
+
+## Update 2026-06-02 - Caravan Profiles Architecture Notes
+- `CARAVAN_PROFILES` defines trade cost/output profiles.
+- `runCaravanTrade(profileId)` now supports deterministic profile execution.
+- Default caravan events keep the mixed profile outside Caravan Route; Caravan Route can vary profile selection.
+- Scenario T validates food, medicine, and materials profile trades.
+
+### Next Architecture Work
+- Expose profile selection through tradepost UI without coupling UI rendering to random events.
