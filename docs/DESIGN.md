@@ -174,3 +174,18 @@
 - Caravan trading is now readable at a glance: the player sees what each deal gives and whether they can afford it without hovering.
 - A last-deal line gives quick feedback that a trade actually happened.
 - Next design focus: scenario events should make each start feel distinct (Gold Rush economic risk, Fort raid waves, Caravan route trade windows).
+
+## Update 2026-06-02 - Housing Progression (v1.46)
+- Жильё теперь прогрессирует, как в RimWorld, и палатка не бессмысленна:
+  - земля (0) — медленный сон, без укрытия;
+  - 🏕️ палатка/лагерь (1) — дешёвая ранняя времянка, пока нет стен/кроватей;
+  - 🛏️ одиночная кровать (2) — лучше палатки;
+  - 🏠 кровать в замкнутой комнате/доме (3) — лучший сон (energy 5.2) + бонус комнаты к настроению.
+- «Дом» = кровать внутри замкнутой зоны из заборов/ворот (reuse `enclosedRoomAt`). Это даёт игроку
+  понятную цель: обнести спальню стенами с воротами.
+- Сделано аддитивно: старая семантика «кровать=2» сохранена (тест AC не сломан), добавлен тир 3.
+
+### Логика-ревизия (на будущее)
+- Палатка остаётся ранним укрытием; мид-гейм её вытесняет дом — это норм прогрессия.
+- Проверить далее: используется ли ресурс «вода» (колодец) где-либо; не дублируют ли друг друга
+  источники еды; нужна ли «крыша» отдельно от стен (сейчас комната = только стены).

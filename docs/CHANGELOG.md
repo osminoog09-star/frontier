@@ -2,6 +2,16 @@
 
 ## 2026-06-02
 
+### v1.46 - Housing Progression (beds make tents make sense)
+
+- Fixed a design redundancy: with beds, the tent/camp felt pointless. Now there is a clear progression:
+  ground(0) < tent/camp(1, early shelter) < lone bed(2) < **bed inside an enclosed room/house(3)**.
+- A bed inside a fenced/gated room ("house") gives the best sleep (energy 5.2) plus the room mood bonus —
+  giving the player a RimWorld-like reason to wall off a bedroom.
+- Additive change: existing "bed=2" semantics preserved, so Codex's Scenario AC stays valid.
+- Harness: Scenario AK (lone bed 2 vs bed-in-room 3, ordered sleep rates). A-AK (37) green.
+- Design note + a small logic-review checklist added to docs/DESIGN.md.
+
 ### v1.45 - Ambient Audio (Week 2 audio pass)
 
 - Added ambient sound layers driven by time/weather: light wind by day, quieter rustle at night,

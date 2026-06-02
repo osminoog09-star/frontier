@@ -760,6 +760,26 @@ const test = `
   console.log('SCENARIO AJ (ambient audio profile):');
   console.log('   profile select:', profOk?'OK':'FAIL', '(' + [pDay,pNight,pRain,pBliz].join('/') + ') | setAmbient smoke:', (smokeOk&&smokeProfileSet)?'OK':'FAIL');
   if (!profOk || !smokeOk || !smokeProfileSet) throw new Error('Scenario AJ failed');
+
+  // Scenario AK: housing progression — lone bed (2) < bed inside an enclosed room/house (3)
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['bed','camp','fence','gate'].includes(b.type));
+  // ровная земля под комнату, чтобы flood-fill не считал воду/скалу стенами
+  for (let y = 30; y <= 34; y++) for (let x = 40; x <= 44; x++) { G.map[y][x].type = TERRAIN.GRASS; G.map[y][x].obj = null; }
+  const pawnK = G.pawns[0];
+  pawnK.x = 42*TILE; pawnK.y = 32*TILE;
+  G.buildings.push({ type:'bed', tx:42, ty:32, done:true, blueprint:false, hp:120, maxHp:120 });
+  const loneComfort = sleepComfortAt(pawnK);
+  // обнести кровать кольцом забора 40..44 x 30..34 → замкнутая комната (дом)
+  for (let x = 40; x <= 44; x++) for (let y = 30; y <= 34; y++) {
+    if (x===40||x===44||y===30||y===34) G.buildings.push({ type:'fence', tx:x, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+  }
+  const roomComfort = sleepComfortAt(pawnK);
+  const rateOk = sleepEnergyRate(3) > sleepEnergyRate(2) && sleepEnergyRate(2) > sleepEnergyRate(1) && sleepEnergyRate(1) > sleepEnergyRate(0);
+  const houseOk = loneComfort === 2 && roomComfort === 3 && rateOk;
+  console.log('SCENARIO AK (housing progression bed->house):');
+  console.log('   lone bed:', loneComfort, '| bed in room:', roomComfort, '| sleep rates ordered:', rateOk?'OK':'FAIL', '|', houseOk?'OK':'FAIL');
+  if (!houseOk) throw new Error('Scenario AK failed');
 })();
 `;
 try {

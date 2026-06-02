@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.46 - Housing Progression. Кровать в замкнутой комнате (доме) = лучший сон (comfort 3); палатка осталась ранним укрытием. Scenario AK. Harness A-AK (37) green.
+
 - v1.45 - Ambient Audio. Эмбиент-слои по времени/погоде (ветер днём, шелест ночью, дождь, метель); ambientProfile() + Sfx.setAmbient(). Scenario AJ. Harness A-AJ (36) green.
 - v1.44 - Basic Room Comfort.
 - Мебель внутри замкнутой зоны из забора/ворот даёт первый room-score, mood-бонус и мысль.

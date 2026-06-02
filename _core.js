@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.45';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.46';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -628,7 +628,7 @@ function updatePawns() {
       const comfort = sleepComfortAt(p);
       const dE = (p.state==='sleeping' ? sleepEnergyRate(comfort) : -0.3);
       p.energy = clamp(p.energy + dE, 0, p.maxEnergy);
-      if (p.state==='sleeping' && comfort >= 2) p.mood = clamp(p.mood + 0.5, 0, 100);
+      if (p.state==='sleeping' && comfort >= 2) p.mood = clamp(p.mood + (comfort >= 3 ? 0.8 : 0.5), 0, 100);
       if (p.food <= 0) p.hp = Math.max(0, p.hp - 2);
       if (p.hp <= 0) downPawn(p);
     }
@@ -809,13 +809,17 @@ function addThought(p, text, duration, positive) {
 
 const CAMP_CAP = 3; // сколько ковбоев помещается в один лагерь/палатку
 const BED_CAP = 1;
+// Прогрессия жилья (как в RimWorld): земля(0) < палатка/лагерь(1) < одиночная кровать(2) < кровать в доме(3).
+// «Дом» = кровать внутри замкнутой комнаты из стен/ворот (enclosedRoomAt). Палатка — ранняя времянка.
 function sleepComfortAt(p) {
   if (!p || !G || !G.buildings) return 0;
-  if (G.buildings.some(b=>b.type==='bed' && b.done && !b.blueprint && distTiles(p,b.tx,b.ty)<=1.2)) return 2;
+  const bed = G.buildings.find(b=>b.type==='bed' && b.done && !b.blueprint && distTiles(p,b.tx,b.ty)<=1.2);
+  if (bed) return enclosedRoomAt(bed.tx, bed.ty) ? 3 : 2;   // кровать в комнате = 3, одиночная = 2
   if (G.buildings.some(b=>b.type==='camp' && b.done && !b.blueprint && distTiles(p,b.tx,b.ty)<=1.8)) return 1;
   return 0;
 }
 function sleepEnergyRate(comfort) {
+  if (comfort >= 3) return 5.2;   // кровать в доме — лучший сон
   if (comfort >= 2) return 4.4;
   if (comfort >= 1) return 3.2;
   return 2.4;
@@ -3690,7 +3694,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.45','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук (ветер/сверчки/дождь).'],
+    ['now', 'v1.36–1.46','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья (кровать в доме лучше палатки).'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
