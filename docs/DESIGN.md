@@ -108,3 +108,8 @@
 - Players can now pause an individual recipe station without demolishing it or starving the whole colony of inputs.
 - The control lives where the player looks for station state: the building info panel.
 - This is the first step toward richer production queues while keeping the UI compact.
+
+## Update 2026-06-02 - Public Mobile Web Design Status
+- Phone access now has a dedicated narrow-screen layout instead of squeezing the desktop sidebar beside the map.
+- The first mobile pass prioritizes playability: full-width map, compact topbar, hidden sidebar.
+- Deeper mobile panels can come later; the goal here is reliable public access from a phone browser.

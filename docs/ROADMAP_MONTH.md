@@ -218,3 +218,12 @@
 
 ### Next Step
 - Publish and smoke-test the web build through GitHub Pages for phone access.
+
+## Update 2026-06-02 - Public Mobile Web Status
+- Done: GitHub repository `osminoog09-star/frontier` created and pushed.
+- Done: GitHub Pages enabled from `main` root.
+- Done: phone-oriented CSS added in `versions/frontier-v1.16.html`.
+- Done: local mobile viewport smoke passes with full-width canvas.
+
+### Next Step
+- Confirm public mobile URL after Pages cache refresh, then continue gameplay roadmap.

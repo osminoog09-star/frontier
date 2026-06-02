@@ -158,3 +158,12 @@
 
 ### Next Architecture Work
 - Add recipe queue depth or per-station desired output limits after public deployment is stable.
+
+## Update 2026-06-02 - Public Mobile Web Architecture Notes
+- The game is now published as static GitHub Pages content from repository root.
+- `frontier.html` remains the playable build; `server.js` is only for local/LAN testing.
+- Inline favicon prevents noisy 404 console errors on GitHub Pages.
+- Mobile CSS hides the sidebar below 700px so the canvas remains usable on phones.
+
+### Next Architecture Work
+- Keep public URL smoke checks as part of release validation.

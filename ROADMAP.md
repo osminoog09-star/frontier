@@ -246,3 +246,19 @@
 ### Next Autonomous Target
 - [ ] GitHub Pages/mobile publishing: keep public build online and smoke-test the public URL.
 - [ ] Continue gameplay roadmap with more station control/queues after public access is stable.
+
+## Update 2026-06-02 - v1.16 Public Mobile Web Slice
+- [x] Created `versions/frontier-v1.16.html` from the current playable build.
+- [x] Added inline favicon to avoid GitHub Pages `/favicon.ico` 404 noise.
+- [x] Added mobile CSS for narrow screens: sidebar hides, canvas gets full phone width, controls compress.
+- [x] Local phone viewport smoke green: 390px canvas width, sidebar hidden, no console errors.
+- [x] GitHub repository created and pushed: `osminoog09-star/frontier`.
+- [x] GitHub Pages enabled from `main` root.
+
+### Public URL
+- Game: `https://osminoog09-star.github.io/frontier/frontier.html`
+- Project page: `https://osminoog09-star.github.io/frontier/`
+
+### Next Autonomous Target
+- [ ] Public GitHub Pages mobile smoke after deployment cache refresh.
+- [ ] Continue production queues/output limits after public access is stable.
