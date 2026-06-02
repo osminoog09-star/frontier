@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.61';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.62';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -2598,16 +2598,23 @@ function drawStructure(type, x, y, S, def, b) {
       break;
     }
     case 'lab': {
-      ctx.fillStyle = '#3a4560'; ctx.fillRect(x+2, y+2, S-4, S-4);
-      ctx.fillStyle = '#6aa0c0'; ctx.beginPath(); ctx.arc(cx, cy, S*0.18, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#aee0ff'; ctx.beginPath(); ctx.arc(cx-2, cy-2, S*0.07, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#33405a'; ctx.fillRect(x+2, y+S*0.25, S-4, S*0.73);          // стены
+      ctx.fillStyle = '#26304a';                                                    // крыша
+      ctx.beginPath(); ctx.moveTo(x+1, y+S*0.27); ctx.lineTo(cx, y+2); ctx.lineTo(x+S-1, y+S*0.27); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#6aa0c0'; ctx.beginPath(); ctx.arc(cx, cy+2, S*0.16, 0, Math.PI*2); ctx.fill();   // колба
+      ctx.fillStyle = '#aee0ff'; ctx.beginPath(); ctx.arc(cx-2, cy, S*0.06, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(174,224,255,${0.5+0.4*Math.sin((G.tick||0)*0.12)})`;     // пузырёк
+      ctx.beginPath(); ctx.arc(cx+3, cy-3-((G.tick||0)%20)/10, 1.6, 0, Math.PI*2); ctx.fill();
       break;
     }
     case 'clinic': {
-      ctx.fillStyle = '#e8e8e0'; ctx.fillRect(x+2, y+2, S-4, S-4);
-      ctx.fillStyle = '#c03030';
-      ctx.fillRect(cx-2, cy-7, 4, 14); ctx.fillRect(cx-7, cy-2, 14, 4);
-      ctx.strokeStyle='#aaa'; ctx.strokeRect(x+2, y+2, S-4, S-4);
+      ctx.fillStyle = '#d8d4c8'; ctx.fillRect(x+2, y+S*0.28, S-4, S*0.7);          // стены
+      ctx.fillStyle = '#9a3030';                                                    // красная крыша
+      ctx.beginPath(); ctx.moveTo(x, y+S*0.3); ctx.lineTo(cx, y+2); ctx.lineTo(x+S, y+S*0.3); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#7a6a55'; ctx.fillRect(cx-4, y+S*0.62, 8, S*0.36);           // дверь
+      ctx.fillStyle = '#fff'; ctx.fillRect(cx-6, y+S*0.36, 12, 12);                 // вывеска
+      ctx.fillStyle = '#c03030'; ctx.fillRect(cx-1, y+S*0.36+2, 2, 8); ctx.fillRect(cx-4, y+S*0.36+5, 8, 2);
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.strokeRect(x+2, y+S*0.28, S-4, S*0.7);
       break;
     }
     case 'smithy': {

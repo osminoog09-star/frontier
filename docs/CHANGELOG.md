@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.62 - Building Sprite Polish
+
+- Clinic and lab no longer look like flat white/blue boxes: added walls, a roof, a door/sign and an animated flask — they read as buildings.
+- Code audit: confirmed all 20 building types have a custom drawStructure case (none falls to the default placeholder).
+- Render-only; existing render-smoke scenarios stay green. A-AT green, guard OK.
+
 ### v1.61 - Herd Details Panel
 
 - PC-first ranch/horse UX slice: the stats panel now shows a compact herd panel with tamed/wild horses, taming progress, stable/ranch counts, movement bonus, and daily ranch yield.

@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.62 - Building Sprite Polish (Claude). Клиника/лаборатория объёмнее (стены/крыша/вывеска), не плоские квадраты. Аудит: у всех 20 зданий есть свой спрайт. Render-only, harness зелёный.
+
 - v1.61 - Herd Details Panel. PC stats показывает компактную animal-панель: табун, приручение, конюшни/ранчо, бонус скорости и доход ранчо. Добавлен `herdDetailRows()` и Scenario AX. Harness A-AX (50) green.
 
 - v1.60 - Room Details Panel. PC stats показывает компактную room-панель: тип, уют, качество стен, размер и мебель по каждой найденной комнате. Добавлен `roomDetailRows()` и Scenario AW. Harness A-AW (49) green.
