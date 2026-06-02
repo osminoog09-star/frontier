@@ -103,3 +103,8 @@
 - When filters accidentally block hauling, the game now exposes it through diagnostics instead of silently letting stacks rot on the ground.
 - This supports the player's mental model: if nobody hauls, the log can say whether the cause is storage rules.
 - Next production control should follow the same idea: make station intent explicit and visible.
+
+## Update 2026-06-02 - Production Toggle Design Status
+- Players can now pause an individual recipe station without demolishing it or starving the whole colony of inputs.
+- The control lives where the player looks for station state: the building info panel.
+- This is the first step toward richer production queues while keeping the UI compact.

@@ -233,3 +233,16 @@
 ### Next Autonomous Target
 - [ ] Production station toggles: allow disabling/enabling a recipe station from its info panel.
 - [ ] Then add harness/browser coverage for paused stations not consuming inputs.
+
+## Update 2026-06-02 - v1.15 Production Station Toggle Slice
+- [x] Created `versions/frontier-v1.15.html` from the current playable build.
+- [x] Added `craftEnabled` state for recipe stations.
+- [x] `tryCraft()` now skips disabled recipe stations.
+- [x] Recipe station info panel now has a clickable enable/disable chip.
+- [x] Disabled stations show `Станция: выключена` and do not consume inputs.
+- [x] Extended `_harness.js` with Scenario L: paused station consumes nothing, resumed station crafts again.
+- [x] Regression harness green: Scenarios A-L pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
+- [ ] GitHub Pages/mobile publishing: keep public build online and smoke-test the public URL.
+- [ ] Continue gameplay roadmap with more station control/queues after public access is stable.

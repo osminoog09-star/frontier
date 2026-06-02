@@ -148,3 +148,13 @@
 
 ### Next Architecture Work
 - Add station-level enabled/paused state to recipe buildings and make `tryCraft()` respect it.
+
+## Update 2026-06-02 - Production Toggle Architecture Notes
+- Recipe stations now support `craftEnabled`.
+- `normalizeRecipeStation()` defaults missing state to enabled for save compatibility.
+- `tryCraft()` filters out disabled stations before reservation/pathing.
+- `showBuildingInfo()` renders a recipe enable/disable chip and re-renders after toggling.
+- Scenario L verifies that disabled stations do not consume inputs and resumed stations craft normally.
+
+### Next Architecture Work
+- Add recipe queue depth or per-station desired output limits after public deployment is stable.

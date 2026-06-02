@@ -210,3 +210,11 @@
 
 ### Next Step
 - Add production station pause/toggle controls.
+
+## Update 2026-06-02 - Week 1 Production Toggle Status
+- Done: production station toggle slice implemented as `versions/frontier-v1.15.html`.
+- Done: recipe stations can be enabled/disabled from their info panel.
+- Done: `_harness.js` includes Scenario L for paused/resumed station behavior.
+
+### Next Step
+- Publish and smoke-test the web build through GitHub Pages for phone access.
