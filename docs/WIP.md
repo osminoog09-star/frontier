@@ -39,6 +39,10 @@
 
 ## Последний завершённый срез
 
+- v1.39 - Decor Beauty Slice.
+- Добавлен декор как первый beauty-срез: рядом с украшением настроение растёт и появляется мысль.
+- Harness A-AE green, local Chrome mobile smoke green.
+
 - v1.38 - Table Dining Comfort Slice.
 - Добавлен стол как второй срез мебели: еда за столом даёт небольшой бонус настроения и мысль.
 - Harness A-AD green, local Chrome mobile smoke green.

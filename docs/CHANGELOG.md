@@ -2,6 +2,13 @@
 
 ## 2026-06-02
 
+### v1.39 - Decor Beauty Slice
+
+- Added **Decor (Декор 🪴)** as the first beauty/room-feel slice.
+- Pawns near built decor get a small mood delta bonus and a positive "Красивый уголок" thought.
+- Added a drawn decor sprite, bottom build button, and building info line.
+- Harness: Scenario AE validates the nearby beauty mood bonus and thought.
+
 ### v1.38 - Table Dining Comfort Slice
 
 - Added the **Table (Стол 🍽️)** as the second furniture/rooms slice.

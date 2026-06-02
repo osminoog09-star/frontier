@@ -640,6 +640,21 @@ const test = `
   console.log('SCENARIO AD (table dining comfort):');
   console.log('   dining bonus:', diningOk?'OK':'FAIL', '| mood:', noTableMood.toFixed(1), '->', tableMood.toFixed(1), '| thought:', tableThought?'OK':'FAIL');
   if (!diningOk) throw new Error('Scenario AD failed');
+
+  // Scenario AE: decor gives nearby beauty mood/thought
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => b.type !== 'decor');
+  const pBeauty = G.pawns[0];
+  pBeauty.x = 15*TILE; pBeauty.y = 15*TILE; pBeauty.food = 80; pBeauty.energy = 80; pBeauty.hp = pBeauty.maxHp; pBeauty.sick = null;
+  const plainDelta = calcMoodDelta(pBeauty);
+  G.buildings.push({ type:'decor', tx:16, ty:15, done:true, blueprint:false, hp:100, maxHp:100 });
+  const decorDelta = calcMoodDelta(pBeauty);
+  updateThoughts(pBeauty);
+  const decorThought = pBeauty.thoughts.some(t => t.text.includes('Красивый уголок'));
+  const decorOk = nearBeautyDecor(pBeauty) && decorDelta > plainDelta + 0.15 && decorThought;
+  console.log('SCENARIO AE (decor beauty mood):');
+  console.log('   beauty bonus:', decorOk?'OK':'FAIL', '| delta:', plainDelta.toFixed(2), '->', decorDelta.toFixed(2), '| thought:', decorThought?'OK':'FAIL');
+  if (!decorOk) throw new Error('Scenario AE failed');
 })();
 `;
 try {

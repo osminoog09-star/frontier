@@ -6,10 +6,17 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.38 - Table Dining Comfort Slice`.
+- Последний локальный срез: `v1.39 - Decor Beauty Slice`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.38`.
-- Harness: Scenarios A-AD должны быть зелёные; перед push обязательно `node _harness.js`.
+- Текущий `GAME_VERSION`: `1.39`.
+- Harness: Scenarios A-AE должны быть зелёные; перед push обязательно `node _harness.js`.
+
+## Что изменилось в v1.39
+
+- Добавлена постройка `decor` / "Декор" как первый beauty-срез.
+- Если ковбой рядом с готовым декором, его mood delta немного растёт.
+- Добавлена мысль "Красивый уголок", отрисовка декора, кнопка строительства и info-overlay строка.
+- Scenario AE проверяет nearby beauty bonus и мысль.
 
 ## Что изменилось в v1.38
 

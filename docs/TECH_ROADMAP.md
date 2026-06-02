@@ -24,6 +24,13 @@
 - Scenario AD validates table comfort against eating without a table.
 - Next furniture work should move from individual furniture bonuses toward room/beauty evaluation.
 
+## v1.39 decor beauty start
+
+- Added decor as the first beauty object.
+- Nearby decor gives a small mood delta bonus and a visible positive thought.
+- Scenario AE validates the beauty delta and thought.
+- Next step: room/wall recognition or a compact room quality panel.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:

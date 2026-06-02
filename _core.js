@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.38';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.39';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -32,6 +32,7 @@ const BUILDS = {
   camp:   { name:'Лагерь',   icon:'🏕️', cost:{wood:15},          size:2, prod:'rest',  rate:0.2 },
   bed:    { name:'Кровать',  icon:'🛏️', cost:{wood:12},          size:1, prod:'comfort',rate:0 },
   table:  { name:'Стол',     icon:'🍽️', cost:{wood:10},          size:1, prod:'comfort',rate:0 },
+  decor:  { name:'Декор',    icon:'🪴', cost:{wood:8,gold:2},     size:1, prod:'beauty', rate:0 },
   well:   { name:'Колодец',  icon:'🪣', cost:{wood:10,ore:5},    size:1, prod:'water', rate:0.1 },
   stable: { name:'Конюшня',  icon:'🐴', cost:{wood:25,ore:10},   size:2, prod:'horses',rate:0 },
 };
@@ -702,6 +703,7 @@ function calcMoodDelta(p) {
   if (hasResearch('cooking') && p.food > 60) delta += 0.1;
   if (p.sick) delta -= 0.3 * p.sick.severity;
   if (p.state === 'sleeping' && sleepComfortAt(p) >= 2) delta += 0.15;
+  if (nearBeautyDecor(p)) delta += 0.2;
 
   // Traits
   if (p.traits.includes('optimist')) delta += 0.15;
@@ -730,6 +732,7 @@ function updateThoughts(p) {
   if (G.season===3) p.thoughts.push({text:'❄️ Зябко', neg:true});
   if (p.sick) p.thoughts.push({text:`🤒 ${p.sick.name}`, neg:true});
   if (sleepComfortAt(p) >= 2 && p.energy > 50) p.thoughts.push({text:'🛏️ Спал в кровати', neg:false});
+  if (nearBeautyDecor(p)) p.thoughts.push({text:'🪴 Красивый уголок', neg:false});
 }
 
 function addThought(p, text, duration, positive) {
@@ -755,6 +758,9 @@ function sleepEnergyRate(comfort) {
 }
 function hasDiningTable() {
   return !!(G && G.buildings && G.buildings.some(b=>b.type==='table' && b.done && !b.blueprint));
+}
+function nearBeautyDecor(p) {
+  return !!(p && G && G.buildings && G.buildings.some(b=>b.type==='decor' && b.done && !b.blueprint && distTiles(p,b.tx,b.ty)<=5));
 }
 function doSleep(p) {
   p.state = 'sleeping';
@@ -2239,6 +2245,14 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.strokeStyle = '#2a1a10'; ctx.strokeRect(x+4.5, y+6.5, S-9, S-11);
       break;
     }
+    case 'decor': {
+      ctx.fillStyle = '#5a3a22'; ctx.fillRect(cx-5, y+S-8, 10, 6);
+      ctx.fillStyle = '#3f7a43'; ctx.beginPath(); ctx.arc(cx-3, cy, S*0.18, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#5fa85a'; ctx.beginPath(); ctx.arc(cx+4, cy-3, S*0.16, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#e8c97e'; ctx.beginPath(); ctx.arc(cx+1, cy-5, 2, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#2a1a10'; ctx.strokeRect(cx-5.5, y+S-8.5, 10, 6);
+      break;
+    }
     case 'well': {
       ctx.fillStyle = '#6a6560'; ctx.beginPath(); ctx.arc(cx, cy, S*0.32, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = '#2a4560'; ctx.beginPath(); ctx.arc(cx, cy, S*0.2, 0, Math.PI*2); ctx.fill();
@@ -3125,6 +3139,7 @@ function furnitureInfoHtml(b) {
   if (!b || b.blueprint || !b.done) return '';
   if (b.type === 'bed') return `<div class="inf-line">Комфорт: <b>сон быстрее, настроение выше</b></div>`;
   if (b.type === 'table') return `<div class="inf-line">Комфорт: <b>еда за столом даёт настроение</b></div>`;
+  if (b.type === 'decor') return `<div class="inf-line">Красота: <b>рядом настроение растёт</b></div>`;
   return '';
 }
 
@@ -3309,7 +3324,7 @@ function setupButtons() {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
-    'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-well-btn':'well',
+    'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     document.getElementById(id).addEventListener('click', () => {
@@ -3560,7 +3575,7 @@ function updateBuildButtons() {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
-    'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-well-btn':'well',
+    'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     const btn = document.getElementById(id);
