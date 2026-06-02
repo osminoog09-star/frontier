@@ -145,11 +145,22 @@ function scenarioEventDelay() {
 
 function triggerScenarioDayEvent() {
   if (!G || G.gameOver) return null;
-  if (G.scenario === 'goldrush' && G.day >= 2 && G.day <= 5) {
-    const loss = Math.min(G.res.food, 8);
-    G.res.food -= loss;
-    addLog(`💰 Золотая лихорадка давит на припасы: старатели съели ${loss} еды.`, 'warn');
-    return { type:'goldrush_food_pressure', loss };
+  if (G.scenario === 'goldrush' && G.day >= 2) {
+    // Со дня 4 (чётные дни) на прииск приходят налётчики за золотом — нарастающий риск
+    if (G.day >= 4 && G.day % 2 === 0) {
+      const count = 2 + Math.floor(G.day / 3);
+      spawnEnemy(count);
+      Sfx.alarm();
+      addLog(`💰 Налётчики за золотом: ${count} бандитов идут к прииску!`, 'danger');
+      return { type:'goldrush_claim_raid', count };
+    }
+    // Ранние дни (2-5): давление по еде
+    if (G.day <= 5) {
+      const loss = Math.min(G.res.food, 8);
+      G.res.food -= loss;
+      addLog(`💰 Золотая лихорадка давит на припасы: старатели съели ${loss} еды.`, 'warn');
+      return { type:'goldrush_food_pressure', loss };
+    }
   }
   if (G.scenario === 'fort' && G.day >= 2 && G.day <= 4) {
     const total = 3;

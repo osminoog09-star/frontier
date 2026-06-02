@@ -504,6 +504,19 @@ const test = `
   const wave4ok = fw4 && fw4.wave===3 && fw4.count===4 && G.enemies.length===4 && fw4.reward>fw3.reward;
   console.log('SCENARIO W (fort waves + hold reward):');
   console.log('   wave 1/3:', wave2ok?'OK':'FAIL', '| wave 2/3 reward:', wave3ok?'OK':'FAIL', '| wave 3/3 escalates:', wave4ok?'OK':'FAIL');
+
+  // Scenario X: Gold Rush economic risk — early food pressure, then claim-jumper raids
+  newGame('goldrush'); G.day = 2; G.res.food = 50;
+  const grEarly = triggerScenarioDayEvent();
+  const earlyOk = grEarly && grEarly.type==='goldrush_food_pressure' && G.res.food === 42;
+  newGame('goldrush'); G.day = 4; G.enemies = [];
+  const grRaid = triggerScenarioDayEvent();
+  const raidOk = grRaid && grRaid.type==='goldrush_claim_raid' && grRaid.count>=2 && G.enemies.length===grRaid.count;
+  newGame('goldrush'); G.day = 6; G.enemies = [];
+  const grRaid6 = triggerScenarioDayEvent();
+  const raid6Ok = grRaid6 && grRaid6.type==='goldrush_claim_raid' && grRaid6.count>grRaid.count && G.enemies.length===grRaid6.count;
+  console.log('SCENARIO X (gold rush economic risk):');
+  console.log('   early food pressure:', earlyOk?'OK':'FAIL', '| claim raid day4:', raidOk?'OK':'FAIL', '| raid escalates day6:', raid6Ok?'OK':'FAIL');
 })();
 `;
 try {

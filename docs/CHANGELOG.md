@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.29 - Gold Rush Economic Risk
+
+- Gold Rush now escalates: early days (2-5) keep the food pressure; from day 4 (even days) claim-jumper raids spawn bandits drawn to the mine.
+- Raid size scales with the day, raising tension as the player gets richer.
+- Harness: Scenario X validates early food pressure and escalating claim raids (day 4 vs day 6).
+
 ### v1.28 - Fort Defense Waves + Hold Reward
 
 - Fort Defense raids are now numbered, escalating waves: day 2 → wave 1/3 (2 enemies), day 3 → 2/3 (3), day 4 → 3/3 (4).
