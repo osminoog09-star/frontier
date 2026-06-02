@@ -204,3 +204,13 @@
 
 ### Next Architecture Work
 - Add scenario initialization helpers that can compose starting buildings/resources/events.
+
+## Update 2026-06-02 - Start Scenarios Architecture Notes
+- `SCENARIOS` defines available starting profiles.
+- `newGame(scenarioId)` keeps the default behavior but can apply a selected profile.
+- `applyScenario()` composes starting resources and buildings after base world generation.
+- `addDoneBuilding()` and `forceDry()` support safe scenario setup without abusing player build costs.
+- Scenario Q validates Gold Rush, Fort Defense, and Caravan Route initialization.
+
+### Next Architecture Work
+- Add scenario-specific goals and event modifiers without branching the entire simulation loop.

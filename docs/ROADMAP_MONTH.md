@@ -265,3 +265,12 @@
 
 ### Next Step
 - Start scenario initialization: Gold Rush, Fort Defense, Caravan Route.
+
+## Update 2026-06-02 - Start Scenarios Status
+- Done: scenario initialization slice implemented as `versions/frontier-v1.21.html`.
+- Done: start menu exposes scenarios.
+- Done: Gold Rush, Fort Defense, and Caravan Route profiles are implemented.
+- Done: `_harness.js` includes Scenario Q for scenario initialization.
+
+### Next Step
+- Add scenario-specific goals/events and deeper caravan profiles.

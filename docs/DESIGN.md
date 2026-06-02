@@ -137,3 +137,10 @@
 - The colony now has its first external economy hook: a trading post can turn gold into useful supplies.
 - Caravan events have clearer meaning once the player invests in trade infrastructure.
 - This prepares the "Caravan Route" scenario and later faction/trade systems.
+
+## Update 2026-06-02 - Start Scenarios Design Status
+- Players can now choose a starting fantasy instead of always using the same colony setup.
+- Gold Rush pushes wealth and ore.
+- Fort Defense starts with a defensible perimeter.
+- Caravan Route starts with trade infrastructure.
+- This gives future content a clear structure for goals, events, and balance.

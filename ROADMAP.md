@@ -314,3 +314,19 @@
 ### Next Autonomous Target
 - [ ] Start scenarios: Gold Rush, Fort Defense, Caravan Route.
 - [ ] Add harness coverage for scenario initialization.
+
+## Update 2026-06-02 - v1.21 Start Scenarios Slice
+- [x] Created `versions/frontier-v1.21.html` from the current playable build.
+- [x] Added `SCENARIOS`: settlers, goldrush, fort, caravan.
+- [x] `newGame(scenarioId)` now applies selected starting profile while keeping default start unchanged.
+- [x] Added scenario menu in the main menu.
+- [x] Gold Rush starts with more ore/gold and less food.
+- [x] Fort Defense starts with fences, gate, tower, and extra materials.
+- [x] Caravan Route starts with a completed tradepost and extra trade gold.
+- [x] Save/load persists `scenario`.
+- [x] Extended `_harness.js` with Scenario Q: all scenario profiles initialize correctly.
+- [x] Regression harness green: Scenarios A-Q pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
+- [ ] Scenario-specific goals/events.
+- [ ] Caravan profiles: food caravan, medicine caravan, building-material caravan.

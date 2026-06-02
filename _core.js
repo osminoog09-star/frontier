@@ -64,8 +64,14 @@ const RESEARCHES = [
 let G = null; // game state
 const DEFAULT_RES = { food:120, wood:60, ore:20, meat:0, med:10, sci:0, gold:30 };
 const STORABLE_RES = ['food','wood','ore','meat','med','gold'];
+const SCENARIOS = {
+  settlers: { name:'Поселенцы', desc:'Обычный старт: баланс еды, дерева и золота.' },
+  goldrush: { name:'Золотая лихорадка', desc:'Больше золота и руды, но меньше еды. Быстрее выход к богатству.' },
+  fort: { name:'Оборона форта', desc:'Старт с периметром, воротами и вышкой. Готовься к налётам.' },
+  caravan: { name:'Караванный путь', desc:'Старт с торговым постом и золотом для первых сделок.' },
+};
 
-function newGame() {
+function newGame(scenarioId='settlers') {
   const map = generateMap();
   G = {
     map,
@@ -101,6 +107,7 @@ function newGame() {
     nextId: 1,
     eventTimer: 600 + Math.random()*600,
     gameOver: false,
+    scenario: scenarioId,
   };
 
   // Spawn starting pawns
@@ -130,10 +137,77 @@ function newGame() {
   // Spawn animals
   for (let i=0; i<20; i++) spawnAnimal();
 
+  applyScenario(scenarioId, cx, cy);
+
   _miniDirty = true;
-  addLog('🤠 Добро пожаловать на Дикий Запад!', 'good');
+  addLog(`🤠 Добро пожаловать на Дикий Запад! Сценарий: ${SCENARIOS[G.scenario]?.name || SCENARIOS.settlers.name}`, 'good');
   addLog('Постройте ферму и рубите деревья.', '');
   normalizeGameState('newGame');
+}
+
+function addDoneBuilding(type, tx, ty, extra={}) {
+  const spot = canPlaceBuilding(type, tx, ty, G.buildings) ? {tx, ty} : findBuildableSpot(type, tx, ty, G.buildings);
+  if (!spot) return null;
+  const hp = getBuildingMaxHp(type);
+  const b = {type, tx:spot.tx, ty:spot.ty, blueprint:false, done:true, progress:1, hp, maxHp:hp, selected:false, ...extra};
+  if (type === 'stockpile') b.filters = b.filters || defaultStockpileFilters();
+  normalizeRecipeStation(b);
+  normalizeStockpileFilters(b);
+  G.buildings.push(b);
+  return b;
+}
+
+function forceDry(tx, ty, size=1) {
+  for (let dy=0; dy<size; dy++) for (let dx=0; dx<size; dx++) {
+    const x = tx+dx, y = ty+dy;
+    if (x>=0 && y>=0 && x<MAP_W && y<MAP_H) {
+      G.map[y][x].type = TERRAIN.DIRT;
+      G.map[y][x].obj = null;
+    }
+  }
+}
+
+function addFortPerimeter(cx, cy) {
+  for (let x=cx-5; x<=cx+5; x++) {
+    if (x === cx) addDoneBuilding('gate', x, cy-5);
+    else addDoneBuilding('fence', x, cy-5);
+    addDoneBuilding('fence', x, cy+5);
+  }
+  for (let y=cy-4; y<=cy+4; y++) {
+    addDoneBuilding('fence', cx-5, y);
+    addDoneBuilding('fence', cx+5, y);
+  }
+  addDoneBuilding('tower', cx-4, cy-4);
+}
+
+function applyScenario(id, cx=Math.floor(MAP_W/2), cy=Math.floor(MAP_H/2)) {
+  const scenario = SCENARIOS[id] ? id : 'settlers';
+  G.scenario = scenario;
+  if (scenario === 'goldrush') {
+    G.res.food = 80;
+    G.res.ore += 45;
+    G.res.gold += 70;
+    for (let i=0; i<10; i++) {
+      const tx = clamp(cx + randInt(-8, 8), 2, MAP_W-3);
+      const ty = clamp(cy + randInt(-8, 8), 2, MAP_H-3);
+      G.map[ty][tx].type = TERRAIN.ROCK;
+      G.map[ty][tx].obj = {type:'rock', hp:60, maxHp:60, marked:false};
+    }
+    addLog('💰 Золотая лихорадка: рядом больше руды и стартового золота.', 'good');
+  } else if (scenario === 'fort') {
+    forceDry(cx-6, cy-6, 13);
+    addFortPerimeter(cx, cy);
+    G.res.wood += 35;
+    G.res.ore += 15;
+    addLog('🛡️ Оборона форта: стартовый периметр и вышка готовы.', 'good');
+  } else if (scenario === 'caravan') {
+    forceDry(cx+5, cy+2, 2);
+    addDoneBuilding('tradepost', cx+5, cy+2);
+    G.res.gold += 45;
+    G.res.food += 20;
+    G.eventTimer = 260;
+    addLog('🐎 Караванный путь: торговый пост построен, золото на первую сделку есть.', 'good');
+  }
 }
 
 function generateMap() {
@@ -3012,6 +3086,7 @@ function setupMainMenu() {
     G.speed = 1; document.getElementById('speed-btn').textContent = '▶ x1';
     document.getElementById('end-overlay').style.display='none';
   });
+  document.getElementById('mm-scenarios').addEventListener('click', () => showScenarioPanel(panel, menu));
   document.getElementById('mm-continue').addEventListener('click', () => {
     loadGame(); menu.style.display='none';
     G.speed = 1; document.getElementById('speed-btn').textContent = '▶ x1';
@@ -3024,6 +3099,29 @@ function setupMainMenu() {
 
   // Show roadmap by default on first load
   showRoadmapPanel(panel);
+}
+
+function showScenarioPanel(panel, menu) {
+  panel.innerHTML = `
+    <h2>Сценарии старта</h2>
+    <p>Выбери стартовый профиль. Все сценарии используют тот же мир и те же правила, но меняют первые ресурсы, здания и риск.</p>
+    <div style="display:grid;gap:10px;margin-top:12px">
+      ${Object.entries(SCENARIOS).map(([id, s]) => `
+        <button class="menu-btn-big scenario-start" data-scenario="${id}" style="text-align:left">
+          <b>${s.name}</b><br><span style="font-size:11px;color:#888">${s.desc}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+  panel.querySelectorAll('.scenario-start').forEach(btn => {
+    btn.addEventListener('click', () => {
+      newGame(btn.dataset.scenario || 'settlers');
+      menu.style.display = 'none';
+      G.speed = 1;
+      document.getElementById('speed-btn').textContent = '▶ x1';
+      document.getElementById('end-overlay').style.display='none';
+    });
+  });
 }
 
 function showRoadmapPanel(panel) {
@@ -3162,6 +3260,7 @@ function saveGame() {
       res:G.res, day:G.day, hour:G.hour, minute:G.minute,
       season:G.season, dayOfYear:G.dayOfYear, weather:G.weather,
       nextId:G.nextId,
+      scenario:G.scenario || 'settlers',
       camera:{x:G.camera.x, y:G.camera.y, zoom:G.camera.zoom},
       // compact map: plain number for empty tile, [type, objCode, hp, marked] for tiles with tree/rock
       map: G.map.map(row=>row.map(t=>
@@ -3188,6 +3287,7 @@ function loadGame() {
     newGame();
     Object.assign(G.res, save.res);
     G.day=save.day; G.hour=save.hour; G.minute=save.minute;
+    G.scenario=save.scenario||'settlers';
     G.season=save.season||0; G.dayOfYear=save.dayOfYear||0;
     G.weather=save.weather||'clear';
     if (save.nextId) G.nextId = save.nextId;

@@ -377,6 +377,17 @@ const test = `
   const tradeDelivered = trade.traded && G.res.food >= 35 && G.res.wood >= 18 && G.res.med >= 5;
   console.log('SCENARIO P (tradepost caravan trade):');
   console.log('   spent gold:', tradeSpentGold?'OK':'FAIL', '| delivered:', tradeDelivered?'OK':'FAIL', '| food:', Math.floor(G.res.food), '| wood:', Math.floor(G.res.wood), '| med:', Math.floor(G.res.med));
+
+  // Scenario Q: scenario initialization profiles
+  newGame('goldrush');
+  const goldrushOk = G.scenario === 'goldrush' && G.res.gold >= DEFAULT_RES.gold + 70 && G.res.food < DEFAULT_RES.food;
+  newGame('fort');
+  const fortFences = G.buildings.filter(b=>b.type==='fence' && b.done).length;
+  const fortOk = G.scenario === 'fort' && fortFences >= 30 && G.buildings.some(b=>b.type==='gate') && G.buildings.some(b=>b.type==='tower');
+  newGame('caravan');
+  const caravanOk = G.scenario === 'caravan' && G.buildings.some(b=>b.type==='tradepost' && b.done) && G.res.gold >= DEFAULT_RES.gold + 45;
+  console.log('SCENARIO Q (start scenarios):');
+  console.log('   goldrush:', goldrushOk?'OK':'FAIL', '| fort:', fortOk?'OK':'FAIL', '| caravan:', caravanOk?'OK':'FAIL');
 })();
 `;
 try {
