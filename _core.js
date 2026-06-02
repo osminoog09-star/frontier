@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.39';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.40';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -704,6 +704,7 @@ function calcMoodDelta(p) {
   if (p.sick) delta -= 0.3 * p.sick.severity;
   if (p.state === 'sleeping' && sleepComfortAt(p) >= 2) delta += 0.15;
   if (nearBeautyDecor(p)) delta += 0.2;
+  delta += homesteadComfortBonus();
 
   // Traits
   if (p.traits.includes('optimist')) delta += 0.15;
@@ -733,6 +734,7 @@ function updateThoughts(p) {
   if (p.sick) p.thoughts.push({text:`🤒 ${p.sick.name}`, neg:true});
   if (sleepComfortAt(p) >= 2 && p.energy > 50) p.thoughts.push({text:'🛏️ Спал в кровати', neg:false});
   if (nearBeautyDecor(p)) p.thoughts.push({text:'🪴 Красивый уголок', neg:false});
+  if (homesteadComfortScore() >= 3) p.thoughts.push({text:'🏠 Уютная усадьба', neg:false});
 }
 
 function addThought(p, text, duration, positive) {
@@ -761,6 +763,24 @@ function hasDiningTable() {
 }
 function nearBeautyDecor(p) {
   return !!(p && G && G.buildings && G.buildings.some(b=>b.type==='decor' && b.done && !b.blueprint && distTiles(p,b.tx,b.ty)<=5));
+}
+function homesteadComfortScore() {
+  if (!G || !G.buildings) return 0;
+  const built = type => G.buildings.some(b=>b.type===type && b.done && !b.blueprint);
+  return (built('bed') ? 1 : 0) + (built('table') ? 1 : 0) + (built('decor') ? 1 : 0);
+}
+function homesteadComfortBonus() {
+  const score = homesteadComfortScore();
+  if (score >= 3) return 0.12;
+  if (score >= 2) return 0.05;
+  return 0;
+}
+function homesteadComfortLabel() {
+  const score = homesteadComfortScore();
+  if (score >= 3) return 'уютная';
+  if (score >= 2) return 'обживается';
+  if (score >= 1) return 'зачатки';
+  return 'нет';
 }
 function doSleep(p) {
   p.state = 'sleeping';
@@ -2779,6 +2799,7 @@ function renderResearch() {
     <div>🪵 Деревьев срублено: <b style="color:#aaa">${G.stats.treesChopped}</b></div>
     <div>💰 Золота заработано: <b style="color:#aaa">${Math.floor(G.stats.goldEarned)}</b></div>
     <div>🐎 Караванных сделок: <b style="color:#aaa">${Math.floor(G.stats.caravanDeals || 0)}</b></div>
+    <div>🏠 Комфорт усадьбы: <b style="color:#aaa">${homesteadComfortLabel()} (${homesteadComfortScore()}/3)</b></div>
     <div style="margin-top:4px;color:#7a6a4a">🏆 ${SCENARIOS[G.scenario]?.name || SCENARIOS.settlers.name}: ${goal.sidebar}</div>
   `;
   list.appendChild(stats);

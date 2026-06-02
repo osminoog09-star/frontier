@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.40 - Homestead Comfort Score
+
+- Added a visible **Homestead Comfort** score from built bed/table/decor.
+- A complete basic furniture set gives a small global mood delta bonus.
+- Pawn thoughts can now show "Уютная усадьба" when the comfort set is complete.
+- Stats panel now shows `Комфорт усадьбы: <label> (score/3)`.
+- Harness: Scenario AF validates score 0→3, mood bonus, label, and thought.
+
 ### v1.39 - Decor Beauty Slice
 
 - Added **Decor (Декор 🪴)** as the first beauty/room-feel slice.

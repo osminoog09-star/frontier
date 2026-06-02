@@ -39,6 +39,10 @@
 
 ## Последний завершённый срез
 
+- v1.40 - Homestead Comfort Score.
+- Кровать, стол и декор теперь складываются в общий комфорт усадьбы; stats показывает score, mood получает мягкий bonus.
+- Harness A-AF green, local Chrome mobile smoke green.
+
 - v1.39 - Decor Beauty Slice.
 - Добавлен декор как первый beauty-срез: рядом с украшением настроение растёт и появляется мысль.
 - Harness A-AE green, local Chrome mobile smoke green.

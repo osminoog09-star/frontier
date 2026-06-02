@@ -655,6 +655,27 @@ const test = `
   console.log('SCENARIO AE (decor beauty mood):');
   console.log('   beauty bonus:', decorOk?'OK':'FAIL', '| delta:', plainDelta.toFixed(2), '->', decorDelta.toFixed(2), '| thought:', decorThought?'OK':'FAIL');
   if (!decorOk) throw new Error('Scenario AE failed');
+
+  // Scenario AF: homestead comfort score rewards a basic furniture set
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['bed','table','decor'].includes(b.type));
+  const pHome = G.pawns[0];
+  pHome.x = 30*TILE; pHome.y = 30*TILE; pHome.food = 80; pHome.energy = 80; pHome.hp = pHome.maxHp; pHome.sick = null;
+  const emptyScore = homesteadComfortScore();
+  const emptyBonus = homesteadComfortBonus();
+  const emptyDelta = calcMoodDelta(pHome);
+  G.buildings.push({ type:'bed', tx:30, ty:30, done:true, blueprint:false, hp:120, maxHp:120 });
+  G.buildings.push({ type:'table', tx:31, ty:30, done:true, blueprint:false, hp:100, maxHp:100 });
+  G.buildings.push({ type:'decor', tx:32, ty:30, done:true, blueprint:false, hp:100, maxHp:100 });
+  const fullScore = homesteadComfortScore();
+  const fullBonus = homesteadComfortBonus();
+  const fullDelta = calcMoodDelta(pHome);
+  updateThoughts(pHome);
+  const homeThought = pHome.thoughts.some(t => t.text.includes('Уютная усадьба'));
+  const homeOk = emptyScore === 0 && emptyBonus === 0 && fullScore === 3 && fullBonus > 0 && fullDelta > emptyDelta && homeThought && homesteadComfortLabel() === 'уютная';
+  console.log('SCENARIO AF (homestead comfort score):');
+  console.log('   score:', emptyScore + '->' + fullScore, '| bonus:', emptyBonus.toFixed(2) + '->' + fullBonus.toFixed(2), '| thought:', homeThought?'OK':'FAIL');
+  if (!homeOk) throw new Error('Scenario AF failed');
 })();
 `;
 try {

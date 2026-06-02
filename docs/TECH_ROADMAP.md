@@ -31,6 +31,14 @@
 - Scenario AE validates the beauty delta and thought.
 - Next step: room/wall recognition or a compact room quality panel.
 
+## v1.40 homestead comfort score
+
+- Added aggregate comfort score from bed/table/decor.
+- Complete basic furniture set gives a small global mood delta bonus.
+- Stats panel exposes the comfort label and score.
+- Scenario AF validates score, bonus, label, and thought.
+- Next step: move from colony-wide comfort to room recognition/quality.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
