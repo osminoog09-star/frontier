@@ -1,0 +1,6 @@
+.claude/
+.codex-pet-runs/
+*.log
+node_modules/
+.env
+

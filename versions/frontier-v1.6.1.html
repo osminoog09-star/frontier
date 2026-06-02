@@ -1,0 +1,2997 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Frontier — Дикий Запад</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #1a1a1a; color: #ccc; font-family: 'Courier New', monospace; font-size: 13px; overflow: hidden; user-select: none; }
+
+  #topbar {
+    display: flex; align-items: center; gap: 8px;
+    background: #111; border-bottom: 1px solid #333;
+    padding: 4px 8px; height: 38px; flex-wrap: wrap;
+  }
+  .res-group { display: flex; gap: 10px; align-items: center; }
+  .res { display: flex; align-items: center; gap: 3px; font-size: 12px; color: #aaa; }
+  .res span { color: #e8c97e; font-weight: bold; }
+  .res-icon { font-size: 14px; }
+  #clock { color: #aaa; font-size: 11px; margin-left: auto; white-space: nowrap; }
+
+  #main { display: flex; height: calc(100vh - 38px); }
+
+  #canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+  canvas { display: block; cursor: default; }
+
+  #sidebar {
+    width: 290px; background: #161616; border-left: 1px solid #2a2a2a;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  .tabs { display: flex; background: #111; border-bottom: 1px solid #2a2a2a; }
+  .tab-btn {
+    flex: 1; padding: 6px 2px; background: none; border: none; color: #666;
+    cursor: pointer; font-size: 11px; font-family: inherit;
+    border-bottom: 2px solid transparent; transition: all 0.1s;
+  }
+  .tab-btn:hover { color: #aaa; background: #1a1a1a; }
+  .tab-btn.active { color: #e8c97e; border-bottom-color: #e8c97e; background: #161616; }
+
+  .tab-content { flex: 1; overflow-y: auto; padding: 6px; display: none; }
+  .tab-content.active { display: block; }
+  .tab-content::-webkit-scrollbar { width: 4px; }
+  .tab-content::-webkit-scrollbar-thumb { background: #333; }
+
+  /* Pawn cards */
+  .pawn-card {
+    background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 3px;
+    margin-bottom: 6px; padding: 6px; cursor: pointer; transition: border-color 0.1s;
+  }
+  .pawn-card:hover { border-color: #444; }
+  .pawn-card.selected { border-color: #e8c97e; background: #252015; }
+  .pawn-card.dead { border-color: #5a2222; opacity: 0.6; }
+  .pawn-name { color: #e8c97e; font-weight: bold; font-size: 12px; margin-bottom: 4px; }
+  .pawn-status { color: #888; font-size: 11px; margin-bottom: 4px; }
+  .bar-wrap { margin-bottom: 3px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 10px; color: #777; margin-bottom: 1px; }
+  .bar { height: 5px; background: #1a1a1a; border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+  .bar-hp { background: #c04444; }
+  .bar-food { background: #7ca84e; }
+  .bar-mood { background: #5a8fbf; }
+  .bar-energy { background: #8a6cc7; }
+
+  .trait-row { display:flex; flex-wrap:wrap; gap:3px; margin:4px 0 2px; }
+  .trait-chip { font-size:9px; padding:1px 5px; border-radius:8px; cursor:help; }
+  .trait-chip.tg { background:rgba(124,168,78,0.18); color:#9cc06a; }
+  .trait-chip.tb { background:rgba(192,88,88,0.18); color:#d08a8a; }
+  .pawn-thoughts { font-size: 10px; color: #666; margin-top: 3px; }
+  .thought-pos { color: #7ca84e; }
+  .thought-neg { color: #c05050; }
+
+  /* Build panel */
+  .section-title { color: #7a6a4a; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin: 8px 0 4px; padding-bottom: 2px; border-bottom: 1px solid #2a2a2a; }
+  .build-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; }
+  .build-btn {
+    background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 3px;
+    color: #aaa; cursor: pointer; padding: 5px 4px; font-size: 11px;
+    font-family: inherit; text-align: left; transition: all 0.1s;
+  }
+  .build-btn:hover { border-color: #555; background: #252525; color: #ddd; }
+  .build-btn.active { border-color: #e8c97e; background: #2a2515; color: #e8c97e; }
+  .build-btn .cost { font-size: 10px; color: #666; display: block; margin-top: 2px; }
+  .build-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Research */
+  .research-item {
+    background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 3px;
+    padding: 6px; margin-bottom: 4px;
+  }
+  .research-item.done { border-color: #3a5a3a; }
+  .research-item.active { border-color: #5a7a5a; background: #1a231a; }
+  .research-name { font-size: 12px; color: #bbb; margin-bottom: 2px; }
+  .research-item.done .research-name { color: #7ca84e; }
+  .research-desc { font-size: 10px; color: #666; margin-bottom: 4px; }
+  .research-cost { font-size: 10px; color: #888; }
+  .btn-small {
+    background: #2a3a2a; border: 1px solid #3a5a3a; color: #7ca84e;
+    padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: inherit;
+    border-radius: 2px; margin-top: 4px;
+  }
+  .btn-small:hover { background: #334a33; }
+  .btn-small:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Events log */
+  .log-entry { font-size: 11px; color: #888; padding: 3px 0; border-bottom: 1px solid #1e1e1e; }
+  .log-entry .log-time { color: #555; }
+  .log-entry.warn { color: #c07040; }
+  .log-entry.danger { color: #c04444; }
+  .log-entry.good { color: #7ca84e; }
+
+  /* Bottom bar */
+  #bottombar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    padding: 4px 8px 4px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  }
+  .action-btn {
+    background: #1e1e1e; border: 1px solid #333; color: #aaa;
+    padding: 4px 10px; cursor: pointer; font-size: 11px; font-family: inherit;
+    border-radius: 2px; transition: all 0.1s;
+  }
+  .action-btn:hover { border-color: #555; background: #252525; color: #ddd; }
+  .action-btn.active { border-color: #e8c97e; background: #2a2515; color: #e8c97e; }
+  .action-btn.danger-btn { border-color: #5a2222; }
+  .action-btn.danger-btn:hover { background: #2a1515; color: #e05050; }
+
+  /* Info panel overlay */
+  #info-overlay {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(16,16,16,0.92); border: 1px solid #333; border-radius: 4px;
+    padding: 8px 10px; min-width: 200px; max-width: 260px;
+    font-size: 11px; display: none; pointer-events: none;
+  }
+  #info-overlay .inf-title { color: #e8c97e; font-size: 12px; margin-bottom: 4px; }
+  #info-overlay .inf-line { color: #888; margin: 2px 0; }
+  #info-overlay .inf-line b { color: #bbb; }
+
+  /* Priority editor */
+  #priority-panel {
+    position: absolute; top: 50px; right: 300px;
+    background: #161616; border: 1px solid #333; border-radius: 4px;
+    padding: 8px; min-width: 280px; display: none; z-index: 100;
+  }
+  #priority-panel h3 { color: #e8c97e; font-size: 12px; margin-bottom: 6px; }
+  .priority-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .priority-label { flex: 1; color: #aaa; font-size: 11px; }
+  .priority-select {
+    background: #1e1e1e; border: 1px solid #333; color: #ddd;
+    padding: 2px 4px; font-size: 11px; font-family: inherit; border-radius: 2px;
+    cursor: pointer;
+  }
+  .priority-select option { background: #1e1e1e; }
+
+  /* Tooltip */
+  #tooltip {
+    position: fixed; background: rgba(16,16,16,0.95); border: 1px solid #444;
+    padding: 5px 8px; font-size: 11px; color: #ccc; border-radius: 3px;
+    pointer-events: none; display: none; max-width: 200px; z-index: 200;
+  }
+
+  /* Season indicator */
+  #season-badge {
+    font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 4px;
+  }
+
+  /* Weather badge */
+  #weather-badge { font-size: 13px; margin-left: 4px; }
+
+  /* Autobattle indicator */
+  #autobattle-btn.active { border-color: #c04444; background: #2a1515; color: #e05050; }
+
+  /* Win/lose overlay */
+  #end-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center; z-index: 500;
+    flex-direction: column; gap: 16px;
+  }
+  #end-overlay h1 { font-size: 32px; color: #e8c97e; }
+  #end-overlay p { color: #aaa; font-size: 14px; }
+  #end-overlay button {
+    background: #2a2a1a; border: 1px solid #e8c97e; color: #e8c97e;
+    padding: 8px 24px; font-size: 14px; cursor: pointer; font-family: inherit;
+    border-radius: 3px;
+  }
+
+  /* Schedule grid */
+  .schedule-grid { display: grid; grid-template-columns: 80px repeat(24, 1fr); gap: 1px; font-size: 9px; }
+  .sched-name { color: #aaa; display: flex; align-items: center; padding: 1px 3px; }
+  .sched-cell {
+    height: 16px; border-radius: 1px; cursor: pointer; transition: filter 0.1s;
+  }
+  .sched-cell:hover { filter: brightness(1.3); }
+  .sched-any { background: #3a4a3a; }
+  .sched-sleep { background: #2a2a5a; }
+  .sched-work { background: #4a3a1a; }
+  .sched-joy { background: #3a2a4a; }
+  .sched-hours { grid-column: 2 / -1; display: grid; grid-template-columns: repeat(24, 1fr); color: #555; text-align: center; }
+
+  /* Keybinds hint */
+  #keyhints { position: absolute; bottom: 44px; left: 8px; font-size: 10px; color: #444; pointer-events: none; }
+
+  /* Minimap */
+  #minimap-wrap {
+    position: absolute; right: 8px; bottom: 44px; z-index: 20;
+    border: 1px solid #4a4028; border-radius: 4px; overflow: hidden;
+    background: #0d0b08; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  #minimap { display: block; cursor: pointer; }
+
+  /* Zoom controls */
+  #zoom-controls {
+    position: absolute; right: 8px; bottom: 188px; z-index: 20;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .zoom-btn {
+    width: 30px; height: 30px; background: rgba(20,17,12,0.85); border: 1px solid #4a4028;
+    color: #d8c89a; font-size: 16px; cursor: pointer; border-radius: 4px; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .zoom-btn:hover { background: #2a2418; border-color: #e8c97e; color: #e8c97e; }
+
+  /* Objective HUD */
+  #objective-hud {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    background: rgba(16,16,16,0.85); border: 1px solid #3a3320; border-radius: 6px;
+    padding: 6px 14px; text-align: center; min-width: 220px; pointer-events: none;
+  }
+  #obj-title { color: #e8c97e; font-size: 11px; font-weight: bold; }
+  #obj-text { color: #aaa; font-size: 11px; margin: 2px 0 4px; }
+  .obj-bar { height: 5px; background: #1a1a1a; border-radius: 3px; overflow: hidden; }
+  #obj-fill { height: 100%; background: linear-gradient(90deg,#7a6a2a,#e8c97e); width: 0%; transition: width 0.5s; }
+
+  /* Help popup */
+  #help-popup {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: #181818; border: 2px solid #e8c97e; border-radius: 8px;
+    padding: 18px 22px; max-width: 440px; z-index: 300; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+  }
+  #help-popup h2 { color: #e8c97e; font-size: 18px; margin-bottom: 10px; }
+  #help-popup p { color: #bbb; font-size: 12px; margin: 8px 0; line-height: 1.5; }
+  #help-popup ul { margin: 8px 0 8px 4px; list-style: none; }
+  #help-popup li { color: #aaa; font-size: 12px; margin: 5px 0; line-height: 1.4; }
+  #help-popup b { color: #e8c97e; }
+  #help-popup button {
+    background: #2a2a1a; border: 1px solid #e8c97e; color: #e8c97e; margin-top: 10px;
+    padding: 8px 20px; font-size: 13px; cursor: pointer; font-family: inherit; border-radius: 4px; width: 100%;
+  }
+  #help-popup button:hover { background: #3a3a20; }
+
+  /* Main menu */
+  #main-menu {
+    position: fixed; inset: 0; z-index: 600;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(80,60,30,0.4), transparent 60%),
+      linear-gradient(160deg, #1a1410 0%, #0d0b08 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .menu-box {
+    display: flex; gap: 0; width: 860px; max-width: 94vw; height: 540px; max-height: 92vh;
+    background: rgba(20,18,14,0.6); border: 1px solid #3a3320; border-radius: 12px;
+    overflow: hidden; box-shadow: 0 20px 70px rgba(0,0,0,0.7);
+  }
+  .menu-left {
+    width: 320px; padding: 36px 28px; display: flex; flex-direction: column;
+    background: linear-gradient(180deg, rgba(40,32,18,0.6), rgba(20,16,10,0.6));
+    border-right: 1px solid #2a2418;
+  }
+  .menu-logo { color: #e8c97e; font-size: 40px; letter-spacing: 2px; text-shadow: 0 3px 10px rgba(0,0,0,0.6); }
+  .menu-sub { color: #998a6a; font-size: 12px; margin: 6px 0 30px; }
+  .menu-buttons { display: flex; flex-direction: column; gap: 10px; }
+  .menu-btn-big {
+    background: rgba(40,36,24,0.8); border: 1px solid #4a4028; color: #d8c89a;
+    padding: 12px 16px; font-size: 14px; font-family: inherit; cursor: pointer;
+    border-radius: 6px; text-align: left; transition: all 0.12s;
+  }
+  .menu-btn-big:hover { background: #3a3220; border-color: #e8c97e; color: #e8c97e; transform: translateX(3px); }
+  .menu-ver { margin-top: auto; color: #5a5040; font-size: 10px; }
+  .menu-right { flex: 1; padding: 28px; overflow-y: auto; color: #bbb; }
+  .menu-right::-webkit-scrollbar { width: 6px; }
+  .menu-right::-webkit-scrollbar-thumb { background: #3a3320; border-radius: 3px; }
+  .menu-right h2 { color: #e8c97e; font-size: 20px; margin-bottom: 14px; }
+  .menu-right h3 { color: #d8c89a; font-size: 14px; margin: 16px 0 6px; }
+  .menu-right p, .menu-right li { font-size: 12px; line-height: 1.6; color: #aaa; }
+  .menu-right ul { margin-left: 18px; margin-top: 4px; }
+  .rm-done { color: #7ca84e; }
+  .rm-now { color: #e8c97e; }
+  .rm-soon { color: #888; }
+  .rm-row { padding: 4px 0; border-bottom: 1px solid #221e14; }
+  .rm-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 8px; margin-right: 6px; vertical-align: middle; }
+  .tag-done { background: #2a4a2a; color: #7ca84e; }
+  .tag-now { background: #4a3a1a; color: #e8c97e; }
+  .tag-soon { background: #2a2a2a; color: #888; }
+</style>
+</head>
+<body>
+
+<div id="main-menu">
+  <div class="menu-box">
+    <div class="menu-left">
+      <h1 class="menu-logo">🤠 FRONTIER</h1>
+      <p class="menu-sub">Дикий Запад • выживание в стиле RimWorld</p>
+      <div class="menu-buttons">
+        <button class="menu-btn-big" id="mm-new">▶ Новая игра</button>
+        <button class="menu-btn-big" id="mm-continue">📂 Продолжить</button>
+        <button class="menu-btn-big" id="mm-howto">❓ Как играть</button>
+        <button class="menu-btn-big" id="mm-roadmap">🗺️ Роадмап / Обновления</button>
+        <a class="menu-btn-big" id="mm-site" href="index.html" style="text-decoration:none;display:block">🌐 Сайт проекта (роадмап, инфо)</a>
+        <button class="menu-btn-big" id="mm-diag">🐞 Скачать лог диагностики</button>
+        <button class="menu-btn-big" id="mm-resume" style="display:none">✖ Закрыть меню</button>
+      </div>
+      <p class="menu-ver">Версия 1.6.1 • сборка в папке versions/</p>
+    </div>
+    <div class="menu-right" id="menu-panel">
+      <div id="menu-panel-content"></div>
+    </div>
+  </div>
+</div>
+
+<div id="topbar">
+  <b style="color:#e8c97e;font-size:14px;">🤠 FRONTIER</b>
+  <div class="res-group">
+    <div class="res"><span class="res-icon">🌾</span><span id="res-food">0</span></div>
+    <div class="res"><span class="res-icon">🪵</span><span id="res-wood">0</span></div>
+    <div class="res"><span class="res-icon">⛏️</span><span id="res-ore">0</span></div>
+    <div class="res"><span class="res-icon">🥩</span><span id="res-meat">0</span></div>
+    <div class="res"><span class="res-icon">💊</span><span id="res-med">0</span></div>
+    <div class="res"><span class="res-icon">🔬</span><span id="res-sci">0</span></div>
+    <div class="res"><span class="res-icon">💰</span><span id="res-gold">0</span></div>
+  </div>
+  <span id="season-badge" style="background:#6a5a3a;color:#e8c97e;">Весна</span>
+  <span id="weather-badge">☀️</span>
+  <span id="clock">День 1 • 6:00</span>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <button class="action-btn" id="menu-btn">☰ Меню</button>
+    <button class="action-btn" id="diag-btn" title="Скачать лог диагностики (действия + аномалии)">🐞</button>
+    <button class="action-btn" id="save-btn">💾 Сохр</button>
+    <button class="action-btn" id="load-btn">📂 Загр</button>
+    <button class="action-btn" id="speed-btn">▶ x1</button>
+    <button class="action-btn" id="autobattle-btn">⚔️ Авт.Бой</button>
+    <button class="action-btn" id="fullscreen-btn">⛶ Экран</button>
+  </div>
+</div>
+
+<div id="main">
+  <div id="canvas-wrap">
+    <canvas id="game-canvas"></canvas>
+    <div id="bottombar">
+      <button class="action-btn" id="cancel-btn">✖ Отмена [Esc]</button>
+      <button class="action-btn" id="build-farm-btn">🌾 Ферма</button>
+      <button class="action-btn" id="build-mine-btn">⛏️ Шахта</button>
+      <button class="action-btn" id="build-fence-btn">🪵 Забор</button>
+      <button class="action-btn" id="build-tower-btn">🗼 Вышка</button>
+      <button class="action-btn" id="build-saloon-btn">🍺 Салун</button>
+      <button class="action-btn" id="build-lab-btn">🔬 Лаб.</button>
+      <button class="action-btn" id="build-clinic-btn">💊 Клиника</button>
+      <button class="action-btn" id="build-smithy-btn">🔨 Кузня</button>
+      <button class="action-btn" id="build-camp-btn">🏕️ Лагерь</button>
+      <button class="action-btn" id="build-well-btn">🪣 Колодец</button>
+      <button class="action-btn" id="demolish-btn" style="border-color:#5a2222;">🔥 Снести</button>
+    </div>
+    <div id="info-overlay"></div>
+
+    <div id="minimap-wrap">
+      <canvas id="minimap" width="180" height="135"></canvas>
+    </div>
+
+    <div id="zoom-controls">
+      <button class="zoom-btn" id="zoom-in">＋</button>
+      <button class="zoom-btn" id="zoom-out">－</button>
+      <button class="zoom-btn" id="zoom-reset" title="Сброс масштаба">⊙</button>
+    </div>
+
+    <div id="objective-hud">
+      <div id="obj-title">🎯 Цель</div>
+      <div id="obj-text">Накопи 500 💰 золота</div>
+      <div class="obj-bar"><div id="obj-fill"></div></div>
+    </div>
+
+    <div id="help-popup">
+      <h2>🤠 Добро пожаловать на Фронтир!</h2>
+      <p>Ты управляешь отрядом ковбоев <b>не напрямую</b> — как в RimWorld. Они сами работают по приоритетам.</p>
+      <ul>
+        <li>🌲 <b>Кликни по дереву/камню</b> → ковбой сам придёт и срубит/добудет.</li>
+        <li>🏗️ <b>Снизу выбери постройку</b> → кликни на карту (зелёная зона = можно). Ковбой построит.</li>
+        <li>👥 <b>Клик по ковбою</b> → настрой приоритеты работ.</li>
+        <li>📅 Вкладка «Расп.» → расписание сна/работы/отдыха по часам.</li>
+        <li>⚔️ Кнопка «Авт.Бой» → ковбои сами отстреливают бандитов.</li>
+        <li>🖱️ Тащи мышь = двигать камеру. Колесо = тоже камера.</li>
+      </ul>
+      <p style="color:#7ca84e">Совет: сначала построй <b>2-3 фермы</b> (еда) и <b>лагерь</b> (сон), потом руби лес на постройки.</p>
+      <button id="help-close">Понятно, играть! 🚀</button>
+    </div>
+
+    <div id="keyhints">
+      [ЛКМ] выбрать/построить &nbsp;|&nbsp; [ПКМ] атака &nbsp;|&nbsp; [Колесо] зум &nbsp;|&nbsp; [Тащить] камера &nbsp;|&nbsp; [F] ферма &nbsp;|&nbsp; [M] шахта &nbsp;|&nbsp; [Esc] сброс
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="pawns">👥 Пешки</button>
+      <button class="tab-btn" data-tab="schedule">📅 Расп.</button>
+      <button class="tab-btn" data-tab="research">🔬 Наука</button>
+      <button class="tab-btn" data-tab="log">📜 Лог</button>
+    </div>
+
+    <div class="tab-content active" id="tab-pawns">
+      <div id="pawn-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-schedule">
+      <p class="section-title">Расписание</p>
+      <div id="schedule-wrap"></div>
+    </div>
+
+    <div class="tab-content" id="tab-research">
+      <p class="section-title">Наука</p>
+      <div id="research-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-log">
+      <p class="section-title">Журнал событий</p>
+      <div id="event-log"></div>
+    </div>
+  </div>
+</div>
+
+<div id="priority-panel">
+  <h3 id="priority-title">Приоритеты работ</h3>
+  <div id="priority-rows"></div>
+  <button class="btn-small" id="priority-close">Закрыть</button>
+</div>
+
+<div id="end-overlay" id="end-overlay">
+  <h1 id="end-title">Конец</h1>
+  <p id="end-msg"></p>
+  <button id="end-restart">Новая игра</button>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ==================== CONFIG ====================
+const TILE = 24;
+const MAP_W = 80, MAP_H = 60;
+
+const TERRAIN = { DIRT:0, GRASS:1, SAND:2, WATER:3, ROCK:4, SNOW:5 };
+const TCOLORS = ['#9c7b4e','#6f9a4a','#d9bd86','#2f6ea8','#7a7570','#dfe6ef'];
+const TCOLORS2 = ['#8a6b42','#5f8a3c','#cdaf73','#3a7cb8','#8c8782','#cdd6e4']; // shade variant
+const TNAMES = ['Земля','Трава','Песок','Вода','Скала','Снег'];
+
+const SEASONS = ['Весна','Лето','Осень','Зима'];
+const SEASON_COLORS = ['#6a7a3a','#4a8a2a','#8a6a2a','#4a6a9a'];
+const SEASON_BG = ['#6a5a3a','#5a7a2a','#7a5a2a','#3a4a6a'];
+
+const WORK_TYPES = ['Рубка','Фермерство','Добыча','Строительство','Охота','Уход','Охрана','Перевозка'];
+const WORK_ICONS = ['🪓','🌾','⛏️','🔨','🦌','💊','🛡️','📦'];
+
+const BUILDS = {
+  farm:   { name:'Ферма',    icon:'🌾', cost:{wood:10},          size:1, prod:'food',  rate:0.3 },
+  mine:   { name:'Шахта',    icon:'⛏️', cost:{wood:15,ore:0},    size:1, prod:'ore',   rate:0.2 },
+  fence:  { name:'Забор',    icon:'🪵', cost:{wood:5},            size:1, prod:null,   hp:100 },
+  tower:  { name:'Вышка',    icon:'🗼', cost:{wood:20,ore:10},   size:1, prod:null,   range:12 },
+  saloon: { name:'Салун',    icon:'🍺', cost:{wood:30,gold:10},  size:2, prod:'mood',  rate:0.1 },
+  lab:    { name:'Лаборатория',icon:'🔬',cost:{wood:25,ore:15},  size:2, prod:'sci',   rate:0.15 },
+  clinic: { name:'Клиника',  icon:'💊', cost:{wood:20,med:0},    size:2, prod:'heal',  rate:0.3 },
+  smithy: { name:'Кузня',    icon:'🔨', cost:{wood:20,ore:20},   size:2, prod:'gold',  rate:0.1 },
+  camp:   { name:'Лагерь',   icon:'🏕️', cost:{wood:15},          size:2, prod:'rest',  rate:0.2 },
+  well:   { name:'Колодец',  icon:'🪣', cost:{wood:10,ore:5},    size:1, prod:'water', rate:0.1 },
+};
+
+const TRAITS = {
+  hardworking: { name:'Работяга',   icon:'💪', desc:'+25% скорость работы', good:true },
+  lazy:        { name:'Лентяй',     icon:'😴', desc:'−20% скорость работы', good:false },
+  brave:       { name:'Храбрец',    icon:'🦁', desc:'не падает духом в бою', good:true },
+  coward:      { name:'Трус',       icon:'😨', desc:'настроение падает рядом с врагами', good:false },
+  optimist:    { name:'Оптимист',   icon:'🌞', desc:'настроение растёт быстрее', good:true },
+  pessimist:   { name:'Пессимист',  icon:'🌧️', desc:'настроение ниже', good:false },
+  drunkard:    { name:'Выпивоха',   icon:'🍺', desc:'+отдых в салуне, но хандрит без него', good:false },
+  kind:        { name:'Добряк',     icon:'❤️', desc:'улучшает отношения в отряде', good:true },
+  greedy:      { name:'Жадина',     icon:'🤑', desc:'счастлив когда много золота', good:false },
+  tough:       { name:'Крепкий',    icon:'🛡️', desc:'+30 макс. HP', good:true },
+};
+const TRAIT_KEYS = Object.keys(TRAITS);
+
+const RESEARCHES = [
+  { id:'tools',   name:'Острые инструменты', desc:'+50% добычи всех ресурсов', cost:80,  done:false, effect:'tools' },
+  { id:'medicine',name:'Медицина',           desc:'Ковбои выздоравливают быстрее', cost:120, done:false, effect:'medicine' },
+  { id:'cooking', name:'Кулинария',          desc:'Еда даёт +20% к настроению', cost:60,  done:false, effect:'cooking' },
+  { id:'walls',   name:'Укрепления',         desc:'+50% HP строений', cost:100, done:false, effect:'walls' },
+  { id:'hunting', name:'Следопытство',       desc:'Охотники убивают быстрее, +30% мяса', cost:80, done:false, effect:'hunting' },
+  { id:'trading', name:'Торговля',           desc:'Торговцы приносят больше', cost:70,   done:false, effect:'trading' },
+];
+
+// ==================== STATE ====================
+let G = null; // game state
+
+function newGame() {
+  const map = generateMap();
+  G = {
+    map,
+    pawns: [],
+    buildings: [],
+    animals: [],
+    enemies: [],
+    projectiles: [],
+    bloodSplats: [],
+    res: { food:120, wood:60, ore:20, meat:0, med:10, sci:0, gold:30 },
+    day: 1,
+    hour: 6,
+    minute: 0,
+    tick: 0,
+    season: 0, // 0=spring 1=summer 2=autumn 3=winter
+    dayOfYear: 0, // 0-364
+    weather: 'clear', // clear, rain, storm, sandstorm
+    weatherTimer: 0,
+    autoBattle: false,
+    speed: 1,
+    buildMode: null,
+    selectedPawnId: null,
+    demolishMode: false,
+    log: [],
+    researches: JSON.parse(JSON.stringify(RESEARCHES)),
+    activeResearch: null,
+    stats: { days:0, kills:0, foodHarvested:0, treesChopped:0, goldEarned:0 },
+    camera: { x: MAP_W*TILE/2 - 400, y: MAP_H*TILE/2 - 300, zoom: 1.0 },
+    nextId: 1,
+    eventTimer: 600 + Math.random()*600,
+    gameOver: false,
+  };
+
+  // Spawn starting pawns
+  const cx = Math.floor(MAP_W/2), cy = Math.floor(MAP_H/2);
+  spawnPawn(cx-2, cy, 'Джек',  [1,2,3,4,4,3,4,2]);
+  spawnPawn(cx,   cy, 'Бет',   [4,1,2,3,3,2,4,3]);
+  spawnPawn(cx+2, cy, 'Коди',  [3,4,1,2,4,3,2,2]);
+
+  // Spawn trees & rocks
+  for (let i=0; i<180; i++) {
+    const x=randInt(2,MAP_W-2), y=randInt(2,MAP_H-2);
+    const t = G.map[y][x];
+    if (t.type===TERRAIN.GRASS && !t.obj) {
+      t.obj = { type:'tree', hp:40, maxHp:40, marked:false };
+    }
+  }
+  for (let i=0; i<80; i++) {
+    const x=randInt(2,MAP_W-2), y=randInt(2,MAP_H-2);
+    const t = G.map[y][x];
+    if (t.type===TERRAIN.ROCK && !t.obj) {
+      t.obj = { type:'rock', hp:60, maxHp:60, marked:false };
+    }
+  }
+
+  // Spawn animals
+  for (let i=0; i<20; i++) spawnAnimal();
+
+  _miniDirty = true;
+  addLog('🤠 Добро пожаловать на Дикий Запад!', 'good');
+  addLog('Постройте ферму и рубите деревья.', '');
+}
+
+function generateMap() {
+  // Build smooth value-noise fields for large coherent biomes
+  const seedA = Math.random()*1000, seedB = Math.random()*1000;
+  const elev = buildNoiseField(seedA, 5.5);   // height -> water / land / mountains
+  const moist = buildNoiseField(seedB, 4.0);  // moisture -> grass vs sand
+
+  const map = [];
+  for (let y=0; y<MAP_H; y++) {
+    map[y] = [];
+    for (let x=0; x<MAP_W; x++) {
+      const e = elev[y][x];
+      const m = moist[y][x];
+      let type;
+      if (e < 0.30) type = TERRAIN.WATER;
+      else if (e > 0.78) type = TERRAIN.ROCK;
+      else if (m > 0.55) type = TERRAIN.GRASS;
+      else if (m > 0.38) type = TERRAIN.DIRT;
+      else type = TERRAIN.SAND;
+      // store a per-tile variation value for subtle texture
+      map[y][x] = { type, obj:null, v: (Math.sin(x*12.9+y*78.2)*43758.5)%1 };
+    }
+  }
+
+  // Carve a smooth river through the lowest band
+  let rx = Math.floor(MAP_W*0.5);
+  for (let y=0; y<MAP_H; y++) {
+    rx += randInt(-1,1);
+    rx = clamp(rx, 4, MAP_W-5);
+    const w = 1 + (y%7===0?1:0);
+    for (let dx=-w; dx<=w; dx++) {
+      const xx = rx+dx;
+      if (xx>=0 && xx<MAP_W) map[y][xx].type = TERRAIN.WATER;
+    }
+  }
+
+  // Smooth out single stray water tiles on land (removes salt-and-pepper)
+  for (let y=1; y<MAP_H-1; y++) {
+    for (let x=1; x<MAP_W-1; x++) {
+      if (map[y][x].type===TERRAIN.WATER) {
+        let waterN = 0;
+        for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]])
+          if (map[y+dy][x+dx].type===TERRAIN.WATER) waterN++;
+        if (waterN===0) map[y][x].type = TERRAIN.SAND;
+      }
+    }
+  }
+
+  return map;
+}
+
+// Smooth value noise field 0..1 (bilinear-interpolated lattice + octaves)
+function buildNoiseField(seed, scale) {
+  const gw = Math.ceil(scale)+2, gh = Math.ceil(scale*MAP_H/MAP_W)+2;
+  const rnd = (i,j) => {
+    const n = Math.sin((i*127.1 + j*311.7 + seed)*1.0)*43758.5453;
+    return n - Math.floor(n);
+  };
+  const field = [];
+  for (let y=0; y<MAP_H; y++) {
+    field[y] = [];
+    for (let x=0; x<MAP_W; x++) {
+      // two octaves
+      let val = 0, amp = 0, freq = scale;
+      for (let o=0; o<3; o++) {
+        const gx = x/MAP_W*freq, gy = y/MAP_H*freq;
+        const x0 = Math.floor(gx), y0 = Math.floor(gy);
+        const fx = smooth(gx-x0), fy = smooth(gy-y0);
+        const a = rnd(x0,y0+o*50),     b = rnd(x0+1,y0+o*50);
+        const c = rnd(x0,y0+1+o*50),   d = rnd(x0+1,y0+1+o*50);
+        const top = a+(b-a)*fx, bot = c+(d-c)*fx;
+        val += (top+(bot-top)*fy) * (1/(o+1));
+        amp += 1/(o+1);
+        freq *= 2;
+      }
+      field[y][x] = val/amp;
+    }
+  }
+  return field;
+}
+function smooth(t){ return t*t*(3-2*t); }
+
+function spawnPawn(tx, ty, name, priorities) {
+  const roles = ['Лесоруб','Фермер','Горняк','Строитель','Охотник','Медик','Охранник','Носильщик'];
+  const roleIdx = priorities.indexOf(Math.min(...priorities));
+  G.pawns.push({
+    id: G.nextId++,
+    name,
+    role: roles[roleIdx],
+    x: tx*TILE + TILE/2,
+    y: ty*TILE + TILE/2,
+    tx: tx, ty: ty,
+    hp: 100, maxHp: 100,
+    food: 100, maxFood: 100,
+    mood: 80, maxMood: 100,
+    energy: 100, maxEnergy: 100,
+    alive: true,
+    dead: false,
+    state: 'idle', // idle, moving, working, sleeping, joy, fighting
+    task: null,
+    targetX: tx, targetY: ty,
+    path: [],
+    priorities: [...priorities], // 1=top, 4=low, 0=disabled for each WORK_TYPES
+    schedule: Array(24).fill('any'), // any/sleep/work/joy
+    thoughts: [],
+    attackCooldown: 0,
+    bleedTimer: 0,
+    woundSeverity: 0, // 0-3
+    traits: rollTraits(),
+    opinions: {},      // {pawnId: -100..100}
+    sick: null,        // {name, severity 1-3, timer}
+    workMul: 1,
+    socialTimer: randInt(100,400),
+    schedule_default: (() => {
+      const s = Array(24).fill('work');
+      for (let h=22; h<24; h++) s[h]='sleep';
+      for (let h=0; h<6; h++) s[h]='sleep';
+      s[12]='joy'; s[13]='joy';
+      return s;
+    })(),
+  });
+  // Apply default schedule + trait effects
+  const p = G.pawns[G.pawns.length-1];
+  p.schedule = [...p.schedule_default];
+  applyTraitEffects(p);
+}
+
+function rollTraits() {
+  const n = Math.random()<0.5 ? 1 : 2;
+  const pool = [...TRAIT_KEYS];
+  const out = [];
+  for (let i=0; i<n; i++) {
+    if (!pool.length) break;
+    const k = pool.splice(randInt(0,pool.length-1),1)[0];
+    // avoid contradictory pairs
+    const conflicts = {hardworking:'lazy',lazy:'hardworking',brave:'coward',coward:'brave',optimist:'pessimist',pessimist:'optimist'};
+    if (out.includes(conflicts[k])) continue;
+    out.push(k);
+  }
+  return out;
+}
+
+function applyTraitEffects(p) {
+  p.workMul = 1;
+  if (p.traits.includes('hardworking')) p.workMul *= 1.25;
+  if (p.traits.includes('lazy')) p.workMul *= 0.8;
+  if (p.traits.includes('tough')) { p.maxHp = 130; if (p.hp===100) p.hp = 130; }
+}
+
+// Effective work speed (traits + illness)
+function wmul(p) {
+  return (p.workMul || 1) * (p.sick ? (0.7 - p.sick.severity*0.12) : 1);
+}
+
+function spawnAnimal(forced) {
+  const types = ['deer','bison','rabbit'];
+  const t = types[randInt(0, types.length-1)];
+  const x = randInt(2, MAP_W-2) * TILE + TILE/2;
+  const y = randInt(2, MAP_H-2) * TILE + TILE/2;
+  G.animals.push({
+    id: G.nextId++,
+    type: t,
+    x, y,
+    tx: Math.floor(x/TILE), ty: Math.floor(y/TILE),
+    hp: t==='bison'?80:t==='deer'?40:20,
+    maxHp: t==='bison'?80:t==='deer'?40:20,
+    speed: t==='rabbit'?2.5:1.5,
+    meat: t==='bison'?30:t==='deer'?15:5,
+    marked: false,
+    wanderTimer: randInt(60,200),
+    fleeTimer: 0,
+    path: [], targetX:0, targetY:0,
+    alive: true,
+  });
+}
+
+const ENEMY_TYPES = {
+  knifer: { name:'Головорез', hp:55, speed:1.6, atk:10, range:1.5,  ranged:false, color:'#8a2020', reload:55,  icon:'🔪' },
+  gunner: { name:'Стрелок',   hp:65, speed:1.1, atk:9,  range:7.0,  ranged:true,  color:'#a04428', reload:110, icon:'🔫' },
+  boss:   { name:'Главарь',   hp:160,speed:1.0, atk:16, range:6.0,  ranged:true,  color:'#6a1818', reload:90,  icon:'🤠' },
+};
+
+function spawnEnemy(count) {
+  const side = randInt(0,3);
+  for (let i=0; i<count; i++) {
+    let ex, ey;
+    if (side===0) { ex=randInt(0,MAP_W-1); ey=0; }
+    else if (side===1) { ex=MAP_W-1; ey=randInt(0,MAP_H-1); }
+    else if (side===2) { ex=randInt(0,MAP_W-1); ey=MAP_H-1; }
+    else { ex=0; ey=randInt(0,MAP_H-1); }
+    // pick type: one boss per big raid, rest mix of gunner/knifer
+    let type;
+    if (i===0 && count>=4) type='boss';
+    else type = Math.random()<0.5 ? 'gunner' : 'knifer';
+    const def = ENEMY_TYPES[type];
+    G.enemies.push({
+      id: G.nextId++,
+      type,
+      x: ex*TILE+TILE/2, y: ey*TILE+TILE/2,
+      tx: ex, ty: ey,
+      hp: def.hp + randInt(0,15),
+      maxHp: def.hp + 15,
+      speed: def.speed,
+      atk: def.atk,
+      range: def.range,
+      ranged: def.ranged,
+      reload: def.reload,
+      path: [], targetX:ex, targetY:ey,
+      attackCooldown: randInt(0,40),
+      alive: true,
+    });
+  }
+}
+
+// ==================== AI ====================
+function updatePawns() {
+  G._claims = {}; // reset per-tick job reservations (workplace key -> count)
+  for (const p of G.pawns) {
+    if (!p.alive) continue;
+    p.attackCooldown = Math.max(0, p.attackCooldown - 1);
+
+    // Passive stats
+    if (G.tick % 60 === 0) { // once per in-game minute (approx)
+      p.food = clamp(p.food - 0.5, 0, p.maxFood);
+      const dE = (p.state==='sleeping' ? 3 : -0.3);
+      p.energy = clamp(p.energy + dE, 0, p.maxEnergy);
+      if (p.food <= 0) p.hp = Math.max(0, p.hp - 2);
+      if (p.hp <= 0) killPawn(p);
+    }
+
+    // Eat if hungry
+    if (p.food < 40 && G.res.food >= 5) {
+      G.res.food -= 5;
+      p.food = Math.min(p.maxFood, p.food + 30);
+      addThought(p, '🍖 Поел', 5, true);
+    }
+
+    // Update mood
+    const moodDelta = calcMoodDelta(p);
+    p.mood = clamp(p.mood + moodDelta * 0.02, 0, 100);
+
+    if (p.mood < 10 && Math.random() < 0.002) {
+      addLog(`😡 ${p.name} устроил срыв!`, 'warn');
+      p.state = 'breakdown';
+      setTimeout(() => { if(p.alive) p.state='idle'; }, 5000);
+    }
+
+    // Healing
+    if (p.hp < p.maxHp && p.state==='sleeping') {
+      const healRate = hasResearch('medicine') ? 0.3 : 0.1;
+      p.hp = Math.min(p.maxHp, p.hp + healRate);
+    }
+
+    // ---- COMBAT: overrides schedule (auto-battle, self-defense, OR manual target) ----
+    let inCombat = false;
+    if (G.enemies.length > 0) {
+      // auto-battle: engage in wide radius; otherwise self-defense in close radius
+      const radius = G.autoBattle ? 22 : 7;
+      const e = nearestEnemy(p, radius);
+      if (e) { fightEnemy(p, e); inCombat = true; }
+      else if (p.state === 'fighting' && !p.manualTarget) p.state = 'idle';
+    }
+    if (!inCombat && p.manualTarget != null) {
+      const e = G.enemies.find(en => en.id === p.manualTarget && en.alive);
+      if (e) { fightEnemy(p, e); inCombat = true; }
+      else { p.manualTarget = null; if (p.state === 'fighting') p.state = 'idle'; }
+    }
+
+    if (!inCombat) {
+      // Decide what to do based on schedule
+      const schedSlot = p.schedule[G.hour];
+      if (p.state === 'breakdown') { /* frozen */ }
+      else if (schedSlot === 'sleep' || p.energy < 5) doSleep(p);
+      else if (schedSlot === 'joy') doJoy(p);
+      else doWork(p);
+    }
+
+    // Movement (faster when charging into combat)
+    const moveSpeed = p.state==='sleeping' ? 0.5 : inCombat ? 2.4 : 2.0;
+    moveTowardsTarget(p, moveSpeed);
+
+    // Social interactions
+    updateSocial(p);
+
+    // Illness progression
+    updateIllness(p);
+
+    // Update thoughts periodically
+    if (G.tick % 300 === p.id % 300) updateThoughts(p);
+  }
+}
+
+function updateSocial(p) {
+  p.socialTimer--;
+  if (p.socialTimer > 0) return;
+  p.socialTimer = randInt(200, 500);
+  // find a nearby colleague
+  const other = G.pawns.find(q => q.alive && q.id!==p.id && Math.hypot(q.x-p.x,q.y-p.y)<TILE*4);
+  if (!other) return;
+  if (p.opinions[other.id]===undefined) p.opinions[other.id]=0;
+  // chemistry: kind boosts, pessimist/greedy can clash
+  let change = randInt(-3, 5);
+  if (p.traits.includes('kind') || other.traits.includes('kind')) change += 4;
+  if (p.traits.includes('pessimist')) change -= 2;
+  p.opinions[other.id] = clamp(p.opinions[other.id] + change, -100, 100);
+  const op = p.opinions[other.id];
+  if (op > 40 && Math.random()<0.3) { addThought(p,'😊 Поболтал с другом',6,true); p.mood=Math.min(100,p.mood+3); }
+  else if (op < -40 && Math.random()<0.3) { addThought(p,'😠 Поссорился',6,false); p.mood=Math.max(0,p.mood-3);
+    if (Math.random()<0.15) addLog(`💢 ${p.name} и ${other.name} поругались`, ''); }
+}
+
+function updateIllness(p) {
+  // random chance to fall ill (worse in winter / low mood)
+  if (!p.sick && G.tick % 200 === p.id % 200) {
+    let chance = 0.004;
+    if (G.season===3) chance *= 2;
+    if (p.food < 30) chance *= 2;
+    if (Math.random() < chance) {
+      const diseases = ['Лихорадка','Простуда','Дизентерия','Инфекция'];
+      p.sick = { name: diseases[randInt(0,diseases.length-1)], severity: 1, timer: 0 };
+      addLog(`🤒 ${p.name} заболел: ${p.sick.name}`, 'warn');
+    }
+  }
+  if (p.sick) {
+    p.sick.timer++;
+    const treated = G.res.med > 0 && (nearestBuilding(p,'clinic') || hasResearch('medicine'));
+    if (treated) {
+      // recovering
+      if (G.tick % 120 === 0) {
+        G.res.med = Math.max(0, G.res.med - 0.3);
+        p.sick.timer -= 200;
+        if (p.sick.timer < -300) { addLog(`💚 ${p.name} выздоровел`, 'good'); p.sick=null; return; }
+      }
+    } else {
+      // worsening
+      if (p.sick.timer > 600 && p.sick.severity < 3) { p.sick.severity++; p.sick.timer=0; }
+      if (p.sick.severity >= 3 && G.tick % 60 === 0) p.hp = Math.max(0, p.hp - 1);
+      if (p.hp <= 0) killPawn(p);
+    }
+    // sick pawns work slower
+  }
+}
+
+function calcMoodDelta(p) {
+  let delta = 0;
+  if (p.food > 80) delta += 0.2;
+  else if (p.food < 30) delta -= 0.5;
+  if (p.hp < 50) delta -= 0.3;
+  if (p.energy > 80) delta += 0.1;
+  if (G.weather === 'sandstorm') delta -= 0.4;
+  if (G.season===3) delta -= 0.1; // winter
+  if (hasResearch('cooking') && p.food > 60) delta += 0.1;
+  if (p.sick) delta -= 0.3 * p.sick.severity;
+
+  // Traits
+  if (p.traits.includes('optimist')) delta += 0.15;
+  if (p.traits.includes('pessimist')) delta -= 0.15;
+  if (p.traits.includes('greedy')) delta += G.res.gold > 200 ? 0.2 : -0.1;
+  if (p.traits.includes('coward') && G.enemies.length>0) {
+    const near = G.enemies.some(e=>Math.hypot(e.x-p.x,e.y-p.y)<TILE*12);
+    if (near) delta -= 0.5;
+  }
+  if (p.traits.includes('drunkard')) {
+    const nearSaloon = nearestBuilding(p,'saloon') && p.state==='joy';
+    delta += nearSaloon ? 0.2 : -0.12;
+  }
+  return delta;
+}
+
+function updateThoughts(p) {
+  p.thoughts = [];
+  if (p.food < 30) p.thoughts.push({text:'😩 Голоден', neg:true});
+  else if (p.food > 80) p.thoughts.push({text:'😋 Сыт', neg:false});
+  if (p.energy < 20) p.thoughts.push({text:'😴 Устал', neg:true});
+  if (p.hp < 50) p.thoughts.push({text:'🤕 Ранен', neg:true});
+  if (p.mood > 80) p.thoughts.push({text:'😊 Счастлив', neg:false});
+  else if (p.mood < 30) p.thoughts.push({text:'😞 Подавлен', neg:true});
+  if (G.weather === 'rain') p.thoughts.push({text:'🌧️ Мокнет', neg:true});
+  if (G.season===3) p.thoughts.push({text:'❄️ Зябко', neg:true});
+  if (p.sick) p.thoughts.push({text:`🤒 ${p.sick.name}`, neg:true});
+}
+
+function addThought(p, text, duration, positive) {
+  p.thoughts.push({text, neg:!positive});
+  setTimeout(() => {
+    const i = p.thoughts.findIndex(t=>t.text===text);
+    if (i>=0) p.thoughts.splice(i,1);
+  }, duration*1000);
+}
+
+function doSleep(p) {
+  p.state = 'sleeping';
+  // Move to camp or nearest bed
+  const camp = nearestBuilding(p, 'camp');
+  if (camp) setTarget(p, camp.tx, camp.ty);
+}
+
+function doJoy(p) {
+  p.state = 'joy';
+  const saloon = nearestBuilding(p, 'saloon');
+  if (saloon) setTarget(p, saloon.tx, saloon.ty);
+  else wander(p, 2);
+  if (G.tick % 90 === p.id % 90) {
+    p.mood = Math.min(100, p.mood + 2);
+    p.energy = Math.min(100, p.energy + 1);
+  }
+}
+
+function doWork(p) {
+  p._wt = null; // reset workplace tag (for diagnostics)
+
+  // Construction is urgent: a placed blueprint gets built first (if pawn can build).
+  // Capped at 2 builders per blueprint inside tryBuild, so the rest keep working.
+  if (p.priorities[3] > 0 && G.buildings.some(b=>b.blueprint && !b.done)) {
+    if (tryBuild(p)) return;
+  }
+
+  // Find best task by priority
+  const sorted = WORK_TYPES.map((w,i)=>({i,w,pri:p.priorities[i]}))
+    .filter(x=>x.pri>0).sort((a,b)=>a.pri-b.pri);
+
+  for (const {i,w} of sorted) {
+    if (doSpecificWork(p, i)) return;
+  }
+
+  p.state = 'idle';
+  wander(p, 4);
+}
+
+function doSpecificWork(p, workIdx) {
+  // 0:Рубка 1:Фермерство 2:Добыча 3:Строительство 4:Охота 5:Уход 6:Охрана 7:Перевозка
+  switch(workIdx) {
+    case 0: return tryChopTree(p);
+    case 1: return tryFarm(p);
+    case 2: return tryMine(p);
+    case 3: return tryBuild(p);
+    case 4: return tryHunt(p);
+    case 5: return tryHeal(p);
+    case 6: return tryGuard(p);
+    case 7: return false; // perish transport for now
+  }
+  return false;
+}
+
+function tryChopTree(p) {
+  const marked = findMarkedObj(p, 'tree', 20);
+  if (!marked) return false;
+  claimSpot('t_'+marked.x+'_'+marked.y);
+  setTarget(p, marked.x, marked.y);
+  if (distTiles(p, marked.x, marked.y) <= 1.5) {
+    workOnObj(p, marked, 'tree', 15, () => {
+      const mul = hasResearch('tools') ? 1.5 : 1;
+      G.res.wood += Math.floor((8 + randInt(0,6)) * mul);
+      G.stats.treesChopped++;
+      G.map[marked.y][marked.x].obj = null;
+      p.state = 'idle';
+    });
+  }
+  p.state = 'working';
+  return true;
+}
+
+function tryFarm(p) {
+  const farm = freeBuildingWithWork(p, 'farm', 25, 2);
+  if (!farm) return false;
+  claimSpot('b_'+farm.tx+'_'+farm.ty);
+  p._wt = 'b_'+farm.tx+'_'+farm.ty;
+  setTarget(p, farm.tx, farm.ty);
+  if (distTiles(p, farm.tx, farm.ty) <= 1.5) {
+    if (!farm.growth) farm.growth = 0;
+    farm.growth += 0.005 * wmul(p) * (G.season===3 ? 0.2 : G.season===1 ? 1.4 : 1);
+    if (farm.growth >= 1) {
+      const mul = hasResearch('tools') ? 1.5 : 1;
+      const got = Math.floor((8+randInt(0,5)) * mul);
+      G.res.food += got;
+      G.stats.foodHarvested += got;
+      farm.growth = 0;
+    }
+    p.state = 'working';
+  }
+  return true;
+}
+
+function tryMine(p) {
+  const marked = findMarkedObj(p, 'rock', 25);
+  const mine = marked ? null : freeBuildingWithWork(p, 'mine', 25, 2);
+  const target = marked || mine;
+  if (!target) return false;
+
+  if (marked) {
+    claimSpot('t_'+marked.x+'_'+marked.y);
+    setTarget(p, marked.x, marked.y);
+    if (distTiles(p, marked.x, marked.y) <= 1.5) {
+      workOnObj(p, marked, 'rock', 20, () => {
+        const mul = hasResearch('tools') ? 1.5 : 1;
+        G.res.ore += Math.floor((5+randInt(0,5)) * mul);
+        G.map[marked.y][marked.x].obj = null;
+        p.state = 'idle';
+      });
+    }
+  } else {
+    claimSpot('b_'+mine.tx+'_'+mine.ty);
+    p._wt = 'b_'+mine.tx+'_'+mine.ty;
+    setTarget(p, mine.tx, mine.ty);
+    if (distTiles(p, mine.tx, mine.ty) <= 1.5) {
+      if (G.tick % 120 === 0) {
+        const mul = hasResearch('tools') ? 1.5 : 1;
+        G.res.ore += Math.floor(2 * mul);
+        G.res.gold += 0.1;
+      }
+    }
+  }
+  p.state = 'working';
+  return true;
+}
+
+function tryBuild(p) {
+  // nearest pending blueprint that isn't already full (cap 2 builders)
+  const bp = G.buildings.filter(b=>b.blueprint && !b.done)
+    .filter(b=>claimCount('bp_'+b.tx+'_'+b.ty) < 2)
+    .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty))[0];
+  if (!bp) return false;
+  claimSpot('bp_'+bp.tx+'_'+bp.ty);
+  p._wt = 'bp_'+bp.tx+'_'+bp.ty;
+  setTarget(p, bp.tx, bp.ty);
+  if (distTiles(p, bp.tx, bp.ty) <= 2) {
+    bp.progress = (bp.progress||0) + 0.008 * wmul(p);
+    if (bp.progress >= 1) {
+      bp.blueprint = false;
+      bp.done = true;
+      bp.hp = getBuildingMaxHp(bp.type);
+      bp.maxHp = bp.hp;
+      addLog(`🔨 ${p.name} построил ${BUILDS[bp.type].name}`, 'good');
+      Diag.action(`Построено: ${BUILDS[bp.type].name} @${bp.tx},${bp.ty}`);
+    }
+  }
+  p.state = 'working';
+  return true;
+}
+
+function tryHunt(p) {
+  const animal = G.animals.filter(a=>a.alive && a.marked).sort((a,b)=>dist(p,a)-dist(b,a))[0]
+    || G.animals.filter(a=>a.alive).sort((a,b)=>dist(p,a)-dist(b,a))[0];
+  if (!animal) return false;
+  setTarget(p, Math.floor(animal.x/TILE), Math.floor(animal.y/TILE));
+  const d = Math.hypot(p.x-animal.x, p.y-animal.y);
+  if (d < TILE*1.5) {
+    if (p.attackCooldown <= 0) {
+      const dmg = hasResearch('hunting') ? 18 : 12;
+      animal.hp -= dmg;
+      p.attackCooldown = 60;
+      if (animal.hp <= 0) {
+        const mul = hasResearch('hunting') ? 1.3 : 1;
+        G.res.meat += Math.floor(animal.meat * mul);
+        G.res.food += Math.floor(animal.meat * 0.5 * mul);
+        animal.alive = false;
+        G.animals = G.animals.filter(a=>a.alive);
+        addLog(`🦌 ${p.name} добыл ${animal.type==='bison'?'бизона':animal.type==='deer'?'оленя':'кролика'}`, 'good');
+        p.state='idle';
+      }
+    }
+  }
+  p.state = 'working';
+  return true;
+}
+
+function tryHeal(p) {
+  const wounded = G.pawns.find(q=>q.alive && q.hp < q.maxHp*0.9 && q.id!==p.id);
+  if (!wounded || G.res.med <= 0) return false;
+  setTarget(p, Math.floor(wounded.x/TILE), Math.floor(wounded.y/TILE));
+  if (Math.hypot(p.x-wounded.x, p.y-wounded.y) < TILE*2) {
+    if (G.tick % 60 === 0 && G.res.med > 0) {
+      const rate = hasResearch('medicine') ? 15 : 8;
+      wounded.hp = Math.min(wounded.maxHp, wounded.hp + rate);
+      G.res.med -= 0.5;
+    }
+  }
+  p.state = 'working';
+  return true;
+}
+
+function tryGuard(p) {
+  // Patrol perimeter
+  if (!p.patrolTarget || (distTiles(p, p.patrolTarget.x, p.patrolTarget.y) < 2)) {
+    const perimeter = [
+      {x:10, y:10}, {x:MAP_W-10, y:10},
+      {x:MAP_W-10, y:MAP_H-10}, {x:10, y:MAP_H-10}
+    ];
+    p.patrolTarget = perimeter[Math.floor(G.tick/300) % 4];
+  }
+  setTarget(p, p.patrolTarget.x, p.patrolTarget.y);
+  p.state = 'working';
+  return true;
+}
+
+// Pawns are gunslingers: shoot from range, keep distance
+function fightEnemy(p, e) {
+  p.state = 'fighting';
+  const d = Math.hypot(p.x-e.x, p.y-e.y) / TILE;
+  const SHOOT_RANGE = 6.5;
+
+  if (d > SHOOT_RANGE) {
+    // close in
+    setTarget(p, Math.floor(e.x/TILE), Math.floor(e.y/TILE));
+  } else if (d < 2.5) {
+    // too close — back off a little (kiting)
+    const bx = Math.floor((p.x + (p.x-e.x))/TILE);
+    const by = Math.floor((p.y + (p.y-e.y))/TILE);
+    setTarget(p, clamp(bx,0,MAP_W-1), clamp(by,0,MAP_H-1));
+  } else {
+    // hold position and shoot
+    setTarget(p, Math.floor(p.x/TILE), Math.floor(p.y/TILE));
+  }
+
+  if (d <= SHOOT_RANGE && p.attackCooldown <= 0) {
+    p.attackCooldown = hasResearch('tools') ? 45 : 60; // fire rate
+    // accuracy falls with distance and target cover
+    const cover = getCover(e.x, e.y);
+    let hitChance = clamp(0.95 - d*0.07 - cover, 0.2, 0.95);
+    const dmg = 14 + randInt(0,8);
+    fireProjectile(p.x, p.y-4, e, true, Math.random()<hitChance ? dmg : 0);
+  }
+}
+
+function fireProjectile(x, y, target, friendly, dmg) {
+  G.projectiles.push({
+    x, y,
+    tx: target.x, ty: target.y,
+    target, friendly, dmg,
+    life: 30,
+    speed: 9,
+  });
+}
+
+function updateProjectiles() {
+  for (const pr of G.projectiles) {
+    pr.life--;
+    // home toward target's current position a bit
+    const aimX = pr.target && pr.target.alive!==false ? pr.target.x : pr.tx;
+    const aimY = pr.target && pr.target.alive!==false ? pr.target.y : pr.ty;
+    const dx = aimX - pr.x, dy = aimY - pr.y;
+    const d = Math.hypot(dx, dy);
+    if (d < pr.speed || pr.life<=0) {
+      // impact
+      if (pr.dmg > 0 && pr.target && pr.target.alive!==false) {
+        applyHit(pr.target, pr.dmg, pr.friendly);
+        addSplat(pr.target.x, pr.target.y);
+      } else if (pr.dmg>0) {
+        addSplat(pr.x, pr.y); // miss puff
+      }
+      pr.life = 0;
+    } else {
+      pr.x += dx/d * pr.speed;
+      pr.y += dy/d * pr.speed;
+    }
+  }
+  G.projectiles = G.projectiles.filter(p=>p.life>0);
+}
+
+function applyHit(target, dmg, friendly) {
+  target.hp -= dmg;
+  if (friendly) {
+    // target is enemy
+    if (target.hp <= 0 && target.alive) {
+      target.alive = false;
+      G.stats.kills++;
+      const reward = target.type==='boss' ? 30 : 6;
+      G.res.gold += reward;
+      G.stats.goldEarned += reward;
+      addLog(`💀 ${ENEMY_TYPES[target.type]?.name||'Бандит'} убит! +${reward}💰`, 'good');
+    }
+  } else {
+    // target is pawn — random wound
+    if (target.hp <= 0) killPawn(target);
+    else if (Math.random()<0.3) {
+      target.woundSeverity = Math.min(3, (target.woundSeverity||0)+1);
+      addThought(target, '🩸 Ранен пулей', 8, false);
+    }
+  }
+}
+
+// Cover: 0..0.4 hit-chance reduction if target hugs a wall/rock/building
+function getCover(wx, wy) {
+  const tx = Math.floor(wx/TILE), ty = Math.floor(wy/TILE);
+  let cover = 0;
+  for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+    const x2=tx+dx, y2=ty+dy;
+    if (x2<0||y2<0||x2>=MAP_W||y2>=MAP_H) continue;
+    const t = G.map[y2][x2];
+    if (t.obj && (t.obj.type==='rock'||t.obj.type==='tree')) cover += 0.12;
+    if (G.buildings.find(b=>b.tx===x2&&b.ty===y2 && !b.blueprint)) cover += 0.15;
+  }
+  return Math.min(cover, 0.4);
+}
+
+function updateEnemies() {
+  G.enemies = G.enemies.filter(e=>e.alive);
+  for (const e of G.enemies) {
+    e.attackCooldown = Math.max(0, e.attackCooldown-1);
+    // Find nearest alive pawn
+    const target = G.pawns.filter(p=>p.alive).sort((a,b)=>dist(e,a)-dist(e,b))[0];
+    if (!target) continue;
+    const d = Math.hypot(e.x-target.x, e.y-target.y) / TILE;
+    const range = e.range || 1.5;
+
+    if (e.ranged) {
+      // keep at shooting range
+      if (d > range) setTarget(e, Math.floor(target.x/TILE), Math.floor(target.y/TILE));
+      else setTarget(e, Math.floor(e.x/TILE), Math.floor(e.y/TILE));
+      moveTowardsTarget(e, e.speed);
+      if (d <= range && e.attackCooldown <= 0) {
+        e.attackCooldown = e.reload;
+        const cover = getCover(target.x, target.y);
+        const hit = Math.random() < clamp(0.8 - d*0.06 - cover, 0.15, 0.8);
+        fireProjectile(e.x, e.y-4, target, false, hit ? e.atk+randInt(0,4) : 0);
+      }
+    } else {
+      // melee charger
+      setTarget(e, Math.floor(target.x/TILE), Math.floor(target.y/TILE));
+      moveTowardsTarget(e, e.speed);
+      if (d < 1.5 && e.attackCooldown <= 0) {
+        e.attackCooldown = e.reload;
+        applyHit(target, e.atk, false);
+        addSplat(target.x, target.y);
+      }
+    }
+  }
+}
+
+function updateAnimals() {
+  for (const a of G.animals) {
+    if (!a.alive) continue;
+    a.wanderTimer--;
+    if (a.wanderTimer <= 0) {
+      a.targetX = clamp(Math.floor(a.x/TILE) + randInt(-6,6), 0, MAP_W-1);
+      a.targetY = clamp(Math.floor(a.y/TILE) + randInt(-6,6), 0, MAP_H-1);
+      a.wanderTimer = randInt(80,200);
+    }
+    // Flee from nearby pawns
+    const nearPawn = G.pawns.find(p=>p.alive && Math.hypot(p.x-a.x,p.y-a.y)<TILE*5);
+    if (nearPawn && !a.marked) {
+      const dx = a.x - nearPawn.x, dy = a.y - nearPawn.y;
+      const d = Math.hypot(dx,dy);
+      a.x += dx/d * a.speed * 1.5;
+      a.y += dy/d * a.speed * 1.5;
+    } else {
+      const tx = a.targetX*TILE+TILE/2, ty = a.targetY*TILE+TILE/2;
+      const dx = tx-a.x, dy = ty-a.y;
+      const d = Math.hypot(dx,dy);
+      if (d > 2) { a.x += dx/d*a.speed; a.y += dy/d*a.speed; }
+    }
+    a.x = clamp(a.x, 0, MAP_W*TILE);
+    a.y = clamp(a.y, 0, MAP_H*TILE);
+  }
+  // Respawn
+  if (G.tick % 1200 === 0 && G.animals.length < 30) spawnAnimal();
+}
+
+// ==================== PATHFINDING (simple A*) ====================
+function setTarget(obj, tx, ty) {
+  tx = clamp(tx, 0, MAP_W-1);
+  ty = clamp(ty, 0, MAP_H-1);
+  if (obj.targetX === tx && obj.targetY === ty) return;
+  obj.targetX = tx;
+  obj.targetY = ty;
+  obj.path = [];
+}
+
+function moveTowardsTarget(obj, speed) {
+  const tx = obj.targetX * TILE + TILE/2;
+  const ty = obj.targetY * TILE + TILE/2;
+  const dx = tx - obj.x, dy = ty - obj.y;
+  const d = Math.hypot(dx, dy);
+  if (d > 2) {
+    obj.x += dx/d * speed;
+    obj.y += dy/d * speed;
+  }
+}
+
+function distTiles(obj, tx, ty) {
+  const ox = Math.floor(obj.x/TILE), oy = Math.floor(obj.y/TILE);
+  return Math.hypot(ox-tx, oy-ty);
+}
+
+function dist(a, b) {
+  return Math.hypot(a.x-b.x, a.y-b.y);
+}
+
+// ==================== HELPERS ====================
+function nearestBuilding(p, type) {
+  return G.buildings.filter(b=>b.type===type && b.done)
+    .sort((a,b)=>dist(p,{x:a.tx*TILE,y:a.ty*TILE})-dist(p,{x:b.tx*TILE,y:b.ty*TILE}))[0] || null;
+}
+
+function nearestBuildingWithWork(p, type, range) {
+  return G.buildings.filter(b=>b.type===type && b.done)
+    .filter(b=>distTiles(p, b.tx, b.ty) <= range)
+    .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty))[0] || null;
+}
+
+// Job reservation: limit how many pawns work one spot, so they spread out
+function claimCount(key) { return (G._claims && G._claims[key]) || 0; }
+function claimSpot(key) { if (!G._claims) G._claims={}; G._claims[key] = (G._claims[key]||0)+1; }
+// nearest workplace of `type` whose worker count is below cap
+function freeBuildingWithWork(p, type, range, cap) {
+  const list = G.buildings.filter(b=>b.type===type && b.done && distTiles(p,b.tx,b.ty)<=range)
+    .filter(b=> claimCount('b_'+b.tx+'_'+b.ty) < cap)
+    .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty));
+  return list[0] || null;
+}
+
+function nearestEnemy(p, range) {
+  return G.enemies.filter(e=>e.alive)
+    .filter(e=>Math.hypot(e.x-p.x,e.y-p.y)<range*TILE)
+    .sort((a,b)=>dist(p,a)-dist(p,b))[0] || null;
+}
+
+function findMarkedObj(p, type, range) {
+  let best = null, bestD = 999;
+  for (let dy=-range; dy<=range; dy++) {
+    for (let dx=-range; dx<=range; dx++) {
+      const tx = Math.floor(p.x/TILE)+dx, ty = Math.floor(p.y/TILE)+dy;
+      if (tx<0||ty<0||tx>=MAP_W||ty>=MAP_H) continue;
+      const t = G.map[ty][tx];
+      if (t.obj && t.obj.type===type && t.obj.marked) {
+        if (claimCount('t_'+tx+'_'+ty) >= 1) continue; // already taken by another pawn
+        const d = Math.hypot(dx,dy);
+        if (d<bestD) { bestD=d; best={x:tx,y:ty,obj:t.obj}; }
+      }
+    }
+  }
+  return best;
+}
+
+let workTimers = {};
+function workOnObj(p, target, type, duration, onDone) {
+  const key = `${target.x}_${target.y}`;
+  if (!workTimers[key]) workTimers[key] = 0;
+  workTimers[key] += wmul(p);
+  if (workTimers[key] >= duration * 3) {
+    workTimers[key] = 0;
+    onDone();
+  }
+}
+
+function wander(p, range) {
+  if (G.tick % 120 === p.id % 120) {
+    const tx = clamp(Math.floor(p.x/TILE)+randInt(-range,range), 0, MAP_W-1);
+    const ty = clamp(Math.floor(p.y/TILE)+randInt(-range,range), 0, MAP_H-1);
+    if (G.map[ty][tx].type !== TERRAIN.WATER) setTarget(p, tx, ty);
+  }
+}
+
+function killPawn(p) {
+  if (!p.alive) return;
+  p.alive = false;
+  p.dead = true;
+  addLog(`💀 ${p.name} погиб!`, 'danger');
+  addSplat(p.x, p.y);
+  const alivePawns = G.pawns.filter(q=>q.alive);
+  if (alivePawns.length === 0) { gameOver('lose'); }
+}
+
+function addSplat(x, y) {
+  G.bloodSplats.push({x, y, opacity:1, size:4+Math.random()*4});
+}
+
+function getBuildingMaxHp(type) {
+  return hasResearch('walls') ? 300 : 200;
+}
+
+function hasResearch(id) {
+  return G.researches.find(r=>r.id===id)?.done || false;
+}
+
+function addLog(msg, type='') {
+  const entry = { msg, type, time:`День ${G.day} ${String(G.hour).padStart(2,'0')}:${String(G.minute).padStart(2,'0')}` };
+  G.log.unshift(entry);
+  if (G.log.length > 100) G.log.pop();
+  renderLog();
+}
+
+function gameOver(type) {
+  G.gameOver = true;
+  const overlay = document.getElementById('end-overlay');
+  overlay.style.display = 'flex';
+  if (type==='win') {
+    document.getElementById('end-title').textContent = '🏆 Победа!';
+    document.getElementById('end-msg').textContent = `Ты построил империю за ${G.day} дней! Убито бандитов: ${G.stats.kills}`;
+  } else {
+    document.getElementById('end-title').textContent = '💀 Поражение';
+    document.getElementById('end-msg').textContent = 'Все ковбои погибли. Дикий Запад победил.';
+  }
+}
+
+// ==================== TIME & EVENTS ====================
+function updateTime() {
+  G.minute += 0.5 * G.speed;
+  if (G.minute >= 60) {
+    G.minute = 0;
+    G.hour++;
+    if (G.hour >= 24) {
+      G.hour = 0;
+      G.day++;
+      G.dayOfYear = (G.dayOfYear + 1) % 365;
+      G.season = Math.floor(G.dayOfYear / 91);
+      G.stats.days++;
+      onNewDay();
+    }
+  }
+}
+
+function onNewDay() {
+  // Science from labs
+  const labs = G.buildings.filter(b=>b.type==='lab'&&b.done).length;
+  G.res.sci += labs * 5;
+
+  // Gold from smithy
+  const smithies = G.buildings.filter(b=>b.type==='smithy'&&b.done).length;
+  G.res.gold += smithies * 3;
+  G.stats.goldEarned += smithies * 3;
+
+  // Research progress
+  if (G.activeResearch) {
+    const r = G.researches.find(r=>r.id===G.activeResearch);
+    if (r && !r.done && G.res.sci >= r.cost) {
+      G.res.sci -= r.cost;
+      r.done = true;
+      addLog(`🔬 Исследование завершено: ${r.name}`, 'good');
+      G.activeResearch = null;
+      renderResearch();
+    }
+  }
+
+  // Season change
+  if (G.dayOfYear % 91 === 0) {
+    addLog(`🍂 Наступил ${SEASONS[G.season]}`, '');
+  }
+
+  // Win condition
+  if (G.res.gold >= 500) { gameOver('win'); }
+}
+
+function triggerEvent(peaceful) {
+  const events = [
+    { name:'Торговец', fn: () => { G.res.food+=30; G.res.med+=5; addLog('🤠 Торговец привёз еду и медикаменты!', 'good'); } },
+    { name:'Засуха', fn: () => { G.buildings.filter(b=>b.type==='farm').forEach(f=>f.growth=0); addLog('☀️ Засуха! Все фермы сгорели.', 'warn'); } },
+    { name:'Налёт бандитов', fn: () => { const n=2+randInt(0,3); spawnEnemy(n); addLog(`🔫 Налёт! ${n} бандита атакуют!`, 'danger'); } },
+    { name:'Золотая жила', fn: () => { G.res.gold+=30; addLog('💰 Нашли золотую жилу! +30 золота', 'good'); } },
+    { name:'Охота', fn: () => { for(let i=0;i<5;i++) spawnAnimal(); addLog('🦌 Стадо животных прошло мимо!', 'good'); } },
+    { name:'Знахарь', fn: () => { G.res.med+=15; addLog('💊 Знахарь оставил медикаменты!', 'good'); } },
+    { name:'Буря', fn: () => { G.weather='storm'; G.weatherTimer=300; addLog('⛈️ Надвигается гроза!', 'warn'); } },
+    { name:'Эпидемия', fn: () => { G.pawns.filter(p=>p.alive).forEach(p=>p.hp=Math.max(10,p.hp-20)); addLog('🤒 Эпидемия! Все ковбои заболели.', 'danger'); } },
+    { name:'Наёмник', fn: () => {
+      const names=['Дэн','Ро','Сью','Карл','Пит'];
+      const nm=names[randInt(0,names.length-1)];
+      const cx=Math.floor(MAP_W/2), cy=Math.floor(MAP_H/2);
+      spawnPawn(cx+randInt(-3,3), cy+randInt(-3,3), nm, [2,2,2,2,2,2,2,2]);
+      addLog(`🤠 Наёмник ${nm} присоединился к отряду!`, 'good');
+    }},
+    { name:'Пожар', fn: () => {
+      const trees = [];
+      for(let y=0;y<MAP_H;y++) for(let x=0;x<MAP_W;x++) if(G.map[y][x].obj?.type==='tree') trees.push({x,y});
+      const burned=trees.slice(0,randInt(3,8));
+      burned.forEach(t=>G.map[t.y][t.x].obj=null);
+      addLog(`🔥 Лесной пожар! Сгорело ${burned.length} деревьев.`, 'warn');
+    }},
+  ];
+  let pool = events;
+  if (peaceful) pool = events.filter(e=>!['Налёт бандитов','Эпидемия'].includes(e.name));
+  const ev = pool[randInt(0, pool.length-1)];
+  ev.fn();
+}
+
+function updateWeather() {
+  G.weatherTimer = Math.max(0, G.weatherTimer - 1);
+  if (G.weatherTimer <= 0) {
+    if (Math.random() < 0.002) {
+      const weathers = G.season===3 ? ['clear','snow','blizzard'] : ['clear','rain','storm','sandstorm'];
+      G.weather = weathers[randInt(0, weathers.length-1)];
+      G.weatherTimer = 200 + randInt(0,400);
+      if (G.weather==='storm') addLog('⛈️ Началась гроза!', 'warn');
+      else if (G.weather==='blizzard') addLog('🌨️ Метель!', 'warn');
+      else if (G.weather==='sandstorm') addLog('🌪️ Песчаная буря!', 'warn');
+    } else {
+      G.weather = 'clear';
+    }
+  }
+}
+
+// ==================== RENDERING ====================
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+let hoverTile = null;
+
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function render() {
+  if (!G) return;
+  const cam = G.camera;
+  const z = cam.zoom;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(-cam.x*z, -cam.y*z);
+  ctx.scale(z, z);
+
+  const startX = Math.max(0, Math.floor(cam.x/TILE)-1);
+  const startY = Math.max(0, Math.floor(cam.y/TILE)-1);
+  const endX = Math.min(MAP_W, Math.ceil((cam.x+canvas.width/z)/TILE)+1);
+  const endY = Math.min(MAP_H, Math.ceil((cam.y+canvas.height/z)/TILE)+1);
+
+  // Draw tiles
+  for (let y=startY; y<endY; y++) {
+    for (let x=startX; x<endX; x++) {
+      const tile = G.map[y][x];
+      // checker-ish subtle variation for texture
+      const useShade = (((x*7+y*13) % 5) < 2);
+      let col = useShade ? TCOLORS2[tile.type] : TCOLORS[tile.type];
+      // Season tint
+      if (G.season===3 && tile.type!==TERRAIN.WATER) col = blendColor(col, '#c4d2e4', 0.4);
+      else if (G.season===2 && tile.type===TERRAIN.GRASS) col = blendColor(col, '#b09030', 0.35);
+      ctx.fillStyle = col;
+      ctx.fillRect(x*TILE, y*TILE, TILE+1, TILE+1);
+
+      // Water shimmer
+      if (tile.type===TERRAIN.WATER && (x+y+Math.floor(G.tick/30))%6===0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        ctx.fillRect(x*TILE+4, y*TILE+TILE*0.4, TILE-8, 2);
+      }
+      // Grass blades hint
+      if (tile.type===TERRAIN.GRASS && G.season!==3 && ((x*3+y*5)%4===0)) {
+        ctx.fillStyle = 'rgba(40,70,20,0.25)';
+        ctx.fillRect(x*TILE+TILE*0.3, y*TILE+TILE*0.3, 2, 4);
+        ctx.fillRect(x*TILE+TILE*0.6, y*TILE+TILE*0.5, 2, 3);
+      }
+
+      // Objects
+      if (tile.obj) drawTileObj(x, y, tile.obj);
+    }
+  }
+
+  // Hover highlight / build preview
+  if (hoverTile && !isDragging) {
+    const {tx, ty} = hoverTile;
+    if (tx>=0 && ty>=0 && tx<MAP_W && ty<MAP_H) {
+      if (G.buildMode) {
+        const def = BUILDS[G.buildMode];
+        const sz = def.size;
+        let ok = true;
+        for (let dy=0; dy<sz; dy++) for (let dx=0; dx<sz; dx++) {
+          const x2=tx+dx, y2=ty+dy;
+          if (x2>=MAP_W||y2>=MAP_H||G.map[y2][x2].type===TERRAIN.WATER||G.buildings.find(b=>b.tx===x2&&b.ty===y2)) ok=false;
+        }
+        ctx.fillStyle = ok ? 'rgba(120,200,120,0.30)' : 'rgba(200,80,80,0.35)';
+        ctx.fillRect(tx*TILE, ty*TILE, TILE*sz, TILE*sz);
+        ctx.strokeStyle = ok ? '#9cff9c' : '#ff8080';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(tx*TILE, ty*TILE, TILE*sz, TILE*sz);
+        ctx.font = `${TILE*sz*0.5}px serif`;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.globalAlpha = 0.6;
+        ctx.fillText(def.icon, tx*TILE+TILE*sz/2, ty*TILE+TILE*sz/2);
+        ctx.globalAlpha = 1;
+      } else if (G.demolishMode) {
+        ctx.fillStyle = 'rgba(200,60,60,0.3)';
+        ctx.fillRect(tx*TILE, ty*TILE, TILE, TILE);
+      } else {
+        ctx.strokeStyle = 'rgba(232,201,126,0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(tx*TILE+1, ty*TILE+1, TILE-2, TILE-2);
+      }
+      ctx.lineWidth = 1;
+    }
+  }
+
+  // Blood splats
+  for (const s of G.bloodSplats) {
+    ctx.fillStyle = `rgba(160,30,30,${s.opacity})`;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Buildings
+  for (const b of G.buildings) {
+    drawBuilding(b);
+  }
+
+  // Animals
+  for (const a of G.animals) {
+    if (!a.alive) continue;
+    drawAnimal(a);
+  }
+
+  // Enemies
+  for (const e of G.enemies) {
+    if (!e.alive) continue;
+    drawEnemy(e);
+  }
+
+  // Pawns
+  for (const p of G.pawns) {
+    drawPawn(p);
+  }
+
+  // Projectiles (bullets)
+  for (const pr of G.projectiles) {
+    ctx.strokeStyle = pr.friendly ? 'rgba(255,230,150,0.9)' : 'rgba(255,160,120,0.9)';
+    ctx.lineWidth = 2;
+    const aimX = pr.target ? pr.target.x : pr.tx, aimY = pr.target ? pr.target.y : pr.ty;
+    const d = Math.hypot(aimX-pr.x, aimY-pr.y) || 1;
+    ctx.beginPath();
+    ctx.moveTo(pr.x, pr.y);
+    ctx.lineTo(pr.x - (aimX-pr.x)/d*6, pr.y - (aimY-pr.y)/d*6);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+  }
+
+  ctx.restore();
+
+  // Screen-space overlays
+  drawWeather();
+  drawDayNightOverlay();
+  drawMinimap();
+}
+
+function drawDayNightOverlay() {
+  const h = G.hour + G.minute/60;
+  let tint = null;
+  if (h < 5 || h >= 21) tint = 'rgba(10,15,45,0.55)';        // night
+  else if (h < 7) tint = 'rgba(60,40,80,0.35)';              // dawn
+  else if (h < 8) tint = 'rgba(200,140,80,0.18)';            // sunrise warm
+  else if (h >= 19 && h < 20) tint = 'rgba(220,120,60,0.20)';// sunset
+  else if (h >= 20) tint = 'rgba(40,30,70,0.40)';            // dusk
+  if (G.weather==='storm'||G.weather==='blizzard') tint = 'rgba(30,35,55,0.45)';
+  if (tint) {
+    ctx.fillStyle = tint;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  // Warm glow around lit buildings at night
+  if (h < 6 || h >= 20) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const b of G.buildings) {
+      if (b.blueprint) continue;
+      if (['saloon','smithy','camp','lab'].includes(b.type)) {
+        const z = G.camera.zoom;
+        const sx = (b.tx*TILE + TILE*BUILDS[b.type].size/2 - G.camera.x)*z;
+        const sy = (b.ty*TILE + TILE*BUILDS[b.type].size/2 - G.camera.y)*z;
+        if (sx<-40||sy<-40||sx>canvas.width+40||sy>canvas.height+40) continue;
+        const grd = ctx.createRadialGradient(sx, sy, 2, sx, sy, 40);
+        grd.addColorStop(0, 'rgba(255,180,80,0.25)');
+        grd.addColorStop(1, 'rgba(255,180,80,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(sx-40, sy-40, 80, 80);
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+}
+
+function drawTileObj(x, y, obj) {
+  const px = x*TILE+TILE/2, py = y*TILE+TILE/2;
+  if (obj.type==='tree') {
+    const healthy = obj.hp/obj.maxHp;
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath(); ctx.ellipse(px+2, py+8, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+    // Trunk
+    ctx.fillStyle = '#5a3a20';
+    ctx.fillRect(px-2, py-1, 4, TILE/2);
+    // Canopy: layered for volume
+    const base = G.season===3 ? '#9ab0c0' : G.season===2 ? '#9a7a30' : '#3a7a2a';
+    const light = G.season===3 ? '#c0d0dc' : G.season===2 ? '#c0a040' : '#5a9a3a';
+    ctx.fillStyle = base;
+    ctx.beginPath(); ctx.arc(px, py-3, 8*healthy+2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = light;
+    ctx.beginPath(); ctx.arc(px-2, py-5, 5*healthy+1, 0, Math.PI*2); ctx.fill();
+    if (obj.marked) {
+      ctx.strokeStyle = '#e8c97e'; ctx.lineWidth = 1.5;
+      ctx.strokeRect(x*TILE+1, y*TILE+1, TILE-2, TILE-2); ctx.lineWidth = 1;
+    }
+  } else if (obj.type==='rock') {
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath(); ctx.ellipse(px+2, py+5, 9, 3, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#56524d';
+    ctx.beginPath(); ctx.ellipse(px, py+1, 9, 7, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#7a756e';
+    ctx.beginPath(); ctx.ellipse(px-1, py-1, 6, 5, -0.3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#969089';
+    ctx.beginPath(); ctx.ellipse(px-2, py-2, 2.5, 2, 0, 0, Math.PI*2); ctx.fill();
+    if (obj.marked) {
+      ctx.strokeStyle = '#e8a030'; ctx.lineWidth = 1.5;
+      ctx.strokeRect(x*TILE+1, y*TILE+1, TILE-2, TILE-2); ctx.lineWidth = 1;
+    }
+  }
+}
+
+function drawBuilding(b) {
+  const x = b.tx*TILE, y = b.ty*TILE;
+  const def = BUILDS[b.type];
+  const S = TILE*def.size;
+
+  if (b.blueprint) {
+    // Blueprint look: dashed outline + ghost icon
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = 'rgba(80,140,200,0.12)';
+    ctx.fillRect(x, y, S, S);
+    ctx.strokeStyle = '#6aa6e0';
+    ctx.setLineDash([4,3]); ctx.lineWidth = 1.5;
+    ctx.strokeRect(x+1, y+1, S-2, S-2);
+    ctx.setLineDash([]); ctx.lineWidth = 1;
+    ctx.font = `${S*0.4}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.globalAlpha = 0.5;
+    ctx.fillText(def.icon, x+S/2, y+S/2);
+    ctx.globalAlpha = 1;
+    if (b.progress > 0) {
+      ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(x, y+S-4, S, 4);
+      ctx.fillStyle = '#6aa6e0'; ctx.fillRect(x, y+S-4, S*b.progress, 4);
+    }
+    return;
+  }
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.fillRect(x+3, y+3, S, S);
+
+  // Specific drawings
+  drawStructure(b.type, x, y, S, def, b);
+
+  // Selection
+  if (b.selected) {
+    ctx.strokeStyle = '#e8c97e'; ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, S, S); ctx.lineWidth = 1;
+  }
+
+  // HP bar
+  if (b.hp < b.maxHp) {
+    const ratio = b.hp/b.maxHp;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x, y-5, S, 3);
+    ctx.fillStyle = ratio>0.5?'#7ca84e':'#c04444'; ctx.fillRect(x, y-5, S*ratio, 3);
+  }
+}
+
+function drawStructure(type, x, y, S, def, b) {
+  const cx = x+S/2, cy = y+S/2;
+  switch(type) {
+    case 'farm': {
+      ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x, y, S, S);
+      const g = b.growth || 0;
+      for (let i=0; i<3; i++) for (let j=0; j<3; j++) {
+        const px = x+4+i*(S-8)/2.5, py = y+4+j*(S-8)/2.5;
+        ctx.fillStyle = g>0.7?'#e8c040':g>0.3?'#7aaa3a':'#4a6a2a';
+        ctx.fillRect(px, py, 3, 3+g*4);
+      }
+      ctx.strokeStyle = '#3a2a1a'; ctx.strokeRect(x+0.5, y+0.5, S-1, S-1);
+      break;
+    }
+    case 'mine': {
+      ctx.fillStyle = '#5a5550'; ctx.fillRect(x, y, S, S);
+      ctx.fillStyle = '#3a3530'; // pit
+      ctx.beginPath(); ctx.ellipse(cx, cy, S*0.3, S*0.25, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#8a8580'; // rocks
+      ctx.fillRect(x+3, y+3, 4, 4); ctx.fillRect(x+S-7, y+S-7, 4, 4);
+      ctx.strokeStyle = '#2a2520'; ctx.strokeRect(x+0.5, y+0.5, S-1, S-1);
+      break;
+    }
+    case 'fence': {
+      ctx.strokeStyle = '#6a4520'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x+2, cy); ctx.lineTo(x+S-2, cy); ctx.stroke();
+      ctx.fillStyle = '#7a5530';
+      ctx.fillRect(x+3, y+4, 3, S-8); ctx.fillRect(x+S-6, y+4, 3, S-8);
+      ctx.lineWidth = 1;
+      break;
+    }
+    case 'tower': {
+      ctx.fillStyle = '#6a5540'; ctx.fillRect(x+4, y+4, S-8, S-8);
+      ctx.fillStyle = '#4a3a2a'; ctx.fillRect(x+2, y+2, S-4, 4); // top platform
+      ctx.fillStyle = '#3a2a1a';
+      for (let i=0; i<S; i+=6) ctx.fillRect(x+2+i, y+2, 2, 2);
+      // little flag
+      ctx.strokeStyle='#5a4030'; ctx.beginPath(); ctx.moveTo(cx,y+2); ctx.lineTo(cx,y-4); ctx.stroke();
+      ctx.fillStyle='#b04040'; ctx.fillRect(cx, y-4, 5, 3);
+      break;
+    }
+    case 'saloon': {
+      ctx.fillStyle = '#7a5530'; ctx.fillRect(x, y+S*0.35, S, S*0.65); // body
+      ctx.fillStyle = '#5a3a1a'; // roof
+      ctx.beginPath(); ctx.moveTo(x, y+S*0.35); ctx.lineTo(cx, y+2); ctx.lineTo(x+S, y+S*0.35); ctx.fill();
+      ctx.fillStyle = '#3a2510'; ctx.fillRect(cx-4, y+S*0.6, 8, S*0.4); // door
+      ctx.fillStyle = '#c8a040'; ctx.fillRect(x+4, y+S*0.5, 5, 5); ctx.fillRect(x+S-9, y+S*0.5, 5, 5); // windows
+      break;
+    }
+    case 'lab': {
+      ctx.fillStyle = '#3a4560'; ctx.fillRect(x+2, y+2, S-4, S-4);
+      ctx.fillStyle = '#6aa0c0'; ctx.beginPath(); ctx.arc(cx, cy, S*0.18, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#aee0ff'; ctx.beginPath(); ctx.arc(cx-2, cy-2, S*0.07, 0, Math.PI*2); ctx.fill();
+      break;
+    }
+    case 'clinic': {
+      ctx.fillStyle = '#e8e8e0'; ctx.fillRect(x+2, y+2, S-4, S-4);
+      ctx.fillStyle = '#c03030';
+      ctx.fillRect(cx-2, cy-7, 4, 14); ctx.fillRect(cx-7, cy-2, 14, 4);
+      ctx.strokeStyle='#aaa'; ctx.strokeRect(x+2, y+2, S-4, S-4);
+      break;
+    }
+    case 'smithy': {
+      ctx.fillStyle = '#4a3525'; ctx.fillRect(x+2, y+2, S-4, S-4);
+      ctx.fillStyle = '#2a2020'; ctx.fillRect(cx-6, cy-2, 12, 8); // anvil base
+      ctx.fillStyle = '#888'; ctx.fillRect(cx-7, cy-4, 14, 4);
+      // glow
+      ctx.fillStyle = 'rgba(255,140,40,'+(0.4+0.3*Math.sin(G.tick*0.1))+')';
+      ctx.beginPath(); ctx.arc(x+S-7, y+7, 4, 0, Math.PI*2); ctx.fill();
+      break;
+    }
+    case 'camp': {
+      ctx.fillStyle = '#c8b090'; // tent
+      ctx.beginPath(); ctx.moveTo(cx, y+3); ctx.lineTo(x+3, y+S-3); ctx.lineTo(x+S-3, y+S-3); ctx.fill();
+      ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.moveTo(cx, y+S*0.4); ctx.lineTo(cx-5, y+S-3); ctx.lineTo(cx+5, y+S-3); ctx.fill();
+      ctx.strokeStyle='#8a7050'; ctx.beginPath(); ctx.moveTo(cx, y+1); ctx.lineTo(cx, y+S-3); ctx.stroke();
+      break;
+    }
+    case 'well': {
+      ctx.fillStyle = '#6a6560'; ctx.beginPath(); ctx.arc(cx, cy, S*0.32, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#2a4560'; ctx.beginPath(); ctx.arc(cx, cy, S*0.2, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#4a3520'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x+4, y+2); ctx.lineTo(x+4, cy); ctx.moveTo(x+S-4, y+2); ctx.lineTo(x+S-4, cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x+3, y+3); ctx.lineTo(x+S-3, y+3); ctx.stroke(); ctx.lineWidth=1;
+      break;
+    }
+    default:
+      ctx.fillStyle = '#444'; ctx.fillRect(x, y, S, S);
+      ctx.font = `${S*0.5}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(def.icon, cx, cy);
+  }
+}
+
+function drawPawn(p) {
+  const isSelected = G.selectedPawnId === p.id;
+  const x = Math.round(p.x), y = Math.round(p.y);
+
+  if (!p.alive) {
+    // Gravestone (drawn)
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath(); ctx.ellipse(x, y+7, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#6a6a6a';
+    ctx.fillRect(x-5, y-6, 10, 12);
+    ctx.beginPath(); ctx.arc(x, y-6, 5, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#4a4a4a';
+    ctx.fillRect(x-3, y-2, 6, 1.5);
+    ctx.fillRect(x-1, y-5, 2, 6);
+    return;
+  }
+
+  // Walk animation phase
+  if (!p._anim) p._anim = 0;
+  const moving = Math.hypot((p._lx||x)-x, (p._ly||y)-y) > 0.3;
+  p._lx = x; p._ly = y;
+  if (moving) p._anim += 0.3; else p._anim = 0;
+  const legSwing = Math.sin(p._anim) * 2.5;
+
+  // Each pawn has a consistent shirt color from id
+  const shirts = ['#7a5a9a','#5a7a9a','#9a6a4a','#4a8a6a','#9a9a4a','#aa5a5a','#5a8a9a','#8a6a8a'];
+  const shirt = p.state==='fighting' ? '#b04040' : shirts[p.id % shirts.length];
+
+  // Selection ring
+  if (isSelected) {
+    ctx.strokeStyle = '#e8c97e';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(x, y+7, 11, 5, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.lineWidth = 1;
+  }
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.beginPath(); ctx.ellipse(x, y+8, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+
+  if (p.state==='sleeping') {
+    // lying down
+    ctx.fillStyle = shirt;
+    ctx.fillRect(x-8, y-2, 16, 6);
+    ctx.fillStyle = '#3a2510';
+    ctx.fillRect(x-11, y-2, 5, 5); // hat
+    ctx.fillStyle = '#666';
+    ctx.font = '9px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('💤', x+2, y-9);
+  } else {
+    // Legs (animated)
+    ctx.strokeStyle = '#3a2a1a';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(x-2, y+3); ctx.lineTo(x-2+legSwing, y+9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+2, y+3); ctx.lineTo(x+2-legSwing, y+9); ctx.stroke();
+    ctx.lineWidth = 1;
+    // Body / vest
+    ctx.fillStyle = shirt;
+    roundRect(x-5, y-4, 10, 9, 2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(x-1, y-4, 2, 9); // vest seam
+    // Arms
+    ctx.strokeStyle = shirt; ctx.lineWidth = 2.5;
+    const armSwing = moving ? -legSwing : 0;
+    ctx.beginPath(); ctx.moveTo(x-4, y-2); ctx.lineTo(x-6, y+2+armSwing); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+4, y-2); ctx.lineTo(x+6, y+2-armSwing); ctx.stroke();
+    ctx.lineWidth = 1;
+    // Head
+    ctx.fillStyle = '#d8a878';
+    ctx.beginPath(); ctx.arc(x, y-7, 3.5, 0, Math.PI*2); ctx.fill();
+    // Cowboy hat
+    ctx.fillStyle = '#4a3018';
+    ctx.beginPath(); ctx.ellipse(x, y-9, 7, 2.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillRect(x-3, y-13, 6, 4);
+    ctx.beginPath(); ctx.ellipse(x, y-13, 3, 1.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(x-3, y-10, 6, 1);
+    // Gun if fighting
+    if (p.state==='fighting') {
+      ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x+5, y); ctx.lineTo(x+10, y-2); ctx.stroke();
+      ctx.lineWidth = 1;
+    }
+  }
+
+  // State icon (working tool, etc.)
+  const stateIcon = {working:'⚒', fighting:'', joy:'♪', breakdown:'💢'}[p.state] || '';
+  if (stateIcon) {
+    ctx.font = '9px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(stateIcon, x+8, y-12);
+  }
+
+  // Name tag
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  roundRect(x-16, y+11, 32, 9, 2); ctx.fill();
+  ctx.fillStyle = p.mood < 30 ? '#e07070' : '#e8c97e';
+  ctx.font = '8px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(p.name.substring(0,7), x, y+16);
+
+  // HP bar above head (only if damaged)
+  if (p.hp < p.maxHp) {
+    const hpRatio = p.hp/p.maxHp;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(x-12, y-20, 24, 3);
+    ctx.fillStyle = hpRatio>0.6?'#7ca84e':hpRatio>0.3?'#e8a030':'#c04444';
+    ctx.fillRect(x-12, y-20, 24*hpRatio, 3);
+  }
+}
+
+// rounded rect helper (path only; caller does fill/stroke)
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+function drawAnimal(a) {
+  const icons = {deer:'🦌', bison:'🐃', rabbit:'🐇'};
+  ctx.font = '14px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(icons[a.type]||'🐾', a.x, a.y);
+  if (a.marked) {
+    ctx.strokeStyle = '#c04444';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, 10, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+  }
+}
+
+function drawEnemy(e) {
+  const x = Math.round(e.x), y = Math.round(e.y);
+  const def = ENEMY_TYPES[e.type] || ENEMY_TYPES.knifer;
+  const big = e.type==='boss';
+  const sz = big ? 1.4 : 1;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.beginPath(); ctx.ellipse(x, y+8*sz, 7*sz, 3, 0, 0, Math.PI*2); ctx.fill();
+
+  // Legs
+  ctx.strokeStyle = '#2a1515'; ctx.lineWidth = 2.5*sz;
+  ctx.beginPath(); ctx.moveTo(x-2, y+3*sz); ctx.lineTo(x-2, y+9*sz); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x+2, y+3*sz); ctx.lineTo(x+2, y+9*sz); ctx.stroke();
+  ctx.lineWidth = 1;
+  // Body
+  ctx.fillStyle = def.color;
+  roundRect(x-5*sz, y-4*sz, 10*sz, 9*sz, 2); ctx.fill();
+  // Head
+  ctx.fillStyle = '#c89878';
+  ctx.beginPath(); ctx.arc(x, y-7*sz, 3.5*sz, 0, Math.PI*2); ctx.fill();
+  // Black hat (bandit)
+  ctx.fillStyle = '#1a1010';
+  ctx.beginPath(); ctx.ellipse(x, y-9*sz, 7*sz, 2.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillRect(x-3*sz, y-13*sz, 6*sz, 4*sz);
+  // Bandana
+  ctx.fillStyle = big ? '#c0a040' : '#aa3030';
+  ctx.fillRect(x-3.5*sz, y-6*sz, 7*sz, 2.5);
+  // Weapon hint
+  if (e.ranged) {
+    ctx.strokeStyle='#222'; ctx.lineWidth=2*sz;
+    ctx.beginPath(); ctx.moveTo(x+4*sz, y); ctx.lineTo(x+10*sz, y-2); ctx.stroke(); ctx.lineWidth=1;
+  } else {
+    ctx.fillStyle='#ccc'; ctx.fillRect(x+5*sz, y-2, 5*sz, 1.5);
+  }
+
+  // HP bar
+  const r = e.hp/e.maxHp;
+  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x-12*sz, y-16*sz, 24*sz, 3);
+  ctx.fillStyle = '#c04444'; ctx.fillRect(x-12*sz, y-16*sz, 24*sz*r, 3);
+  // Name for boss
+  if (big) {
+    ctx.fillStyle='#e8a030'; ctx.font='8px Courier New'; ctx.textAlign='center';
+    ctx.fillText('ГЛАВАРЬ', x, y-20);
+  }
+}
+
+function drawWeather() {
+  if (!G) return;
+  if (G.weather === 'rain' || G.weather === 'storm') {
+    ctx.strokeStyle = G.weather==='storm' ? 'rgba(150,180,255,0.25)' : 'rgba(100,150,255,0.15)';
+    ctx.lineWidth = 1;
+    for (let i=0; i<(G.weather==='storm'?80:40); i++) {
+      const rx = (Math.sin(G.tick*0.01+i*77.3)*0.5+0.5)*canvas.width;
+      const ry = ((G.tick*2+i*37)%(canvas.height+20))-20;
+      ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx-2, ry+8); ctx.stroke();
+    }
+  }
+  if (G.weather === 'sandstorm') {
+    ctx.fillStyle = 'rgba(200,150,80,0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  if (G.season === 3 && (G.weather==='blizzard'||Math.random()<0.01)) {
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    for (let i=0; i<20; i++) {
+      const rx = (Math.sin(G.tick*0.007+i*53.1)*0.5+0.5)*canvas.width;
+      const ry = ((G.tick*1.5+i*41)%(canvas.height+10))-10;
+      ctx.beginPath(); ctx.arc(rx, ry, 2, 0, Math.PI*2); ctx.fill();
+    }
+  }
+}
+
+// ==================== MINIMAP ====================
+const miniCanvas = document.getElementById('minimap');
+const miniCtx = miniCanvas.getContext('2d');
+let _miniBase = null; // cached terrain image
+let _miniDirty = true;
+
+function buildMiniBase() {
+  const off = document.createElement('canvas');
+  off.width = MAP_W; off.height = MAP_H;
+  const octx = off.getContext('2d');
+  for (let y=0; y<MAP_H; y++) for (let x=0; x<MAP_W; x++) {
+    octx.fillStyle = TCOLORS[G.map[y][x].type];
+    octx.fillRect(x, y, 1, 1);
+  }
+  _miniBase = off;
+  _miniDirty = false;
+}
+
+function drawMinimap() {
+  if (!G) return;
+  if (_miniDirty || !_miniBase) buildMiniBase();
+  const W = miniCanvas.width, H = miniCanvas.height;
+  const sx = W/MAP_W, sy = H/MAP_H;
+  // terrain
+  miniCtx.imageSmoothingEnabled = false;
+  miniCtx.drawImage(_miniBase, 0, 0, W, H);
+
+  // buildings (gold)
+  miniCtx.fillStyle = '#e8c97e';
+  for (const b of G.buildings) if (!b.blueprint) miniCtx.fillRect(b.tx*sx, b.ty*sy, sx*1.5, sy*1.5);
+  // animals (light)
+  miniCtx.fillStyle = 'rgba(220,200,160,0.7)';
+  for (const a of G.animals) if (a.alive) miniCtx.fillRect((a.x/TILE)*sx-0.5, (a.y/TILE)*sy-0.5, 1.5, 1.5);
+  // enemies (red)
+  miniCtx.fillStyle = '#ff4040';
+  for (const e of G.enemies) if (e.alive) miniCtx.fillRect((e.x/TILE)*sx-1, (e.y/TILE)*sy-1, 3, 3);
+  // pawns (cyan)
+  miniCtx.fillStyle = '#5ad0ff';
+  for (const p of G.pawns) if (p.alive) miniCtx.fillRect((p.x/TILE)*sx-1, (p.y/TILE)*sy-1, 3, 3);
+
+  // camera viewport rectangle
+  const z = G.camera.zoom;
+  const vx = (G.camera.x/TILE)*sx;
+  const vy = (G.camera.y/TILE)*sy;
+  const vw = (canvas.width/z/TILE)*sx;
+  const vh = (canvas.height/z/TILE)*sy;
+  miniCtx.strokeStyle = '#ffffff'; miniCtx.lineWidth = 1;
+  miniCtx.strokeRect(vx, vy, vw, vh);
+}
+
+// Click minimap -> center camera there
+miniCanvas.addEventListener('mousedown', (e) => {
+  const r = miniCanvas.getBoundingClientRect();
+  const fx = (e.clientX - r.left)/r.width;
+  const fy = (e.clientY - r.top)/r.height;
+  const z = G.camera.zoom;
+  G.camera.x = fx*MAP_W*TILE - canvas.width/z/2;
+  G.camera.y = fy*MAP_H*TILE - canvas.height/z/2;
+  e.stopPropagation();
+});
+
+// ==================== UI UPDATE ====================
+function updateUI() {
+  if (!G) return;
+  document.getElementById('res-food').textContent = Math.floor(G.res.food);
+  document.getElementById('res-wood').textContent = Math.floor(G.res.wood);
+  document.getElementById('res-ore').textContent = Math.floor(G.res.ore);
+  document.getElementById('res-meat').textContent = Math.floor(G.res.meat);
+  document.getElementById('res-med').textContent = Math.floor(G.res.med);
+  document.getElementById('res-sci').textContent = Math.floor(G.res.sci);
+  document.getElementById('res-gold').textContent = Math.floor(G.res.gold);
+
+  const s = G.season;
+  const badge = document.getElementById('season-badge');
+  badge.textContent = SEASONS[s];
+  badge.style.background = SEASON_BG[s];
+
+  const weatherIcons = {clear:G.season===3?'❄️':'☀️', rain:'🌧️', storm:'⛈️', sandstorm:'🌪️', snow:'🌨️', blizzard:'🌨️'};
+  document.getElementById('weather-badge').textContent = weatherIcons[G.weather] || '☀️';
+
+  const h = Math.floor(G.hour), m = Math.floor(G.minute);
+  document.getElementById('clock').textContent = `День ${G.day} • ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+
+  // Objective progress
+  const goalPct = clamp(G.res.gold/500, 0, 1)*100;
+  document.getElementById('obj-fill').style.width = goalPct+'%';
+  document.getElementById('obj-text').textContent = `Накопи 500 💰 золота  (${Math.floor(G.res.gold)}/500)`;
+
+  renderPawns();
+  renderSchedule();
+}
+
+function renderPawns() {
+  const list = document.getElementById('pawn-list');
+  list.innerHTML = '';
+  for (const p of G.pawns) {
+    const card = document.createElement('div');
+    card.className = 'pawn-card' + (G.selectedPawnId===p.id?' selected':'') + (p.dead?' dead':'');
+    const stateNames = {idle:'Отдыхает',working:'Работает',sleeping:'Спит',fighting:'Сражается',joy:'Развлекается',breakdown:'Срыв!'};
+    const woundText = p.hp < p.maxHp*0.5 ? '🤕 Ранен' : '';
+    const sickText = p.sick ? `🤒 ${p.sick.name}` : '';
+    const traitChips = (p.traits||[]).map(t=>{
+      const tr = TRAITS[t]; if(!tr) return '';
+      return `<span class="trait-chip ${tr.good?'tg':'tb'}" title="${tr.desc}">${tr.icon} ${tr.name}</span>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="pawn-name">🤠 ${p.name} ${p.dead?'(погиб)':''}</div>
+      <div class="pawn-status">${p.role} • ${stateNames[p.state]||p.state} ${woundText} ${sickText}</div>
+      <div class="trait-row">${traitChips}</div>
+      ${bar('HP',p.hp,p.maxHp,'bar-hp')}
+      ${bar('Еда',p.food,p.maxFood,'bar-food')}
+      ${bar('Настр',p.mood,p.maxMood,'bar-mood')}
+      ${bar('Сила',p.energy,p.maxEnergy,'bar-energy')}
+      <div class="pawn-thoughts">${p.thoughts.slice(0,3).map(t=>`<span class="${t.neg?'thought-neg':'thought-pos'}">${t.text}</span>`).join(' ')}</div>
+    `;
+    if (!p.dead) {
+      card.addEventListener('click', () => {
+        G.selectedPawnId = G.selectedPawnId===p.id ? null : p.id;
+        showPriorityPanel(p);
+      });
+    }
+    list.appendChild(card);
+  }
+}
+
+function bar(label, val, max, cls) {
+  const pct = Math.round(clamp(val/max,0,1)*100);
+  return `<div class="bar-wrap">
+    <div class="bar-label"><span>${label}</span><span>${Math.floor(val)}/${max}</span></div>
+    <div class="bar"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function renderSchedule() {
+  const wrap = document.getElementById('schedule-wrap');
+  if (document.getElementById('tab-schedule').classList.contains('active')) {
+    wrap.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'schedule-grid';
+
+    // Hours header
+    const hrow = document.createElement('div');
+    hrow.style.cssText = 'color:#555;font-size:9px;text-align:center;grid-column:2/-1;display:grid;grid-template-columns:repeat(24,1fr)';
+    for (let h=0; h<24; h++) {
+      const c = document.createElement('span');
+      c.textContent = h;
+      hrow.appendChild(c);
+    }
+    grid.innerHTML = '<div></div>';
+    grid.appendChild(hrow);
+
+    for (const p of G.pawns) {
+      if (p.dead) continue;
+      const nameEl = document.createElement('div');
+      nameEl.className = 'sched-name';
+      nameEl.textContent = p.name;
+      grid.appendChild(nameEl);
+      for (let h=0; h<24; h++) {
+        const cell = document.createElement('div');
+        const slot = p.schedule[h];
+        cell.className = `sched-cell sched-${slot}`;
+        if (h === G.hour) cell.style.outline = '1px solid #e8c97e';
+        cell.title = `${p.name} ${h}:00 — ${slot}`;
+        const ph = h, pp = p;
+        cell.addEventListener('click', () => {
+          const slots = ['any','work','sleep','joy'];
+          pp.schedule[ph] = slots[(slots.indexOf(pp.schedule[ph])+1)%slots.length];
+          renderSchedule();
+        });
+        grid.appendChild(cell);
+      }
+    }
+    wrap.appendChild(grid);
+
+    const legend = document.createElement('div');
+    legend.style.cssText = 'margin-top:8px;font-size:10px;color:#666;display:flex;gap:8px;flex-wrap:wrap';
+    legend.innerHTML = `
+      <span><span style="background:#3a4a3a;padding:0 4px">■</span> Свободно</span>
+      <span><span style="background:#4a3a1a;padding:0 4px">■</span> Работа</span>
+      <span><span style="background:#2a2a5a;padding:0 4px">■</span> Сон</span>
+      <span><span style="background:#3a2a4a;padding:0 4px">■</span> Досуг</span>
+    `;
+    wrap.appendChild(legend);
+  }
+}
+
+function renderResearch() {
+  const list = document.getElementById('research-list');
+  list.innerHTML = '';
+  const sci = Math.floor(G.res.sci);
+  for (const r of G.researches) {
+    const div = document.createElement('div');
+    div.className = 'research-item' + (r.done?' done':'') + (G.activeResearch===r.id?' active':'');
+    const canAfford = sci >= r.cost;
+    div.innerHTML = `
+      <div class="research-name">${r.done?'✅':''} ${r.name}</div>
+      <div class="research-desc">${r.desc}</div>
+      <div class="research-cost">🔬 ${r.cost} очков науки ${r.done?'(завершено)':canAfford?'(доступно)':'(недостаточно)'}</div>
+      ${!r.done ? `<button class="btn-small" ${G.activeResearch===r.id?'disabled':''} data-rid="${r.id}">${G.activeResearch===r.id?'⏳ Исследуется...':'▶ Исследовать'}</button>` : ''}
+    `;
+    list.appendChild(div);
+  }
+
+  list.querySelectorAll('.btn-small[data-rid]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const r = G.researches.find(r=>r.id===btn.dataset.rid);
+      if (!r || r.done) return;
+      if (G.res.sci >= r.cost) {
+        G.res.sci -= r.cost;
+        r.done = true;
+        G.activeResearch = null;
+        addLog(`🔬 Исследовано: ${r.name}`, 'good');
+        renderResearch();
+      } else {
+        G.activeResearch = r.id;
+        addLog(`🔬 Начато исследование: ${r.name}`, '');
+        renderResearch();
+      }
+    });
+  });
+
+  // Stats
+  const stats = document.createElement('div');
+  stats.style.cssText = 'margin-top:10px;padding:6px;background:#1a1a1a;border-radius:3px;font-size:10px;color:#666';
+  stats.innerHTML = `
+    <div class="section-title">Статистика</div>
+    <div>📅 Прожито дней: <b style="color:#aaa">${G.stats.days}</b></div>
+    <div>💀 Убито бандитов: <b style="color:#aaa">${G.stats.kills}</b></div>
+    <div>🍖 Еды собрано: <b style="color:#aaa">${G.stats.foodHarvested}</b></div>
+    <div>🪵 Деревьев срублено: <b style="color:#aaa">${G.stats.treesChopped}</b></div>
+    <div>💰 Золота заработано: <b style="color:#aaa">${Math.floor(G.stats.goldEarned)}</b></div>
+    <div style="margin-top:4px;color:#7a6a4a">🏆 Цель: накопить 500 💰 (сейчас: ${Math.floor(G.res.gold)})</div>
+  `;
+  list.appendChild(stats);
+}
+
+function renderLog() {
+  const el = document.getElementById('event-log');
+  el.innerHTML = G.log.slice(0,50).map(e=>
+    `<div class="log-entry ${e.type}"><span class="log-time">${e.time}</span> ${e.msg}</div>`
+  ).join('');
+}
+
+function showPriorityPanel(p) {
+  const panel = document.getElementById('priority-panel');
+  document.getElementById('priority-title').textContent = `Приоритеты: ${p.name}`;
+  const rows = document.getElementById('priority-rows');
+  rows.innerHTML = '';
+  WORK_TYPES.forEach((w,i) => {
+    const row = document.createElement('div');
+    row.className = 'priority-row';
+    const sel = document.createElement('select');
+    sel.className = 'priority-select';
+    [['❌ Выкл',0],['1 (высший)',1],['2',2],['3',3],['4 (низкий)',4]].forEach(([lbl,val]) => {
+      const opt = document.createElement('option');
+      opt.value = val; opt.textContent = lbl;
+      if (p.priorities[i]===val) opt.selected=true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', () => { p.priorities[i] = parseInt(sel.value); });
+    row.innerHTML = `<div class="priority-label">${WORK_ICONS[i]} ${w}</div>`;
+    row.appendChild(sel);
+    rows.appendChild(row);
+  });
+  panel.style.display = 'block';
+}
+
+// ==================== INPUT ====================
+let isDragging = false, dragStart = null, dragCamStart = null;
+
+// Convert mouse event -> world tile coords (accounts for canvas offset & zoom)
+function eventToTile(e) {
+  const r = canvas.getBoundingClientRect();
+  const z = G.camera.zoom;
+  const sx = e.clientX - r.left, sy = e.clientY - r.top;
+  const mx = sx/z + G.camera.x;
+  const my = sy/z + G.camera.y;
+  return { tx: Math.floor(mx/TILE), ty: Math.floor(my/TILE), wx: mx, wy: my, sx, sy };
+}
+
+canvas.addEventListener('mousedown', (e) => {
+  if (e.button === 0) {
+    isDragging = false;
+    dragStart = {x:e.clientX, y:e.clientY};
+    dragCamStart = {...G.camera};
+  }
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (dragStart) {
+    const dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
+    if (Math.hypot(dx,dy) > 5) {
+      isDragging = true;
+      G.camera.x = dragCamStart.x - dx/G.camera.zoom;
+      G.camera.y = dragCamStart.y - dy/G.camera.zoom;
+    }
+  }
+
+  const {tx, ty, sx, sy} = eventToTile(e);
+  hoverTile = {tx, ty};
+  showTooltip(e, tx, ty);
+});
+
+canvas.addEventListener('mouseup', (e) => {
+  if (isDragging) { isDragging = false; dragStart = null; return; }
+  dragStart = null;
+
+  const {tx, ty, sx, sy} = eventToTile(e);
+
+  if (e.button === 0) handleLeftClick(tx, ty, sx, sy);
+  if (e.button === 2) handleRightClick(tx, ty);
+});
+
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 1/1.12);
+}, {passive:false});
+
+// Zoom keeping the world point under (clientX,clientY) fixed
+function zoomAt(clientX, clientY, factor) {
+  const r = canvas.getBoundingClientRect();
+  const sx = clientX - r.left, sy = clientY - r.top;
+  const cam = G.camera;
+  const worldX = sx/cam.zoom + cam.x;
+  const worldY = sy/cam.zoom + cam.y;
+  cam.zoom = clamp(cam.zoom * factor, 0.4, 2.8);
+  cam.x = worldX - sx/cam.zoom;
+  cam.y = worldY - sy/cam.zoom;
+}
+
+function handleLeftClick(tx, ty, cx, cy) {
+  if (!G || G.gameOver) return;
+  if (tx<0||ty<0||tx>=MAP_W||ty>=MAP_H) return;
+
+  if (G.demolishMode) {
+    const b = G.buildings.find(b=>b.tx===tx&&b.ty===ty);
+    if (b) {
+      G.buildings = G.buildings.filter(x=>x!==b);
+      const def = BUILDS[b.type];
+      // Refund half
+      if (def.cost.wood) G.res.wood += Math.floor(def.cost.wood/2);
+      addLog(`🔥 Снесено: ${def.name}`, 'warn');
+      Diag.action(`Снёс ${def.name} @${tx},${ty}`);
+    }
+    return;
+  }
+
+  if (G.buildMode) {
+    placeBuild(tx, ty);
+    return;
+  }
+
+  // Click on tile obj
+  const tile = G.map[ty][tx];
+  if (tile.obj) {
+    tile.obj.marked = !tile.obj.marked;
+    return;
+  }
+
+  // Click on animal
+  const animal = G.animals.find(a=>a.alive && Math.abs(Math.floor(a.x/TILE)-tx)<2 && Math.abs(Math.floor(a.y/TILE)-ty)<2);
+  if (animal) { animal.marked = !animal.marked; return; }
+
+  // Click on pawn
+  const pawn = G.pawns.find(p=>p.alive && Math.abs(Math.floor(p.x/TILE)-tx)<2 && Math.abs(Math.floor(p.y/TILE)-ty)<2);
+  if (pawn) {
+    G.selectedPawnId = G.selectedPawnId===pawn.id ? null : pawn.id;
+    if (G.selectedPawnId) showPriorityPanel(pawn);
+    else document.getElementById('priority-panel').style.display='none';
+    return;
+  }
+
+  // Click on building
+  const bld = G.buildings.find(b=>tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
+  if (bld) {
+    showBuildingInfo(bld, cx, cy);
+    return;
+  }
+
+  // Move selected pawn
+  if (G.selectedPawnId) {
+    const p = G.pawns.find(p=>p.id===G.selectedPawnId);
+    if (p) { setTarget(p, tx, ty); p.state='idle'; }
+  }
+}
+
+function handleRightClick(tx, ty) {
+  if (G.buildMode || G.demolishMode) {
+    G.buildMode = null;
+    G.demolishMode = false;
+    updateBuildButtons();
+    return;
+  }
+  // Attack enemy — assign as persistent manual target
+  const e = G.enemies.find(e=>e.alive && Math.abs(Math.floor(e.x/TILE)-tx)<2 && Math.abs(Math.floor(e.y/TILE)-ty)<2);
+  if (e && G.selectedPawnId) {
+    const p = G.pawns.find(p=>p.id===G.selectedPawnId);
+    if (p) { p.manualTarget = e.id; p.state='fighting'; addLog(`🔫 ${p.name} атакует бандита!`, ''); }
+  }
+}
+
+function placeBuild(tx, ty) {
+  const def = BUILDS[G.buildMode];
+  if (!def) return;
+  // Check cost
+  for (const [res, amt] of Object.entries(def.cost)) {
+    if (G.res[res] < amt) { addLog(`❌ Недостаточно ресурсов! Нужно ${amt} ${res}`, 'warn'); return; }
+  }
+  // Check overlap
+  const size = def.size;
+  for (let dy=0; dy<size; dy++) {
+    for (let dx=0; dx<size; dx++) {
+      const x2=tx+dx, y2=ty+dy;
+      if (x2<0||y2<0||x2>=MAP_W||y2>=MAP_H) return;
+      if (G.map[y2][x2].type===TERRAIN.WATER) { addLog('❌ Нельзя строить на воде!','warn'); return; }
+      if (G.buildings.find(b=>b.tx===x2&&b.ty===y2)) { addLog('❌ Место занято!','warn'); return; }
+    }
+  }
+  // Deduct cost
+  for (const [res, amt] of Object.entries(def.cost)) G.res[res] -= amt;
+  G.buildings.push({
+    type: G.buildMode, tx, ty,
+    blueprint: true, done: false, progress: 0,
+    hp: 0, maxHp: 0, selected: false,
+  });
+  addLog(`📐 Заложена ${def.name}`, '');
+  Diag.action(`Заложил ${def.name} @${tx},${ty}`);
+}
+
+function showBuildingInfo(b, cx, cy) {
+  const overlay = document.getElementById('info-overlay');
+  const def = BUILDS[b.type];
+  overlay.style.display = 'block';
+  overlay.style.left = Math.min(cx, canvas.width-280) + 'px';
+  overlay.style.top = (cy + 10) + 'px';
+  overlay.innerHTML = `
+    <div class="inf-title">${def.icon} ${def.name}</div>
+    ${b.blueprint ? `<div class="inf-line">🔨 Строится: ${Math.round((b.progress||0)*100)}%</div>` : ''}
+    ${b.done ? `<div class="inf-line">HP: <b>${Math.floor(b.hp||0)}/${b.maxHp||0}</b></div>` : ''}
+    ${def.prod ? `<div class="inf-line">Производит: <b>${def.prod}</b></div>` : ''}
+  `;
+  setTimeout(() => { overlay.style.display='none'; }, 3000);
+}
+
+function showTooltip(e, tx, ty) {
+  const tooltip = document.getElementById('tooltip');
+  if (tx<0||ty<0||tx>=MAP_W||ty>=MAP_H) { tooltip.style.display='none'; return; }
+
+  const tile = G.map[ty][tx];
+  let text = TNAMES[tile.type];
+  if (tile.obj) text += ` • ${tile.obj.type==='tree'?'Дерево':tile.obj.type==='rock'?'Камень':'?'} (HP ${tile.obj.hp}/${tile.obj.maxHp})`;
+
+  const bld = G.buildings.find(b=>tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
+  if (bld) text = `${BUILDS[bld.type].name} ${bld.blueprint?'(стройка)':''}`;
+
+  tooltip.textContent = text;
+  tooltip.style.display = 'block';
+  tooltip.style.left = (e.clientX+12)+'px';
+  tooltip.style.top = (e.clientY-4)+'px';
+}
+
+canvas.addEventListener('mouseleave', () => {
+  document.getElementById('tooltip').style.display='none';
+  document.getElementById('info-overlay').style.display='none';
+  hoverTile = null;
+});
+
+// ==================== BUTTONS ====================
+function setupButtons() {
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab==='research') renderResearch();
+      if (btn.dataset.tab==='schedule') renderSchedule();
+    });
+  });
+
+  // Build buttons
+  const buildMap = {
+    'build-farm-btn':'farm','build-mine-btn':'mine','build-fence-btn':'fence',
+    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-lab-btn':'lab',
+    'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
+    'build-camp-btn':'camp','build-well-btn':'well',
+  };
+  for (const [id, type] of Object.entries(buildMap)) {
+    document.getElementById(id).addEventListener('click', () => {
+      G.buildMode = G.buildMode===type ? null : type;
+      G.demolishMode = false;
+      updateBuildButtons();
+    });
+  }
+
+  document.getElementById('demolish-btn').addEventListener('click', () => {
+    G.demolishMode = !G.demolishMode;
+    G.buildMode = null;
+    updateBuildButtons();
+  });
+
+  document.getElementById('cancel-btn').addEventListener('click', () => {
+    G.buildMode = null; G.demolishMode = false; updateBuildButtons();
+    G.selectedPawnId = null;
+    document.getElementById('priority-panel').style.display='none';
+  });
+
+  document.getElementById('diag-btn').addEventListener('click', () => { Diag.action('Скачал лог диагностики'); Diag.download(); });
+
+  document.getElementById('save-btn').addEventListener('click', () => { Diag.action('Сохранение'); saveGame(); });
+  document.getElementById('load-btn').addEventListener('click', () => { Diag.action('Загрузка'); loadGame(); });
+
+  document.getElementById('speed-btn').addEventListener('click', () => {
+    G.speed = G.speed===0?1:G.speed===1?2:G.speed===2?4:0;
+    document.getElementById('speed-btn').textContent = G.speed===0 ? '⏸ Пауза' : `▶ x${G.speed}`;
+  });
+
+  // Fullscreen
+  document.getElementById('fullscreen-btn').addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      (document.documentElement.requestFullscreen||noopFS).call(document.documentElement);
+    } else {
+      (document.exitFullscreen||noopFS).call(document);
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    document.getElementById('fullscreen-btn').textContent = document.fullscreenElement ? '⛶ Выйти' : '⛶ Экран';
+    setTimeout(resizeCanvas, 100);
+  });
+
+  // Zoom buttons (zoom toward screen center)
+  const cz = (f) => {
+    const r = canvas.getBoundingClientRect();
+    zoomAt(r.left + canvas.width/2, r.top + canvas.height/2, f);
+  };
+  document.getElementById('zoom-in').addEventListener('click', () => cz(1.25));
+  document.getElementById('zoom-out').addEventListener('click', () => cz(1/1.25));
+  document.getElementById('zoom-reset').addEventListener('click', () => { G.camera.zoom = 1.0; });
+
+  document.getElementById('autobattle-btn').addEventListener('click', () => {
+    G.autoBattle = !G.autoBattle;
+    Diag.action('Авт.Бой ' + (G.autoBattle?'ВКЛ':'ВЫКЛ'));
+    const btn = document.getElementById('autobattle-btn');
+    btn.textContent = G.autoBattle ? '⚔️ Авт.Бой ВКЛ' : '⚔️ Авт.Бой';
+    btn.classList.toggle('active', G.autoBattle);
+  });
+
+  document.getElementById('priority-close').addEventListener('click', () => {
+    document.getElementById('priority-panel').style.display='none';
+  });
+
+  document.getElementById('end-restart').addEventListener('click', () => {
+    document.getElementById('end-overlay').style.display='none';
+    newGame();
+  });
+
+  // ---- Main menu ----
+  setupMainMenu();
+
+  // Help popup: show once per browser
+  const helpClose = document.getElementById('help-close');
+  helpClose.addEventListener('click', () => {
+    document.getElementById('help-popup').style.display='none';
+    localStorage.setItem('frontier_helpseen','1');
+  });
+  if (localStorage.getItem('frontier_helpseen')) {
+    document.getElementById('help-popup').style.display='none';
+  }
+}
+
+// ==================== MAIN MENU ====================
+function setupMainMenu() {
+  const menu = document.getElementById('main-menu');
+  const panel = document.getElementById('menu-panel-content');
+  const resumeBtn = document.getElementById('mm-resume');
+
+  const openMenu = () => { menu.style.display='flex'; G._pausedByMenu = G.speed; G.speed = 0; };
+  const closeMenu = () => { menu.style.display='none'; if (G._pausedByMenu) { G.speed = G._pausedByMenu; document.getElementById('speed-btn').textContent = `▶ x${G.speed}`; } };
+
+  document.getElementById('menu-btn').addEventListener('click', () => {
+    resumeBtn.style.display='block';
+    openMenu();
+    showRoadmapPanel(panel);
+  });
+
+  document.getElementById('mm-new').addEventListener('click', () => {
+    newGame(); menu.style.display='none';
+    G.speed = 1; document.getElementById('speed-btn').textContent = '▶ x1';
+    document.getElementById('end-overlay').style.display='none';
+  });
+  document.getElementById('mm-continue').addEventListener('click', () => {
+    loadGame(); menu.style.display='none';
+    G.speed = 1; document.getElementById('speed-btn').textContent = '▶ x1';
+  });
+  document.getElementById('mm-diag').addEventListener('click', () => { Diag.action('Скачал лог из меню'); Diag.download(); });
+  document.getElementById('mm-howto').addEventListener('click', () => showHowtoPanel(panel));
+  document.getElementById('mm-roadmap').addEventListener('click', () => showRoadmapPanel(panel));
+  resumeBtn.addEventListener('click', closeMenu);
+
+  // Show roadmap by default on first load
+  showRoadmapPanel(panel);
+}
+
+function showRoadmapPanel(panel) {
+  const rows = [
+    ['done','v1.0','Фундамент','Карта, ИИ пешек, расписание, приоритеты, постройки, наука, животные, погода, сезоны, события, сохранение'],
+    ['done','v1.1','Графика','Рисованные ковбои с анимацией, нарисованные здания, тени, цикл день/ночь с освещением'],
+    ['done','v1.2','Играбельность','Цель с прогресс-баром, туториал, пауза и скорости, спокойный первый день'],
+    ['done','v1.3','Меню','Починен автобой, правый клик = постоянная цель атаки, главное меню с роадмапом'],
+    ['done','v1.4','Бой','Огнестрел с пулями и точностью, укрытия, типы врагов (стрелок/головорез/главарь), самозащита'],
+    ['done','v1.5','Камера и удобство','Миникарта, зум колесом и кнопками, полный экран, обычный курсор'],
+    ['now','v1.6','Жизнь колонии','Характеры (10 трейтов), отношения и ссоры, болезни с лечением'],
+    ['soon','v1.7','Полировка','Звуки, баланс волн бандитов, тач-управление, достижения'],
+  ];
+  panel.innerHTML = `
+    <h2>🗺️ Роадмап разработки</h2>
+    <p>Игра делается по плану. Каждая версия — отдельный файл в папке <b>versions/</b>, играй в любую.</p>
+    ${rows.map(([st,ver,name,desc])=>{
+      const tag = st==='done'?'<span class="rm-tag tag-done">ГОТОВО</span>'
+                : st==='now'?'<span class="rm-tag tag-now">СЕЙЧАС</span>'
+                : '<span class="rm-tag tag-soon">СКОРО</span>';
+      const cls = st==='done'?'rm-done':st==='now'?'rm-now':'rm-soon';
+      return `<div class="rm-row">${tag}<b class="${cls}">${ver} — ${name}</b><div style="color:#888;font-size:11px;margin-top:2px">${desc}</div></div>`;
+    }).join('')}
+    <h3>Последнее обновление (v1.6.1 — Диагностика и фиксы)</h3>
+    <ul>
+      <li>🐞 <b>Система диагностики</b> — кнопка 🐞 вверху: пишет твои действия и ловит аномалии (стат за пределами, никто не строит, NaN). Можно скачать лог в JSON</li>
+      <li>🔧 Фикс: энергия больше не уходит за 100 (была дыра при сне)</li>
+      <li>🔧 Фикс: пешки распределяются по работам (лимит на ферму/шахту/дерево), не толпятся на одной</li>
+      <li>🔧 Фикс: <b>заложенные постройки теперь строятся сразу</b> (стройка стала срочной, до 2 строителей на чертёж)</li>
+    </ul>
+    <p style="color:#888;font-size:11px;margin-top:6px">Версия 1.6.1 — характеры, отношения и болезни из v1.6 на месте.</p>
+  `;
+}
+
+function showHowtoPanel(panel) {
+  panel.innerHTML = `
+    <h2>❓ Как играть</h2>
+    <p>Ты командуешь отрядом <b>не напрямую</b>, как в RimWorld — задаёшь приоритеты, а ковбои сами всё делают.</p>
+    <h3>Основы</h3>
+    <ul>
+      <li>🌲 <b>Клик по дереву/камню</b> → пешка придёт и добудет ресурс.</li>
+      <li>🏗️ <b>Выбери постройку снизу</b> → кликни на карту. Зелёная зона = можно ставить.</li>
+      <li>👥 <b>Клик по ковбою</b> → панель приоритетов работ (1 = главное, ❌ = не делать).</li>
+      <li>📅 Вкладка «Расп.» → расписание сна / работы / отдыха по часам.</li>
+    </ul>
+    <h3>Бой</h3>
+    <ul>
+      <li>⚔️ Кнопка <b>«Авт.Бой»</b> вверху → ковбои сами стреляют по бандитам.</li>
+      <li>🔫 Или выбери ковбоя и <b>правый клик по врагу</b> — будет преследовать.</li>
+    </ul>
+    <h3>Камера</h3>
+    <ul>
+      <li>🖱️ Тащи мышь = двигать карту. Колесо = тоже двигать.</li>
+      <li>⌨️ WASD / стрелки = камера. F = ферма, M = шахта, Esc = сброс.</li>
+    </ul>
+    <h3>Цель</h3>
+    <p>Накопи <b>500 💰 золота</b>. Золото даёт кузня, добыча руды, убийство бандитов и события. Не дай ковбоям умереть с голоду!</p>
+  `;
+}
+
+function updateBuildButtons() {
+  const buildMap = {
+    'build-farm-btn':'farm','build-mine-btn':'mine','build-fence-btn':'fence',
+    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-lab-btn':'lab',
+    'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
+    'build-camp-btn':'camp','build-well-btn':'well',
+  };
+  for (const [id, type] of Object.entries(buildMap)) {
+    const btn = document.getElementById(id);
+    btn.classList.toggle('active', G.buildMode===type);
+  }
+  document.getElementById('demolish-btn').classList.toggle('active', G.demolishMode);
+  canvas.style.cursor = (G.buildMode || G.demolishMode) ? 'cell' : 'default';
+}
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  if (!G) return;
+  switch(e.key) {
+    case 'Escape': G.buildMode=null; G.demolishMode=false; G.selectedPawnId=null;
+      document.getElementById('priority-panel').style.display='none';
+      updateBuildButtons(); break;
+    case 'f': case 'F': G.buildMode='farm'; G.demolishMode=false; updateBuildButtons(); break;
+    case 'm': case 'M': G.buildMode='mine'; G.demolishMode=false; updateBuildButtons(); break;
+    case 'b': case 'B': G.buildMode='fence'; G.demolishMode=false; updateBuildButtons(); break;
+    case ' ': G.autoBattle=!G.autoBattle; break;
+    case 's': if (e.ctrlKey) { e.preventDefault(); saveGame(); } break;
+  }
+  // Camera WASD
+  const spd = 20;
+  if (e.key==='ArrowLeft'||e.key==='a') G.camera.x -= spd;
+  if (e.key==='ArrowRight'||e.key==='d') G.camera.x += spd;
+  if (e.key==='ArrowUp'||e.key==='w') G.camera.y -= spd;
+  if (e.key==='ArrowDown'||e.key==='s'&&!e.ctrlKey) G.camera.y += spd;
+});
+
+// ==================== SAVE/LOAD ====================
+function saveGame() {
+  try {
+    const save = {
+      res:G.res, day:G.day, hour:G.hour, minute:G.minute,
+      season:G.season, dayOfYear:G.dayOfYear, weather:G.weather,
+      pawns:G.pawns.map(p=>({...p, thoughts:[]})),
+      buildings:G.buildings,
+      researches:G.researches,
+      stats:G.stats,
+      res2:G.res,
+    };
+    localStorage.setItem('frontier_save', JSON.stringify(save));
+    addLog('💾 Игра сохранена', 'good');
+  } catch(ex) { addLog('❌ Ошибка сохранения', 'danger'); }
+}
+
+function loadGame() {
+  try {
+    const data = localStorage.getItem('frontier_save');
+    if (!data) { addLog('❌ Сохранение не найдено', 'warn'); return; }
+    const save = JSON.parse(data);
+    newGame();
+    Object.assign(G.res, save.res);
+    G.day=save.day; G.hour=save.hour; G.minute=save.minute;
+    G.season=save.season||0; G.dayOfYear=save.dayOfYear||0;
+    G.weather=save.weather||'clear';
+    G.pawns=save.pawns.map(p=>({
+      traits:[], opinions:{}, sick:null, workMul:1, socialTimer:200,
+      ...p, thoughts:[], path:[]
+    }));
+    G.buildings=save.buildings;
+    G.researches=save.researches;
+    G.stats=save.stats||G.stats;
+    addLog('📂 Игра загружена', 'good');
+  } catch(ex) { addLog('❌ Ошибка загрузки', 'danger'); }
+}
+
+// ==================== UTILS ====================
+function noopFS(){}
+function randInt(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function blendColor(hex1, hex2, t) {
+  const parse = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const [r1,g1,b1]=parse(hex1), [r2,g2,b2]=parse(hex2);
+  const r=Math.round(r1+(r2-r1)*t), g=Math.round(g1+(g2-g1)*t), b=Math.round(b1+(b2-b1)*t);
+  return `rgb(${r},${g},${b})`;
+}
+
+// ==================== MAIN LOOP ====================
+let lastTime = 0;
+function gameLoop(ts) {
+  requestAnimationFrame(gameLoop);
+  const dt = ts - lastTime;
+  if (dt < 16) return; // cap at 60fps
+  lastTime = ts;
+
+  if (!G || G.gameOver) { render(); return; }
+
+  G.tick++;
+
+  const steps = G.speed;
+  for (let s=0; s<steps; s++) {
+    updateTime();
+    updateWeather();
+    updatePawns();
+    updateAnimals();
+    updateEnemies();
+    updateProjectiles();
+
+    // Events (no raids in the first day — let the player settle)
+    G.eventTimer--;
+    if (G.eventTimer <= 0) {
+      triggerEvent(G.day < 2);
+      G.eventTimer = 500 + randInt(0, 700);
+    }
+  }
+
+  // Fade blood
+  G.bloodSplats.forEach(s => s.opacity -= 0.0005);
+  G.bloodSplats = G.bloodSplats.filter(s=>s.opacity>0);
+
+  render();
+
+  // UI update (less frequent)
+  if (G.tick % 6 === 0) updateUI();
+
+  // Diagnostics scan
+  if (G.tick % 120 === 0) Diag.check();
+}
+
+// ==================== DIAGNOSTICS / LOGGING ====================
+const Diag = {
+  actions: [],     // что делал игрок
+  anomalies: [],   // пойманные аномалии
+  seen: {},        // дедуп аномалий по ключу
+  _bpStuck: 0,
+  stamp() {
+    return `D${G.day} ${String(Math.floor(G.hour)).padStart(2,'0')}:${String(Math.floor(G.minute)).padStart(2,'0')} (t${G.tick})`;
+  },
+  action(msg) {
+    this.actions.push({ t: this.stamp(), tick: G.tick, msg });
+    if (this.actions.length > 3000) this.actions.shift();
+  },
+  anomaly(key, msg) {
+    const last = this.seen[key] ?? -1e9;
+    if (G.tick - last < 600) return;          // не спамить: раз в 600 тиков на ключ
+    this.seen[key] = G.tick;
+    const rec = { t: this.stamp(), tick: G.tick, key, msg };
+    this.anomalies.push(rec);
+    if (this.anomalies.length > 600) this.anomalies.shift();
+    try { console.warn('[ANOMALY]', rec.t, msg); } catch(e){}
+    if (typeof addLog === 'function') addLog('⚠️ ' + msg, 'danger');
+    updateAnomalyBadge();
+  },
+  check() {
+    if (!G || G.gameOver) return;
+    // 1) Шкалы пешек в пределах
+    for (const p of G.pawns) {
+      if (!p.alive) continue;
+      const checks = [['энергия',p.energy,p.maxEnergy],['еда',p.food,p.maxFood],['настр',p.mood,p.maxMood],['HP',p.hp,p.maxHp]];
+      for (const [n,v,mx] of checks) {
+        if (typeof v !== 'number' || isNaN(v)) this.anomaly('nan_'+n, `${p.name}: ${n}=NaN`);
+        else if (v > mx + 1) this.anomaly('over_'+n, `${p.name}: ${n} ${Math.floor(v)} > макс ${mx}`);
+        else if (v < -1) this.anomaly('under_'+n, `${p.name}: ${n} ${Math.floor(v)} < 0`);
+      }
+    }
+    // 2) Ресурсы вменяемы
+    for (const k in G.res) {
+      const v = G.res[k];
+      if (isNaN(v)) this.anomaly('res_nan_'+k, `Ресурс ${k}=NaN`);
+      else if (v < -1) this.anomaly('res_neg_'+k, `Ресурс ${k} отрицательный (${Math.floor(v)})`);
+    }
+    // 3) Скучивание: слишком много пешек на одном рабочем месте
+    const counts = {};
+    for (const p of G.pawns) if (p.alive && p._wt) counts[p._wt] = (counts[p._wt]||0)+1;
+    for (const k in counts) if (counts[k] > 3) this.anomaly('clump_'+k, `${counts[k]} пешек толпятся на одном месте (${k})`);
+    // 4) Чертежи стоят без движения = никто не строит
+    const bps = G.buildings.filter(b=>b.blueprint);
+    if (bps.length) {
+      const anyProg = bps.some(b => (b.progress||0) > (b._lastProg||0) + 0.0001);
+      bps.forEach(b => b._lastProg = b.progress||0);
+      this._bpStuck = anyProg ? 0 : this._bpStuck + 1;
+      if (this._bpStuck > 25) this.anomaly('bp_stuck', `${bps.length} чертёж(ей) не строятся — нет свободных строителей?`);
+    } else this._bpStuck = 0;
+  },
+  download() {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      version: '1.6.1', day: G.day, tick: G.tick,
+      stats: G.stats, res: G.res,
+      pawns: G.pawns.map(p=>({name:p.name, alive:p.alive, hp:p.hp, energy:p.energy, food:p.food, mood:p.mood, traits:p.traits, sick:p.sick})),
+      anomalies: this.anomalies,
+      actions: this.actions.slice(-1500),
+    };
+    try {
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `frontier-log-day${G.day}.json`; a.click();
+      URL.revokeObjectURL(url);
+    } catch(e) { try{ console.log(JSON.stringify(data)); }catch(_){} }
+  },
+};
+try { window.Diag = Diag; } catch(e){}
+
+function updateAnomalyBadge() {
+  const b = document.getElementById('diag-btn');
+  if (!b) return;
+  const n = Diag.anomalies.length;
+  b.textContent = n ? `🐞 ${n}` : '🐞';
+  b.style.color = n ? '#e05050' : '';
+  b.style.borderColor = n ? '#5a2222' : '';
+}
+
+// ==================== START ====================
+setupButtons();
+newGame();
+// Pause under the opening menu until the player picks an option
+G.speed = 0;
+document.getElementById('speed-btn').textContent = '⏸ Пауза';
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
