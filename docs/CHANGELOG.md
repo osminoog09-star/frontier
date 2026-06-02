@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.60 - Room Details Panel
+
+- PC-first room UX slice: the stats panel now shows a compact list of detected rooms with type, comfort, wall quality, size, and furniture counts.
+- Added `roomDetailRows()` so room-panel data is testable without coupling the scenario to DOM rendering.
+- Harness: Scenario AW validates readable room detail rows for bedroom and dining/decor rooms. A-AW (49) green.
+
 ### v1.59 - Room Wall Quality
 
 - PC-first room slice: enclosed rooms now show wall/shape quality as `тесная защита`, `крепкие стены`, or `широкая комната`.

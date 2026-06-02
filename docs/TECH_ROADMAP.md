@@ -105,6 +105,12 @@
 - Stats summary includes wall quality alongside room type and furniture quality.
 - Scenario AV validates compact vs spacious room labels and summary text.
 
+## v1.60 room details panel
+
+- Added `roomDetailRows()` as a small data layer for the room list in the PC stats panel.
+- The stats panel now lists each detected room with type, comfort, wall quality, size, and furniture counts.
+- Scenario AW validates readable room rows for a bedroom and a dining/decor room.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -118,7 +124,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-AV покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат и качество стен.
+- Автотесты: `_harness.js`, сценарии A-AW покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат, качество стен и room-панель.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза

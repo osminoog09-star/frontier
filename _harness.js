@@ -994,6 +994,23 @@ const test = `
   console.log('SCENARIO AV (room wall quality):');
   console.log('   compact:', compactWall.label, compactWall.ratio.toFixed(2), '| wide:', wideWall.label, wideWall.ratio.toFixed(2), '|', avOk?'OK':'FAIL');
   if (!avOk) throw new Error('Scenario AV failed');
+
+  // Scenario AW: room details panel rows expose readable room info for PC sidebar
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['bed','table','decor','fence','gate'].includes(b.type));
+  makeRoomBox(10, 10, 4, [{ type:'bed', dx:2, dy:2 }]);
+  makeRoomBox(24, 10, 8, [{ type:'table', dx:4, dy:4 }, { type:'decor', dx:5, dy:4 }]);
+  const rows = roomDetailRows();
+  const awBedroom = rows.find(r => r.title.includes('спальня'));
+  const awDining = rows.find(r => r.title.includes('столовая'));
+  const awOk = rows.length === 2 && awBedroom && awDining &&
+    awBedroom.comfort.includes('укрытый угол') && awBedroom.walls.includes('тесная защита') &&
+    awBedroom.size.includes('9') && awBedroom.furniture.includes('кровати: 1') &&
+    awDining.comfort.includes('жилая комната') && awDining.walls.includes('широкая комната') &&
+    awDining.size.includes('49') && awDining.furniture.includes('столы: 1') && awDining.furniture.includes('декор: 1');
+  console.log('SCENARIO AW (room details panel rows):');
+  console.log('   rows:', rows.length, '| bedroom:', awBedroom ? awBedroom.furniture : 'missing', '| dining:', awDining ? awDining.furniture : 'missing', '|', awOk?'OK':'FAIL');
+  if (!awOk) throw new Error('Scenario AW failed');
 })();
 `;
 try {

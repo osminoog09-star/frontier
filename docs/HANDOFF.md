@@ -6,11 +6,17 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.59 - Room Wall Quality`.
+- Последний локальный срез: `v1.60 - Room Details Panel`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.59`. Наука: tools/medicine/cooking/walls/hunting/trading/marksman.
-- Harness: Scenarios A-AV (48) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
+- Текущий `GAME_VERSION`: `1.60`. Наука: tools/medicine/cooking/walls/hunting/trading/marksman.
+- Harness: Scenarios A-AW (49) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
+
+## Что изменилось в v1.60
+
+- PC stats/наука теперь показывает компактную room-панель: каждая найденная комната имеет тип, уют, качество стен, размер и мебель.
+- `roomDetailRows()` собирает данные панели отдельно от DOM, чтобы следующий агент мог безопасно расширять room UI.
+- Scenario AW проверяет две комнаты и readable rows; полный harness A-AW (49) зелёный.
 
 ## Что изменилось в v1.59
 
@@ -118,7 +124,7 @@
 Брать маленький проверяемый срез из Недели 2:
 
 1. Развитие лошадей/ранчо: загоны, скот, компактная animal-панель.
-2. Или мебель и комнаты: качество стен, более явная room-панель.
+2. Или PC-полировка: автотайлинг биомов/берегов, более аккуратные панели/иконки.
 3. Каждый gameplay-срез закрыть новым scenario в `_harness.js`.
 
 ## Координация Codex + Cloud

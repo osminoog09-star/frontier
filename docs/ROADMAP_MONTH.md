@@ -215,6 +215,15 @@
 ### Next Step
 - Continue PC roadmap: animal pens/livestock, room panel, autotiling, or desktop UI polish.
 
+## Update 2026-06-02 - v1.60 Room Details Panel
+
+- Done: PC stats now has a compact room panel with type, comfort, wall quality, size, and furniture counts for every detected room.
+- Done: `roomDetailRows()` keeps the panel data testable and reusable.
+- Done: `_harness.js` includes Scenario AW; full harness A-AW is green.
+
+### Next Step
+- Continue PC roadmap: animal pens/livestock, animal panel, autotiling, or desktop UI polish.
+
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.
 - Done: fences are real blockers; gates are passable; A* routes around blockers and through gates.

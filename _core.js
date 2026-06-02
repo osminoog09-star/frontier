@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.59';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.60';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -969,6 +969,22 @@ function roomTypeEntries() {
       wall: roomWallQuality(entry.room),
       tiles: entry.room.tiles,
       counts: entry.counts
+    };
+  });
+}
+function roomDetailRows() {
+  return roomTypeEntries().map((r, idx) => {
+    const furniture = [];
+    if (r.counts.bed) furniture.push('кровати: ' + r.counts.bed);
+    if (r.counts.table) furniture.push('столы: ' + r.counts.table);
+    if (r.counts.decor) furniture.push('декор: ' + r.counts.decor);
+    return {
+      id: idx + 1,
+      title: r.type,
+      comfort: `${r.label} (${r.score}/3)`,
+      walls: `${r.wall.label} · ${r.wall.ratio.toFixed(2)}`,
+      size: `${r.tiles} клеток`,
+      furniture: furniture.length ? furniture.join(', ') : 'пусто'
     };
   });
 }
@@ -3186,6 +3202,20 @@ function renderResearch() {
 
   // Stats
   const goal = scenarioGoalStatus();
+  const roomRows = roomDetailRows();
+  const roomPanelHtml = roomRows.length ? `
+    <div style="margin-top:6px;display:grid;gap:5px">
+      ${roomRows.map(r => `
+        <div style="padding:5px;border:1px solid #2d2a22;background:#151412;border-radius:3px">
+          <div style="color:#e8c97e;font-weight:bold">#${r.id} ${r.title}</div>
+          <div>уют: <b style="color:#aaa">${r.comfort}</b></div>
+          <div>стены: <b style="color:#aaa">${r.walls}</b></div>
+          <div>размер: <b style="color:#aaa">${r.size}</b></div>
+          <div>мебель: <b style="color:#aaa">${r.furniture}</b></div>
+        </div>
+      `).join('')}
+    </div>
+  ` : `<div style="margin-top:6px;color:#777">Комнат пока нет: замкни зону забором/воротами и поставь мебель внутри.</div>`;
   const stats = document.createElement('div');
   stats.style.cssText = 'margin-top:10px;padding:6px;background:#1a1a1a;border-radius:3px;font-size:10px;color:#666';
   stats.innerHTML = `
@@ -3199,6 +3229,7 @@ function renderResearch() {
     <div>🐴 Лошади: <b style="color:#aaa">${ensureHerd().tamed} приручено / ${ensureHerd().wild} диких</b></div>
     <div>🏠 Комфорт усадьбы: <b style="color:#aaa">${homesteadComfortLabel()} (${homesteadComfortScore()}/3)</b></div>
     <div>🧱 Комнаты: <b style="color:#aaa">${roomComfortLabel()} (${roomComfortScore()}/3)</b> · ${roomTypeSummary()}</div>
+    ${roomPanelHtml}
     <div>🎯 В очереди работ: <b style="color:#aaa">${markedSummaryText()}</b></div>
     <div style="margin-top:4px;color:#7a6a4a">🏆 ${SCENARIOS[G.scenario]?.name || SCENARIOS.settlers.name}: ${goal.sidebar}</div>
   `;
