@@ -572,6 +572,22 @@ const test = `
   const bledOut = dp3.dead && !dp3.alive;
   console.log('SCENARIO AA (combat downed/rescue/bleed-out):');
   console.log('   downed not dead:', downedOk?'OK':'FAIL', '| rescued:', rescuedOk?'OK':'FAIL', '| finish-off:', (wasDowned&&finishedOff)?'OK':'FAIL', '| bleed-out:', bledOut?'OK':'FAIL');
+
+  // Scenario AB: stable gives horses → movement speed bonus (caps at +45%)
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => b.type !== 'stable');
+  const m0 = mountSpeedMul();
+  G.buildings.push({ type:'stable', tx:5, ty:5, done:true, blueprint:false, hp:200, maxHp:200 });
+  const m1 = mountSpeedMul();
+  for (let i = 0; i < 3; i++) G.buildings.push({ type:'stable', tx:8+i*3, ty:5, done:true, blueprint:false, hp:200, maxHp:200 });
+  const mCap = mountSpeedMul();
+  const bonusOk = m0 === 1 && Math.abs(m1 - 1.15) < 1e-9 && Math.abs(mCap - 1.45) < 1e-9;
+  let simOk = true;
+  try {
+    for (let i = 0; i < 400; i++) { G.tick++; updateTime(); updateWeather(); updatePawns(); updateAnimals(); updateEnemies(); updateProjectiles(); render(); }
+  } catch (e) { simOk = false; }
+  console.log('SCENARIO AB (stable mount speed):');
+  console.log('   bonus 0/1/cap:', bonusOk?'OK':'FAIL', '(' + m0 + '/' + m1.toFixed(2) + '/' + mCap.toFixed(2) + ') | sim stable:', simOk?'OK':'FAIL');
 })();
 `;
 try {

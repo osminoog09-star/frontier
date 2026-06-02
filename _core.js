@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.34';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.35';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -31,6 +31,7 @@ const BUILDS = {
   smithy: { name:'Кузня',    icon:'🔨', cost:{wood:20,ore:20},   size:2, prod:'gold',  rate:0.1 },
   camp:   { name:'Лагерь',   icon:'🏕️', cost:{wood:15},          size:2, prod:'rest',  rate:0.2 },
   well:   { name:'Колодец',  icon:'🪣', cost:{wood:10,ore:5},    size:1, prod:'water', rate:0.1 },
+  stable: { name:'Конюшня',  icon:'🐴', cost:{wood:25,ore:10},   size:2, prod:'horses',rate:0 },
 };
 
 const RECIPES = {
@@ -542,6 +543,13 @@ function spawnEnemy(count) {
   }
 }
 
+// Лошади из конюшен ускоряют передвижение колонии: каждая готовая конюшня +15%, максимум +45%.
+function mountSpeedMul() {
+  if (!G || !G.buildings) return 1;
+  const stables = G.buildings.filter(b => b.type === 'stable' && b.done && !b.blueprint).length;
+  return 1 + Math.min(stables, 3) * 0.15;
+}
+
 // ==================== AI ====================
 function updatePawns() {
   G._claims = {}; // reset per-tick job reservations (workplace key -> count)
@@ -607,8 +615,9 @@ function updatePawns() {
       else doWork(p);
     }
 
-    // Movement (faster when charging into combat)
-    const moveSpeed = p.state==='sleeping' ? 0.5 : inCombat ? 2.4 : 2.0;
+    // Movement (faster when charging into combat); конюшни дают лошадей → ускорение
+    const base = p.state==='sleeping' ? 0.5 : inCombat ? 2.4 : 2.0;
+    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul());
     moveTowardsTarget(p, moveSpeed);
 
     // Social interactions
@@ -2124,6 +2133,16 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.fillStyle='#b04040'; ctx.fillRect(cx, y-4, 5, 3);
       break;
     }
+    case 'stable': {
+      ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x+2, y+S*0.32, S-4, S*0.66);     // сарай
+      ctx.fillStyle = '#4a3018';                                               // крыша
+      ctx.beginPath(); ctx.moveTo(x, y+S*0.34); ctx.lineTo(cx, y+3); ctx.lineTo(x+S, y+S*0.34); ctx.fill();
+      ctx.fillStyle = '#2a1c10'; ctx.fillRect(cx-5, y+S*0.55, 10, S*0.43);      // ворота сарая
+      ctx.fillStyle = '#caa45a'; ctx.fillRect(cx-4, y+S*0.58, 3, S*0.36); ctx.fillRect(cx+1, y+S*0.58, 3, S*0.36);
+      ctx.font = `${S*0.32}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🐴', cx, y+S*0.2);
+      break;
+    }
     case 'saloon': {
       ctx.fillStyle = '#7a5530'; ctx.fillRect(x, y+S*0.35, S, S*0.65); // body
       ctx.fillStyle = '#5a3a1a'; // roof
@@ -3229,7 +3248,7 @@ function setupButtons() {
   // Build buttons
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-well-btn':'well',
   };
@@ -3410,7 +3429,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.13–1.20','Логистика и торговля: фильтры складов, диагностика, лимиты крафта, торговый пост, караваны.'],
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
-    ['now', 'v1.32–1.34','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение).'],
+    ['now', 'v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
@@ -3480,7 +3499,7 @@ function showHowtoPanel(panel) {
 function updateBuildButtons() {
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-well-btn':'well',
   };

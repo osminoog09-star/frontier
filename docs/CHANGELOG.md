@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.35 - Horses: Stable & Mount Speed
+
+- Added the **Stable (Конюшня 🐴)** building. Each completed stable gives the colony horses that speed up
+  pawn movement by +15% (caps at +45% with 3 stables).
+- New build button + drawn structure + `mountSpeedMul()` applied to non-sleeping movement.
+- Harness: Scenario AB validates the speed bonus values (1 / 1.15 / 1.45) and a 400-tick sim with stables.
+- First pass of Week 2 "horses/ranch"; ranch income & taming come later.
+
 ### v1.34 - Combat Depth: Downed State (Week 2 start)
 
 - Pawns no longer die instantly at 0 HP — they fall **unconscious (downed)** and bleed out over time.
