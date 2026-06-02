@@ -24,7 +24,7 @@
 
   #main { display: flex; height: calc(100dvh - 38px); min-width: 0; overflow: hidden; }
 
-  #canvas-wrap { flex: 1 1 auto; min-width: 0; position: relative; overflow: hidden; background:#101010; }
+  #canvas-wrap { flex: 1 1 auto; min-width: 0; position: relative; overflow: hidden; background:#101010; --bottom-ui-height: 48px; }
   canvas { display: block; cursor: default; width: 100%; height: 100%; }
 
   #sidebar {
@@ -118,6 +118,22 @@
     background: linear-gradient(transparent, rgba(0,0,0,0.8));
     padding: 4px 8px 4px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
   }
+  .build-group { position: relative; flex: 0 0 auto; }
+  .build-group summary {
+    list-style: none; user-select: none;
+    background: #1e1e1e; border: 1px solid #333; color: #d0c4aa;
+    padding: 4px 10px; cursor: pointer; font-size: 11px; font-family: inherit;
+    border-radius: 2px; transition: all 0.1s; white-space: nowrap;
+  }
+  .build-group summary::-webkit-details-marker { display: none; }
+  .build-group summary:hover, .build-group[open] summary { border-color: #e8c97e; background: #2a2515; color: #e8c97e; }
+  .build-group.active summary { border-color: #e8c97e; background: #2a2515; color: #e8c97e; }
+  .build-group-panel {
+    position: absolute; left: 0; bottom: calc(100% + 6px); min-width: 170px; z-index: 60;
+    display: grid; gap: 4px; padding: 6px; border: 1px solid #3a3320; border-radius: 5px;
+    background: rgba(18,16,12,0.96); box-shadow: 0 10px 26px rgba(0,0,0,0.55);
+  }
+  .build-group-panel .action-btn { width: 100%; text-align: left; }
   .action-btn {
     background: #1e1e1e; border: 1px solid #333; color: #aaa;
     padding: 4px 10px; cursor: pointer; font-size: 11px; font-family: inherit;
@@ -213,7 +229,7 @@
 
   /* Minimap */
   #minimap-wrap {
-    position: absolute; right: 8px; bottom: 44px; z-index: 20;
+    position: absolute; right: 8px; bottom: calc(var(--bottom-ui-height, 48px) + 10px); z-index: 20;
     border: 1px solid #4a4028; border-radius: 4px; overflow: hidden;
     background: #0d0b08; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
   }
@@ -221,7 +237,7 @@
 
   /* Zoom controls */
   #zoom-controls {
-    position: absolute; right: 8px; bottom: 188px; z-index: 20;
+    position: absolute; right: 8px; bottom: calc(var(--bottom-ui-height, 48px) + 154px); z-index: 20;
     display: flex; flex-direction: column; gap: 4px;
   }
   .zoom-btn {
@@ -334,15 +350,18 @@
     #sidebar { display: none !important; }
     #canvas-wrap { width: 100vw; height: calc(100dvh - 54px); min-width: 100vw; max-width: 100vw; }
     #bottombar {
-      max-height: 104px; overflow-y: auto; padding: 4px 6px calc(8px + env(safe-area-inset-bottom, 0px)); gap: 4px;
-      right: 0; bottom: 0; -webkit-overflow-scrolling: touch;
+      max-height: 58px; overflow: visible; padding: 4px 6px calc(8px + env(safe-area-inset-bottom, 0px)); gap: 4px;
+      right: 0; bottom: 0;
     }
     .action-btn { padding: 4px 7px; font-size: 10px; white-space: nowrap; }
+    .build-group summary { padding: 4px 7px; font-size: 10px; }
+    .build-group-panel { min-width: 150px; max-width: 180px; max-height: 240px; overflow-y: auto; }
+    .build-group:nth-of-type(n+5) .build-group-panel { left: auto; right: 0; }
     #objective-hud { top: 8px; left: 50%; transform: translateX(-50%); width: min(280px, calc(100vw - 20px)); min-width: 0; }
     #keyhints { display: none; }
     #minimap-wrap {
       width: 96px; height: 72px; right: 8px;
-      bottom: calc(124px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(var(--bottom-ui-height, 58px) + 10px + env(safe-area-inset-bottom, 0px));
     }
     #minimap { width: 96px; height: 72px; }
     #zoom-controls { display: none; }
@@ -388,7 +407,7 @@
         <button class="menu-btn-big" id="mm-diag">🐞 Скачать лог диагностики</button>
         <button class="menu-btn-big" id="mm-resume" style="display:none">✖ Закрыть меню</button>
       </div>
-      <p class="menu-ver">PRE-ALPHA • build 1.42 • план: docs/ROADMAP_MONTH.md</p>
+      <p class="menu-ver">PRE-ALPHA • build 1.43 • план: docs/ROADMAP_MONTH.md</p>
     </div>
     <div class="menu-right" id="menu-panel">
       <div id="menu-panel-content"></div>
@@ -427,25 +446,55 @@
     <canvas id="game-canvas"></canvas>
     <div id="bottombar">
       <button class="action-btn" id="cancel-btn">✖ Отмена [Esc]</button>
-      <button class="action-btn" id="build-farm-btn">🌾 Ферма</button>
-      <button class="action-btn" id="build-kitchen-btn">🍳 Кухня</button>
-      <button class="action-btn" id="build-mine-btn">⛏️ Шахта</button>
-      <button class="action-btn" id="build-stockpile-btn">▣ Склад</button>
-      <button class="action-btn" id="build-fence-btn">🪵 Забор</button>
-      <button class="action-btn" id="build-gate-btn">▫ Ворота</button>
-      <button class="action-btn" id="build-tower-btn">🗼 Вышка</button>
-      <button class="action-btn" id="build-saloon-btn">🍺 Салун</button>
-      <button class="action-btn" id="build-tradepost-btn">🧳 Торг.</button>
-      <button class="action-btn" id="build-stable-btn">🐴 Конюшня</button>
-      <button class="action-btn" id="build-ranch-btn">🤠 Ранчо</button>
-      <button class="action-btn" id="build-lab-btn">🔬 Лаб.</button>
-      <button class="action-btn" id="build-clinic-btn">💊 Клиника</button>
-      <button class="action-btn" id="build-smithy-btn">🔨 Кузня</button>
-      <button class="action-btn" id="build-camp-btn">🏕️ Лагерь</button>
-      <button class="action-btn" id="build-bed-btn">🛏️ Кровать</button>
-      <button class="action-btn" id="build-table-btn">🍽️ Стол</button>
-      <button class="action-btn" id="build-decor-btn">🪴 Декор</button>
-      <button class="action-btn" id="build-well-btn">🪣 Колодец</button>
+      <details class="build-group" data-group="food">
+        <summary>🌾 Еда</summary>
+        <div class="build-group-panel">
+          <button class="action-btn" id="build-farm-btn">🌾 Ферма</button>
+          <button class="action-btn" id="build-kitchen-btn">🍳 Кухня</button>
+          <button class="action-btn" id="build-well-btn">🪣 Колодец</button>
+        </div>
+      </details>
+      <details class="build-group" data-group="logistics">
+        <summary>📦 Логистика</summary>
+        <div class="build-group-panel">
+          <button class="action-btn" id="build-mine-btn">⛏️ Шахта</button>
+          <button class="action-btn" id="build-stockpile-btn">▣ Склад</button>
+          <button class="action-btn" id="build-smithy-btn">🔨 Кузня</button>
+        </div>
+      </details>
+      <details class="build-group" data-group="defense">
+        <summary>🛡️ Оборона</summary>
+        <div class="build-group-panel">
+          <button class="action-btn" id="build-fence-btn">🪵 Забор</button>
+          <button class="action-btn" id="build-gate-btn">▫ Ворота</button>
+          <button class="action-btn" id="build-tower-btn">🗼 Вышка</button>
+        </div>
+      </details>
+      <details class="build-group" data-group="town">
+        <summary>🏘️ Город</summary>
+        <div class="build-group-panel">
+          <button class="action-btn" id="build-saloon-btn">🍺 Салун</button>
+          <button class="action-btn" id="build-tradepost-btn">🧳 Торг.</button>
+          <button class="action-btn" id="build-lab-btn">🔬 Лаб.</button>
+          <button class="action-btn" id="build-clinic-btn">💊 Клиника</button>
+        </div>
+      </details>
+      <details class="build-group" data-group="ranch">
+        <summary>🐴 Ранчо</summary>
+        <div class="build-group-panel">
+          <button class="action-btn" id="build-stable-btn">🐴 Конюшня</button>
+          <button class="action-btn" id="build-ranch-btn">🤠 Ранчо</button>
+        </div>
+      </details>
+      <details class="build-group" data-group="home">
+        <summary>🏠 Дом</summary>
+        <div class="build-group-panel">
+          <button class="action-btn" id="build-camp-btn">🏕️ Лагерь</button>
+          <button class="action-btn" id="build-bed-btn">🛏️ Кровать</button>
+          <button class="action-btn" id="build-table-btn">🍽️ Стол</button>
+          <button class="action-btn" id="build-decor-btn">🪴 Декор</button>
+        </div>
+      </details>
       <button class="action-btn" id="demolish-btn" style="border-color:#5a2222;">🔥 Снести</button>
     </div>
     <div id="info-overlay"></div>

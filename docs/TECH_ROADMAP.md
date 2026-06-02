@@ -55,6 +55,15 @@
 - Scenario AH validates no-stable no-taming, stable taming, boosted ranch yield, and mount-speed boost.
 - Next ranch/animal work can add pens, livestock resources, or a compact animal panel.
 
+## v1.43 build bar groups + minimap clearance
+
+- Fixed feedback from `fix/Screenshot 2026-06-02 171333.png`: minimap overlapped the build area and bottom build buttons occupied too much space.
+- Bottom build actions are grouped into `details.build-group` folders while preserving the existing button ids.
+- Active build mode highlights the owning group; choosing a building closes the folder.
+- `updateBottomUiMetrics()` writes `--bottom-ui-height` from the measured bottom bar height so minimap/zoom controls stay clear.
+- Browser smoke covers desktop 1600x900 and mobile 390x844.
+- Future UI slices should keep checking `fix/` screenshots before selecting roadmap work.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:

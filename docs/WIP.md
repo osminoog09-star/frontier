@@ -39,6 +39,10 @@
 
 ## Последний завершённый срез
 
+- v1.43 - Build Bar Groups + Minimap Clearance.
+- По скрину из fix/: стройка сгруппирована в папки, миникарта отступает от реальной высоты bottom bar.
+- Harness A-AH green, desktop/mobile browser smoke green.
+
 - v1.42 - Horse Taming Slice.
 - Конюшни приручают диких лошадей; приручённые лошади ускоряют ковбоев и усиливают ранчо.
 - Harness A-AH green, local Chrome mobile smoke green.

@@ -161,6 +161,15 @@
 ### Next Step
 - Маленький срез Недели 2: комнаты/стены жилья, загоны/скот, audio-pass или визуальная читаемость.
 
+## Update 2026-06-02 - v1.43 Build UI Fix
+- Done: по скрину из `fix/` исправлено перекрытие миникарты и нижней панели строительства.
+- Done: строительство сгруппировано в папки (еда, логистика, оборона, город, ранчо, дом).
+- Done: миникарта использует реальную высоту bottom bar и держится выше панели на desktop/mobile.
+- Done: browser smoke 1600x900 и 390x844 зелёный, без горизонтального вылета и console errors.
+
+### Next Step
+- Продолжить маленький срез Недели 2: комнаты/стены жилья, загоны/скот, audio-pass или визуальная читаемость.
+
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.
 - Done: fences are real blockers; gates are passable; A* routes around blockers and through gates.

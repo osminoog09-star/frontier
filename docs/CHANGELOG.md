@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.43 - Build Bar Groups + Minimap Clearance
+
+- Reviewed the latest screenshot from `fix/`: minimap overlapped the build area and the build bar took too much space.
+- Grouped bottom build actions into folders: Food, Logistics, Defense, Town, Ranch, Home.
+- Build folders open upward, close after choosing a building, and highlight when their selected building is active.
+- Minimap/zoom controls now use the measured bottom bar height, so the minimap stays above build controls on desktop and mobile.
+- Browser smoke: desktop 1600x900 and mobile 390x844, no horizontal overflow, no console errors, minimap clear of the bottom bar.
+
 ### v1.42 - Horse Taming Slice
 
 - Added a visible herd state: wild horses, tamed horses, and taming progress.

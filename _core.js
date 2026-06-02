@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.42';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.43';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -1907,6 +1907,7 @@ function resizeCanvas() {
   const wrap = document.getElementById('canvas-wrap');
   canvas.width = wrap.clientWidth;
   canvas.height = wrap.clientHeight;
+  updateBottomUiMetrics();
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
@@ -3433,17 +3434,31 @@ function setupButtons() {
       G.buildMode = G.buildMode===type ? null : type;
       G.demolishMode = false;
       updateBuildButtons();
+      document.getElementById(id).closest('.build-group')?.removeAttribute('open');
     });
   }
+
+  document.querySelectorAll('.build-group').forEach(group => {
+    group.addEventListener('toggle', () => {
+      if (group.open) {
+        document.querySelectorAll('.build-group').forEach(other => {
+          if (other !== group) other.open = false;
+        });
+      }
+      updateBottomUiMetrics();
+    });
+  });
 
   document.getElementById('demolish-btn').addEventListener('click', () => {
     G.demolishMode = !G.demolishMode;
     G.buildMode = null;
+    document.querySelectorAll('.build-group').forEach(group => { group.open = false; });
     updateBuildButtons();
   });
 
   document.getElementById('cancel-btn').addEventListener('click', () => {
     G.buildMode = null; G.demolishMode = false; updateBuildButtons();
+    document.querySelectorAll('.build-group').forEach(group => { group.open = false; });
     G.selectedPawnId = null;
     document.getElementById('priority-panel').style.display='none';
   });
@@ -3684,7 +3699,22 @@ function updateBuildButtons() {
     btn.classList.toggle('active', G.buildMode===type);
   }
   document.getElementById('demolish-btn').classList.toggle('active', G.demolishMode);
+  document.querySelectorAll('.build-group').forEach(group => {
+    const active = !!group.querySelector('.action-btn.active');
+    group.classList.toggle('active', active);
+    if (active) group.open = true;
+  });
   canvas.style.cursor = (G.buildMode || G.demolishMode) ? 'cell' : 'default';
+  updateBottomUiMetrics();
+}
+
+function updateBottomUiMetrics() {
+  const wrap = document.getElementById('canvas-wrap');
+  const bar = document.getElementById('bottombar');
+  if (!wrap || !bar) return;
+  const value = Math.ceil(bar.getBoundingClientRect().height) + 'px';
+  if (wrap.style && typeof wrap.style.setProperty === 'function') wrap.style.setProperty('--bottom-ui-height', value);
+  else if (wrap.style) wrap.style['--bottom-ui-height'] = value;
 }
 
 // Keyboard

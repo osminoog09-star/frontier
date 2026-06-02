@@ -6,10 +6,18 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.42 - Horse Taming Slice`.
+- Последний локальный срез: `v1.43 - Build Bar Groups + Minimap Clearance`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.42`.
+- Текущий `GAME_VERSION`: `1.43`.
 - Harness: Scenarios A-AH должны быть зелёные; перед push обязательно `node _harness.js`.
+
+## Что изменилось в v1.43
+
+- По скрину из `fix/` исправлен UX нижней стройки: кнопки больше не лежат одной большой простынёй.
+- Нижняя панель строительства сгруппирована в папки: еда, логистика, оборона, город, ранчо, дом.
+- Папка открывается вверх, после выбора постройки закрывается, активная категория подсвечивается.
+- Миникарта и zoom-controls используют измеренную высоту bottom bar, поэтому не перекрывают строительство на desktop/mobile.
+- Browser smoke: desktop 1600x900 и mobile 390x844, без horizontal overflow, без console errors, миникарта выше bottom bar.
 
 ## Что изменилось в v1.42
 
@@ -104,3 +112,4 @@
 - `docs/CHANGELOG.md` - история срезов.
 - `docs/WIP.md` - замок задач.
 - `AGENTS.md` - правила агентов.
+- `fix/` - входящие скриншоты от пользователя; периодически проверять и разбирать как UX/bug feedback.
