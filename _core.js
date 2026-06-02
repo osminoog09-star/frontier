@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.40';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.41';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -35,6 +35,7 @@ const BUILDS = {
   decor:  { name:'Декор',    icon:'🪴', cost:{wood:8,gold:2},     size:1, prod:'beauty', rate:0 },
   well:   { name:'Колодец',  icon:'🪣', cost:{wood:10,ore:5},    size:1, prod:'water', rate:0.1 },
   stable: { name:'Конюшня',  icon:'🐴', cost:{wood:25,ore:10},   size:2, prod:'horses',rate:0 },
+  ranch:  { name:'Ранчо',    icon:'🤠', cost:{wood:35,ore:8},    size:2, prod:'ranch', rate:0 },
 };
 
 const RECIPES = {
@@ -551,6 +552,15 @@ function mountSpeedMul() {
   if (!G || !G.buildings) return 1;
   const stables = G.buildings.filter(b => b.type === 'stable' && b.done && !b.blueprint).length;
   return 1 + Math.min(stables, 3) * 0.15;
+}
+function ranchDailyYield() {
+  if (!G || !G.buildings) return { food:0, gold:0 };
+  const ranches = G.buildings.filter(b=>b.type==='ranch' && b.done && !b.blueprint).length;
+  const stables = G.buildings.filter(b=>b.type==='stable' && b.done && !b.blueprint).length;
+  if (!ranches || !stables) return { food:0, gold:0 };
+  const food = ranches * 8;
+  const gold = ranches * Math.min(stables, 3) * 2;
+  return { food, gold };
 }
 
 // ==================== AI ====================
@@ -1721,6 +1731,14 @@ function onNewDay() {
   const labs = G.buildings.filter(b=>b.type==='lab'&&b.done).length;
   G.res.sci += labs * 5;
 
+  const ranchYield = ranchDailyYield();
+  if (ranchYield.food || ranchYield.gold) {
+    G.res.food += ranchYield.food;
+    G.res.gold += ranchYield.gold;
+    G.stats.goldEarned += ranchYield.gold;
+    addLog(`🤠 Ранчо дало ${ranchYield.food} еды и ${ranchYield.gold} золота`, 'good');
+  }
+
   // Research progress
   if (G.activeResearch) {
     const r = G.researches.find(r=>r.id===G.activeResearch);
@@ -2202,6 +2220,17 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.fillStyle = '#caa45a'; ctx.fillRect(cx-4, y+S*0.58, 3, S*0.36); ctx.fillRect(cx+1, y+S*0.58, 3, S*0.36);
       ctx.font = `${S*0.32}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('🐴', cx, y+S*0.2);
+      break;
+    }
+    case 'ranch': {
+      ctx.fillStyle = '#7a5a35'; ctx.fillRect(x+2, y+S*0.38, S-4, S*0.6);
+      ctx.fillStyle = '#4a3018';
+      ctx.beginPath(); ctx.moveTo(x+1, y+S*0.4); ctx.lineTo(cx, y+4); ctx.lineTo(x+S-1, y+S*0.4); ctx.fill();
+      ctx.strokeStyle = '#9a6a35'; ctx.lineWidth = 2;
+      ctx.strokeRect(x+4, y+S*0.58, S-8, S*0.32);
+      ctx.lineWidth = 1;
+      ctx.font = `${S*0.28}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🤠', cx, y+S*0.22);
       break;
     }
     case 'saloon': {
@@ -3161,6 +3190,10 @@ function furnitureInfoHtml(b) {
   if (b.type === 'bed') return `<div class="inf-line">Комфорт: <b>сон быстрее, настроение выше</b></div>`;
   if (b.type === 'table') return `<div class="inf-line">Комфорт: <b>еда за столом даёт настроение</b></div>`;
   if (b.type === 'decor') return `<div class="inf-line">Красота: <b>рядом настроение растёт</b></div>`;
+  if (b.type === 'ranch') {
+    const y = ranchDailyYield();
+    return `<div class="inf-line">Ранчо: <b>${y.food || 0} еды / ${y.gold || 0} золота в день</b></div>`;
+  }
   return '';
 }
 
@@ -3343,7 +3376,7 @@ function setupButtons() {
   // Build buttons
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
   };
@@ -3594,7 +3627,7 @@ function showHowtoPanel(panel) {
 function updateBuildButtons() {
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
   };

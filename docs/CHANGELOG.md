@@ -2,6 +2,13 @@
 
 ## 2026-06-02
 
+### v1.41 - Ranch Daily Yield
+
+- Added **Ranch (Ранчо 🤠)** as the next horses/ranch slice.
+- Ranches produce daily food and gold only when at least one Stable is built.
+- Added ranch build button, map drawing, and info-overlay daily yield line.
+- Harness: Scenario AG validates no-yield without stable and daily food/gold yield with stable support.
+
 ### v1.40 - Homestead Comfort Score
 
 - Added a visible **Homestead Comfort** score from built bed/table/decor.

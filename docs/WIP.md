@@ -39,6 +39,10 @@
 
 ## Последний завершённый срез
 
+- v1.41 - Ranch Daily Yield.
+- Добавлено ранчо: при наличии конюшни каждый день даёт еду и золото.
+- Harness A-AG green, local Chrome mobile smoke green.
+
 - v1.40 - Homestead Comfort Score.
 - Кровать, стол и декор теперь складываются в общий комфорт усадьбы; stats показывает score, mood получает мягкий bonus.
 - Harness A-AF green, local Chrome mobile smoke green.

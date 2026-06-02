@@ -39,6 +39,13 @@
 - Scenario AF validates score, bonus, label, and thought.
 - Next step: move from colony-wide comfort to room recognition/quality.
 
+## v1.41 ranch daily yield
+
+- Added ranch building as the next horses/ranch slice.
+- Ranch daily yield requires at least one completed stable.
+- Scenario AG validates no-yield without stable and food/gold yield with stable.
+- Next ranch work can add animal taming or a visible ranch capacity/state.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:

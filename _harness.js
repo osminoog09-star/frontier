@@ -676,6 +676,22 @@ const test = `
   console.log('SCENARIO AF (homestead comfort score):');
   console.log('   score:', emptyScore + '->' + fullScore, '| bonus:', emptyBonus.toFixed(2) + '->' + fullBonus.toFixed(2), '| thought:', homeThought?'OK':'FAIL');
   if (!homeOk) throw new Error('Scenario AF failed');
+
+  // Scenario AG: ranch daily yield requires stable support
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['ranch','stable'].includes(b.type));
+  G.res.food = 10; G.res.gold = 0; G.stats.goldEarned = 0;
+  G.buildings.push({ type:'ranch', tx:12, ty:12, done:true, blueprint:false, hp:200, maxHp:200 });
+  const noStableYield = ranchDailyYield();
+  onNewDay();
+  const noStableOk = noStableYield.food === 0 && noStableYield.gold === 0 && G.res.food === 10 && G.res.gold === 0;
+  G.buildings.push({ type:'stable', tx:15, ty:12, done:true, blueprint:false, hp:200, maxHp:200 });
+  const withStableYield = ranchDailyYield();
+  onNewDay();
+  const withStableOk = withStableYield.food === 8 && withStableYield.gold === 2 && G.res.food === 18 && G.res.gold === 2 && G.stats.goldEarned === 2;
+  console.log('SCENARIO AG (ranch daily yield):');
+  console.log('   requires stable:', noStableOk?'OK':'FAIL', '| yield:', withStableYield.food + ' food / ' + withStableYield.gold + ' gold', '| applied:', withStableOk?'OK':'FAIL');
+  if (!noStableOk || !withStableOk) throw new Error('Scenario AG failed');
 })();
 `;
 try {
