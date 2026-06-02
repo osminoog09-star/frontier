@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.54 - Work Skill. Опыт за труд → уровни (до 10) ускоряют работу (+4%/ур). Scenario AR. Harness A-AR (44) green.
+
 - v1.53 - Arsonist Enemy. Поджигатель атакует и уничтожает постройки (брешь в обороне); в крупных налётах (6+). Scenario AQ. Harness A-AQ (43) green.
 
 - v1.52 - Powder Barrel Trap. Бочка с порохом: взрыв по площади при подходе врага, потом расходуется. Scenario AP. Harness A-AP (42) green.

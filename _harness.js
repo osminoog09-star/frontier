@@ -884,6 +884,23 @@ const test = `
   console.log('SCENARIO AQ (arsonist breaks buildings):');
   console.log('   def burns:', arsDefOk?'OK':'FAIL', '| destroyed fence:', fenceGone?'OK':'FAIL', '| in big raid:', raidHasArsonist?'OK':'FAIL');
   if (!arsOk) throw new Error('Scenario AQ failed');
+
+  // Scenario AR: work skill — XP accrues while working, levels speed up work, capped at 10
+  newGame('settlers');
+  const ps = G.pawns[0];
+  ps.workXp = 0; ps.workLevel = 0;
+  const wmul0 = wmul(ps);
+  for (let i = 0; i < 2200; i++) gainWorkXp(ps);   // ~110 xp → уровень 1
+  const leveledUp = ps.workLevel >= 1;
+  const wmul1 = wmul(ps);
+  const fasterWithSkill = wmul1 > wmul0;
+  // кап: накачать опыт до предела
+  ps.workXp = 100000; for (let i = 0; i < 60; i++) gainWorkXp(ps);
+  const capped = ps.workLevel === 10;
+  const skillOk = leveledUp && fasterWithSkill && capped && Math.abs(wmul({workLevel:10}) - 1.4) < 1e-9;
+  console.log('SCENARIO AR (work skill leveling):');
+  console.log('   level up:', leveledUp?'OK':'FAIL', '| faster:', fasterWithSkill?'OK':'FAIL', '| cap 10:', capped?'OK':'FAIL');
+  if (!skillOk) throw new Error('Scenario AR failed');
 })();
 `;
 try {

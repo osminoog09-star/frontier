@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.54 - Work Skill Leveling
+
+- Pawns gain work XP while working and level up (cap 10); each level adds +4% work speed via wmul (up to +40%).
+- Skill level shows in the pawn card (⭐N). Old saves safe (defaults via ||0).
+- Harness: Scenario AR (XP accrual, level-up speeds work, cap 10, +40% at lvl 10). A-AR (44) green.
+
 ### v1.53 - Arsonist Enemy (attacks buildings)
 
 - New enemy «Поджигатель» (🔥): targets the nearest building instead of pawns, damaging its HP and destroying it (breaching walls/defenses). Falls back to normal behavior if there are no buildings. Joins raids of 6+ (slot after boss/sniper).

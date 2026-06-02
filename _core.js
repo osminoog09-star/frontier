@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.53';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.54';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -459,6 +459,7 @@ function spawnPawn(tx, ty, name, priorities) {
     opinions: {},      // {pawnId: -100..100}
     sick: null,        // {name, severity 1-3, timer}
     workMul: 1,
+    workXp: 0, workLevel: 0,   // навык работы (опыт/уровень)
     socialTimer: randInt(100,400),
     schedule_default: (() => {
       const s = Array(24).fill('work');
@@ -498,7 +499,19 @@ function applyTraitEffects(p) {
 
 // Effective work speed (traits + illness)
 function wmul(p) {
-  return (p.workMul || 1) * (p.sick ? (0.7 - p.sick.severity*0.12) : 1);
+  const skill = 1 + 0.04 * (p.workLevel || 0);   // навык: +4% за уровень (до +40% на 10 ур.)
+  return (p.workMul || 1) * skill * (p.sick ? (0.7 - p.sick.severity*0.12) : 1);
+}
+
+// Опыт работы: копится, пока пешка работает; уровни до 10 ускоряют труд.
+function gainWorkXp(p) {
+  if (!p) return;
+  p.workXp = (p.workXp || 0) + 0.05;
+  const lvl = p.workLevel || 0;
+  if (lvl < 10 && p.workXp >= (lvl + 1) * 100) {
+    p.workLevel = lvl + 1;
+    addLog(`📈 ${p.name} набрался опыта (навык ${p.workLevel}).`, '');
+  }
 }
 
 function spawnAnimal(forced) {
@@ -703,6 +716,8 @@ function updatePawns() {
     const base = p.state==='sleeping' ? 0.5 : inCombat ? 2.4 : 2.0;
     const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul());
     moveTowardsTarget(p, moveSpeed);
+
+    if (p.state === 'working') gainWorkXp(p);   // опыт за труд
 
     // Social interactions
     updateSocial(p);
@@ -2951,7 +2966,7 @@ function renderPawns() {
     }).join('');
     card.innerHTML = `
       <div class="pawn-name">🤠 ${p.name} ${p.dead?'(погиб)':''}</div>
-      <div class="pawn-status">${p.role} • ${stateNames[p.state]||p.state} ${woundText} ${sickText}</div>
+      <div class="pawn-status">${p.role}${(p.workLevel||0)>0?` ⭐${p.workLevel}`:''} • ${stateNames[p.state]||p.state} ${woundText} ${sickText}</div>
       <div class="trait-row">${traitChips}</div>
       ${bar('HP',p.hp,p.maxHp,'bar-hp')}
       ${bar('Еда',p.food,p.maxFood,'bar-food')}
@@ -3836,7 +3851,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.53','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом, враг «Поджигатель» (ломает постройки).'],
+    ['now', 'v1.36–1.54','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом, враг «Поджигатель», навыки работы (опыт→уровни).'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
