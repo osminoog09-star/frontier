@@ -213,4 +213,13 @@
 - Scenario Q validates Gold Rush, Fort Defense, and Caravan Route initialization.
 
 ### Next Architecture Work
-- Add scenario-specific goals and event modifiers without branching the entire simulation loop.
+- Add scenario-specific event modifiers without branching the entire simulation loop.
+
+## Update 2026-06-02 - Scenario Goals Architecture Notes
+- `scenarioGoalStatus()` centralizes objective text, progress, and target values.
+- `isScenarioGoalMet()` replaces the hardcoded 500-gold win condition.
+- `stats.caravanDeals` tracks Caravan Route progress and is normalized for older saves.
+- Scenario R validates goal targets, Fort Defense completion, and caravan deal counting.
+
+### Next Architecture Work
+- Add small scenario event modifiers: Gold Rush economic pressure, Fort raid cadence, Caravan trade cadence.

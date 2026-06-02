@@ -144,3 +144,11 @@
 - Fort Defense starts with a defensible perimeter.
 - Caravan Route starts with trade infrastructure.
 - This gives future content a clear structure for goals, events, and balance.
+
+## Update 2026-06-02 - Scenario Goals Design Status
+- Each starting fantasy now has a different visible win condition.
+- Settlers stays the classic wealth objective.
+- Gold Rush asks for a larger gold target.
+- Fort Defense is about holding out until day 5.
+- Caravan Route is about completing trade deals.
+- The top objective HUD now tells the player what to do without opening documentation.

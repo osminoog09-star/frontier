@@ -388,6 +388,26 @@ const test = `
   const caravanOk = G.scenario === 'caravan' && G.buildings.some(b=>b.type==='tradepost' && b.done) && G.res.gold >= DEFAULT_RES.gold + 45;
   console.log('SCENARIO Q (start scenarios):');
   console.log('   goldrush:', goldrushOk?'OK':'FAIL', '| fort:', fortOk?'OK':'FAIL', '| caravan:', caravanOk?'OK':'FAIL');
+
+  // Scenario R: scenario-specific goals and caravan deal counter
+  newGame('settlers');
+  const settlersGoal = scenarioGoalStatus();
+  const settlersGoalOk = settlersGoal.target === 500 && settlersGoal.text.includes('500');
+  newGame('goldrush');
+  const goldrushGoal = scenarioGoalStatus();
+  const goldrushGoalOk = goldrushGoal.target === 700 && goldrushGoal.text.includes('700');
+  newGame('fort');
+  G.day = 5;
+  const fortGoal = scenarioGoalStatus();
+  const fortGoalOk = fortGoal.target === 5 && isScenarioGoalMet();
+  newGame('caravan');
+  G.res.gold = 60;
+  const beforeDeals = G.stats.caravanDeals || 0;
+  const caravanTrade = runCaravanTrade();
+  const caravanGoal = scenarioGoalStatus();
+  const caravanGoalOk = caravanTrade.traded && G.stats.caravanDeals === beforeDeals + 1 && caravanGoal.target === 3 && caravanGoal.value === 1;
+  console.log('SCENARIO R (scenario goals):');
+  console.log('   settlers:', settlersGoalOk?'OK':'FAIL', '| goldrush:', goldrushGoalOk?'OK':'FAIL', '| fort:', fortGoalOk?'OK':'FAIL', '| caravan:', caravanGoalOk?'OK':'FAIL');
 })();
 `;
 try {

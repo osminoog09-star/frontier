@@ -273,4 +273,14 @@
 - Done: `_harness.js` includes Scenario Q for scenario initialization.
 
 ### Next Step
-- Add scenario-specific goals/events and deeper caravan profiles.
+- Add scenario-specific events and deeper caravan profiles.
+
+## Update 2026-06-02 - Scenario Goals Status
+- Done: scenario goal slice implemented as `versions/frontier-v1.22.html`.
+- Done: Settlers, Gold Rush, Fort Defense, and Caravan Route now have different win goals.
+- Done: objective HUD, pawn stats panel, help text, and win condition use shared scenario goal logic.
+- Done: caravan deals are tracked through `stats.caravanDeals`.
+- Done: `_harness.js` includes Scenario R for scenario goals.
+
+### Next Step
+- Add scenario-specific event pressure and caravan deal profiles.

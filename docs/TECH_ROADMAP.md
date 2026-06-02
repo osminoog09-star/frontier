@@ -4,12 +4,18 @@
 
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
+Для совместной работы агентов:
+
+- `AGENTS.md` - правила работы Codex/cloud-агентов.
+- `docs/HANDOFF.md` - актуальное состояние для следующего исполнителя.
+- `docs/CHANGELOG.md` - журнал срезов и версий.
+
 ## 1. Текущий стабильный фундамент
 
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-O уже покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику и production controls.
+- Автотесты: `_harness.js`, сценарии A-R уже покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю и сценарные цели.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза
@@ -22,8 +28,9 @@
 4. `frontier.html` синхронизирован с `_core.js`.
 5. Создан `versions/frontier-vX.Y.html`.
 6. Обновлены `ROADMAP.md`, `docs/ROADMAP_MONTH.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`, сайт `index.html`.
-7. Commit + push в GitHub.
-8. Проверен публичный GitHub Pages URL.
+7. Обновлены `docs/CHANGELOG.md` и `docs/HANDOFF.md`.
+8. Commit + push в GitHub.
+9. Проверен публичный GitHub Pages URL.
 
 ## 3. Ближайшая очередь
 
@@ -45,7 +52,9 @@
 - [x] "Форт": старт с забором, воротами и вышкой.
 - [x] "Караванный путь": старт с торговым постом и золотом.
 - [x] Harness: сценарий корректно создает стартовые ресурсы/здания.
-- [ ] Следующий шаг: сценарные цели и события.
+- [x] Сценарные цели: золото, выживание форта, караванные сделки.
+- [x] Harness: Scenario R проверяет цели и счётчик караванов.
+- [ ] Следующий шаг: сценарные события и давление.
 
 ### 3.3 Production queues
 

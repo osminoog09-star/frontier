@@ -71,6 +71,62 @@ const SCENARIOS = {
   caravan: { name:'Караванный путь', desc:'Старт с торговым постом и золотом для первых сделок.' },
 };
 
+function ensureScenarioStats() {
+  if (!G.stats) G.stats = {};
+  const defaults = { days:0, kills:0, foodHarvested:0, treesChopped:0, goldEarned:0, caravanDeals:0 };
+  for (const [key, value] of Object.entries(defaults)) {
+    if (typeof G.stats[key] !== 'number' || isNaN(G.stats[key])) G.stats[key] = value;
+  }
+}
+
+function scenarioGoalStatus() {
+  ensureScenarioStats();
+  const scenario = G.scenario || 'settlers';
+  if (scenario === 'goldrush') {
+    const target = 700;
+    const value = Math.floor(G.res.gold || 0);
+    return {
+      scenario, value, target,
+      pct: clamp(value / target, 0, 1) * 100,
+      text: `Накопи 700 💰 золота (${value}/${target})`,
+      sidebar: `накопить 700 💰 (сейчас: ${value})`,
+    };
+  }
+  if (scenario === 'fort') {
+    const target = 5;
+    const value = Math.max(1, Math.floor(G.day || 1));
+    return {
+      scenario, value, target,
+      pct: clamp((value - 1) / (target - 1), 0, 1) * 100,
+      text: `Удержи форт до дня ${target} (сейчас: день ${value})`,
+      sidebar: `удержать форт до дня ${target} (сейчас: ${value})`,
+    };
+  }
+  if (scenario === 'caravan') {
+    const target = 3;
+    const value = Math.floor(G.stats.caravanDeals || 0);
+    return {
+      scenario, value, target,
+      pct: clamp(value / target, 0, 1) * 100,
+      text: `Проведи 3 караванные сделки (${value}/${target})`,
+      sidebar: `провести 3 караванные сделки (сейчас: ${value})`,
+    };
+  }
+  const target = 500;
+  const value = Math.floor(G.res.gold || 0);
+  return {
+    scenario, value, target,
+    pct: clamp(value / target, 0, 1) * 100,
+    text: `Накопи 500 💰 золота (${value}/${target})`,
+    sidebar: `накопить 500 💰 (сейчас: ${value})`,
+  };
+}
+
+function isScenarioGoalMet() {
+  const goal = scenarioGoalStatus();
+  return goal.value >= goal.target;
+}
+
 function newGame(scenarioId='settlers') {
   const map = generateMap();
   G = {
@@ -100,7 +156,7 @@ function newGame(scenarioId='settlers') {
     log: [],
     researches: JSON.parse(JSON.stringify(RESEARCHES)),
     activeResearch: null,
-    stats: { days:0, kills:0, foodHarvested:0, treesChopped:0, goldEarned:0 },
+    stats: { days:0, kills:0, foodHarvested:0, treesChopped:0, goldEarned:0, caravanDeals:0 },
     runtimeErrors: [],
     achievements: {},
     camera: { x: MAP_W*TILE/2 - 400, y: MAP_H*TILE/2 - 300, zoom: 1.0 },
@@ -1425,6 +1481,7 @@ function normalizeGameState(source='') {
   for (const [k,v] of Object.entries(DEFAULT_RES)) {
     if (typeof G.res[k] !== 'number' || isNaN(G.res[k]) || G.res[k] < 0) G.res[k] = v;
   }
+  ensureScenarioStats();
   if (!Array.isArray(G.items)) G.items = [];
   for (const b of G.buildings || []) {
     normalizeStockpileFilters(b);
@@ -1516,7 +1573,7 @@ function onNewDay() {
   checkAchievements();
 
   // Win condition
-  if (G.res.gold >= 500) { gameOver('win'); }
+  if (isScenarioGoalMet()) { gameOver('win'); }
 }
 
 function triggerEvent(peaceful) {
@@ -1570,6 +1627,8 @@ function runCaravanTrade() {
   G.res.food += food;
   G.res.wood += wood;
   G.res.med += med;
+  ensureScenarioStats();
+  G.stats.caravanDeals++;
   addLog(`🐎 Караванная сделка: -15 золота, +${food} еды, +${wood} дерева, +${med} медикаментов`, 'good');
   Diag.action(`Караванная сделка @${post.tx},${post.ty}`);
   return { traded:true, spentGold:15, food, wood, med };
@@ -2320,9 +2379,9 @@ function updateUI() {
   document.getElementById('clock').textContent = `День ${G.day} • ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 
   // Objective progress
-  const goalPct = clamp(G.res.gold/500, 0, 1)*100;
-  document.getElementById('obj-fill').style.width = goalPct+'%';
-  document.getElementById('obj-text').textContent = `Накопи 500 💰 золота  (${Math.floor(G.res.gold)}/500)`;
+  const goal = scenarioGoalStatus();
+  document.getElementById('obj-fill').style.width = goal.pct+'%';
+  document.getElementById('obj-text').textContent = goal.text;
 
   renderPawns();
   renderSchedule();
@@ -2330,6 +2389,7 @@ function updateUI() {
 
 function renderPawns() {
   const list = document.getElementById('pawn-list');
+  const goal = scenarioGoalStatus();
   list.innerHTML = '';
   for (const p of G.pawns) {
     const card = document.createElement('div');
@@ -2475,7 +2535,8 @@ function renderResearch() {
     <div>🍖 Еды собрано: <b style="color:#aaa">${G.stats.foodHarvested}</b></div>
     <div>🪵 Деревьев срублено: <b style="color:#aaa">${G.stats.treesChopped}</b></div>
     <div>💰 Золота заработано: <b style="color:#aaa">${Math.floor(G.stats.goldEarned)}</b></div>
-    <div style="margin-top:4px;color:#7a6a4a">🏆 Цель: накопить 500 💰 (сейчас: ${Math.floor(G.res.gold)})</div>
+    <div>🐎 Караванных сделок: <b style="color:#aaa">${Math.floor(G.stats.caravanDeals || 0)}</b></div>
+    <div style="margin-top:4px;color:#7a6a4a">🏆 ${SCENARIOS[G.scenario]?.name || SCENARIOS.settlers.name}: ${goal.sidebar}</div>
   `;
   list.appendChild(stats);
 }
@@ -3212,7 +3273,7 @@ function showHowtoPanel(panel) {
       <li>⌨️ WASD / стрелки = камера. F = ферма, M = шахта, Esc = сброс.</li>
     </ul>
     <h3>Цель</h3>
-    <p>Накопи <b>500 💰 золота</b>. Золото даёт кузня, добыча руды, убийство бандитов и события. Не дай ковбоям умереть с голоду!</p>
+    <p><b>Текущая цель показана сверху по центру.</b> Она зависит от выбранного сценария: золото, оборона форта или караванные сделки. Не дай ковбоям умереть с голоду!</p>
   `;
 }
 
@@ -3323,6 +3384,7 @@ function loadGame() {
     G.researches=save.researches;
     G.stats=save.stats||G.stats;
     G.achievements=save.achievements||{};
+    normalizeGameState('load');
     addLog('📂 Игра загружена' + (save.map?'':' (старый формат — карта новая)'), 'good');
     Diag.action('Загрузка ' + (save.map?'(с картой v'+(save.v||1)+')':'(старый формат без карты)'));
   } catch(ex) { addLog('❌ Ошибка загрузки', 'danger'); }
@@ -3444,7 +3506,7 @@ const ACHIEVEMENTS = [
   { id:'pop8',        name:'Городок',         desc:'8 ковбоев в отряде',           icon:'👥' },
   { id:'survive10',   name:'Старожил',        desc:'Доживи до 10-го дня',          icon:'📅' },
   { id:'research3',   name:'Учёный',          desc:'Исследуй 3 технологии',        icon:'🔬' },
-  { id:'win',         name:'Король Запада',   desc:'Накопи 500 золота — победа!',   icon:'🏆' },
+  { id:'win',         name:'Король Запада',   desc:'Выполни цель выбранного сценария — победа!',   icon:'🏆' },
 ];
 function unlock(id) {
   if (!G.achievements) G.achievements = {};

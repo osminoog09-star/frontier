@@ -328,5 +328,21 @@
 - [x] Regression harness green: Scenarios A-Q pass, expected Scenario K anomaly is detected, no runtime errors.
 
 ### Next Autonomous Target
-- [ ] Scenario-specific goals/events.
+- [x] Scenario-specific goals.
+- [ ] Scenario-specific events.
+- [ ] Caravan profiles: food caravan, medicine caravan, building-material caravan.
+
+## Update 2026-06-02 - v1.22 Scenario Goals Slice
+- [x] Created `versions/frontier-v1.22.html` from the current playable build.
+- [x] Added shared `scenarioGoalStatus()` for objective HUD, stats panel, help text, and win condition.
+- [x] Settlers goal: 500 gold.
+- [x] Gold Rush goal: 700 gold.
+- [x] Fort Defense goal: survive until day 5.
+- [x] Caravan Route goal: complete 3 caravan deals.
+- [x] Added `stats.caravanDeals`; save/load normalizes it for older saves.
+- [x] Extended `_harness.js` with Scenario R: scenario goals and caravan deal counter.
+- [x] Regression harness green: Scenarios A-R pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
+- [ ] Scenario-specific event pressure.
 - [ ] Caravan profiles: food caravan, medicine caravan, building-material caravan.
