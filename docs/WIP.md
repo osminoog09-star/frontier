@@ -23,7 +23,11 @@
 
 ## Сейчас в работе
 
-Пусто.
+- [PAUSED] Claude/unknown 2026-06-02 - Building Repair / Scenario AT
+  - Сделано: в рабочем дереве найдены незакоммиченные изменения `_core.js`, `_harness.js`, `frontier.html`: `tryRepair()`, подключение ремонта к работе строительства, Scenario AT.
+  - Проверено Codex: `node build.js` OK, `node _harness.js` OK, Scenarios A-AT green, runtime errors 0.
+  - Осталось: автору/следующему агенту обновить docs/site/version snapshot, commit/push; желательно несколько прогонов harness из-за правила handoff.
+  - Затронутые файлы: _core.js, _harness.js, frontier.html.
 
 ---
 
