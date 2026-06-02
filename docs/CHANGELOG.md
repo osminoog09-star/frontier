@@ -2,6 +2,15 @@
 
 ## 2026-06-02
 
+### v1.44-hotfix - Deterministic harness (fix flaky Scenario AC)
+
+- FIX: Scenario AC (bed comfort sleep) was flaky — it ran 60 ticks of RNG-driven pawn AI and the pawn
+  sometimes drifted off the bed tile, so comfort read 0 and the test failed. Because scenarios `throw`
+  on failure, this intermittently aborted the WHOLE harness (AD–AI never ran). It only passed for Codex
+  on a lucky run. Now the pawn is pinned each tick → deterministic. All 35 scenarios (A–AI) pass reliably.
+- Added AGENTS.md rule: harness scenarios must be deterministic (no reliance on Math.random in AI).
+- Game build unchanged (only `_harness.js`); current playable build remains v1.44.
+
 ### v1.44 - Basic Room Comfort
 
 - Added first room recognition pass: furniture inside a small fenced/gated enclosure counts as room comfort.

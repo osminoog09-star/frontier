@@ -593,17 +593,19 @@ const test = `
   // Scenario AC: bed comfort improves sleep and is preferred over camp
   newGame('settlers');
   G.buildings = G.buildings.filter(b => b.type !== 'bed' && b.type !== 'camp');
+  // детерминированно: фиксируем пешку на тайле и состояние сна каждый тик,
+  // чтобы случайный ИИ не «съезжал» с кровати и тест не флакал
   let pSleep = G.pawns[0];
-  pSleep.x = 10*TILE; pSleep.y = 10*TILE; pSleep.energy = 20; pSleep.mood = 50; pSleep.state = 'sleeping'; G.hour = 23;
-  for (let i = 0; i < 60; i++) { G.tick++; updatePawns(); }
+  pSleep.energy = 20; pSleep.mood = 50; G.hour = 23;
+  for (let i = 0; i < 60; i++) { G.tick++; pSleep.x = 10*TILE; pSleep.y = 10*TILE; pSleep.state = 'sleeping'; pSleep.downed = false; updatePawns(); }
   const roughEnergy = pSleep.energy;
   const roughMood = pSleep.mood;
   newGame('settlers');
   G.buildings = G.buildings.filter(b => b.type !== 'bed' && b.type !== 'camp');
   pSleep = G.pawns[0];
-  pSleep.x = 10*TILE; pSleep.y = 10*TILE; pSleep.energy = 20; pSleep.mood = 50; pSleep.state = 'sleeping'; G.hour = 23;
+  pSleep.energy = 20; pSleep.mood = 50; G.hour = 23;
   G.buildings.push({ type:'bed', tx:10, ty:10, done:true, blueprint:false, hp:120, maxHp:120 });
-  for (let i = 0; i < 60; i++) { G.tick++; updatePawns(); }
+  for (let i = 0; i < 60; i++) { G.tick++; pSleep.x = 10*TILE; pSleep.y = 10*TILE; pSleep.state = 'sleeping'; pSleep.downed = false; updatePawns(); }
   const bedEnergy = pSleep.energy;
   const bedMood = pSleep.mood;
   const comfortOk = sleepComfortAt(pSleep) >= 2 && bedEnergy > roughEnergy + 1 && bedMood > roughMood;
