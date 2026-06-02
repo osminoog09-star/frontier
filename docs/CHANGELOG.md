@@ -2,6 +2,13 @@
 
 ## 2026-06-02
 
+### v1.56 - Building Repair
+
+- Builders now repair damaged completed buildings when there are no construction blueprints to build.
+- `tryRepair()` claims damaged buildings, moves a builder to them, restores HP, and logs completion.
+- This gives the colony a counterplay loop after arsonists or other building damage.
+- Harness: Scenario AT validates damaged fence repair to full HP and no-op when nothing is damaged. A-AT (46) green.
+
 ### v1.55 - Marksman Research (combat)
 
 - New research «Меткость»: +0.1 pawn hit chance and +6 shot damage. Extracted pawnHitChance()/pawnShotDamage() pure helpers used by fightEnemy.

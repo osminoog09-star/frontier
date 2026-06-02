@@ -205,6 +205,7 @@ const test = `
   // Scenario G: smithy production chain consumes inputs and creates output
   newGame();
   const crafter = G.pawns[0];
+  crafter.workMul = 1; crafter.workLevel = 0; crafter.sick = null;   // детерминированно
   const sx = Math.floor(80/2)+4, sy = Math.floor(60/2)+4;
   G.map[sy][sx].type = 1;
   G.map[sy][sx].obj = null;
@@ -227,6 +228,7 @@ const test = `
   // Scenario H: kitchen cooking chain consumes meat and creates food
   newGame();
   const cook = G.pawns[0];
+  cook.workMul = 1; cook.workLevel = 0; cook.sick = null;   // детерминированно
   const kx = Math.floor(80/2)+4, ky = Math.floor(60/2)+4;
   for (const [tx, ty] of [[kx,ky],[kx+1,ky],[kx,ky+1],[kx+1,ky+1]]) {
     G.map[ty][tx].type = 1;
@@ -302,6 +304,7 @@ const test = `
   // Scenario L: disabled recipe station does not consume inputs
   newGame();
   const pausedCook = G.pawns[0];
+  pausedCook.workMul = 1; pausedCook.workLevel = 0; pausedCook.sick = null;   // детерминированно
   const px = Math.floor(80/2)+5, py = Math.floor(60/2)+5;
   for (const [tx, ty] of [[px,py],[px+1,py],[px,py+1],[px+1,py+1]]) {
     G.map[ty][tx].type = 1;
@@ -331,6 +334,7 @@ const test = `
   // Scenario M: recipe station output limit blocks new production
   newGame();
   const limitCook = G.pawns[0];
+  limitCook.workMul = 1; limitCook.workLevel = 0; limitCook.sick = null;   // детерминированно (без случайных трейтов)
   const lx = Math.floor(80/2)+5, ly = Math.floor(60/2)+5;
   for (const [tx, ty] of [[lx,ly],[lx+1,ly],[lx,ly+1],[lx+1,ly+1]]) {
     G.map[ty][tx].type = 1;
@@ -915,6 +919,25 @@ const test = `
   console.log('SCENARIO AS (marksman research):');
   console.log('   exists:', hasMarksDef?'OK':'FAIL', '| hit', hc0.toFixed(2)+'->'+hc1.toFixed(2), '| dmg-min', minDmg0+'->'+minDmg1, '|', marksOk?'OK':'FAIL');
   if (!marksOk) throw new Error('Scenario AS failed');
+
+  // Scenario AT: builders repair damaged buildings back to full HP
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => b.type !== 'fence');
+  const rX = 40, rY = 30; G.map[rY][rX].type = TERRAIN.GRASS; G.map[rY][rX].obj = null;
+  G.buildings.push({ type:'fence', tx:rX, ty:rY, done:true, blueprint:false, hp:10, maxHp:100 });
+  const rb = G.pawns[0];
+  rb.x = rX*TILE; rb.y = rY*TILE; rb.workMul = 1; rb.workLevel = 0; rb.sick = null;
+  const dmgBefore = G.buildings.find(b => b.type==='fence').hp;
+  let repaired = false;
+  for (let i = 0; i < 240; i++) { G._claims = {}; tryRepair(rb); }
+  const fence = G.buildings.find(b => b.type==='fence');
+  repaired = fence && fence.hp === fence.maxHp;
+  // если нет повреждённых — tryRepair возвращает false
+  G._claims = {}; const noneToRepair = tryRepair(rb) === false;
+  const repairOk = dmgBefore === 10 && repaired && noneToRepair;
+  console.log('SCENARIO AT (building repair):');
+  console.log('   hp', dmgBefore, '-> ', fence?fence.hp:'?', '| repaired:', repaired?'OK':'FAIL', '| none-left false:', noneToRepair?'OK':'FAIL');
+  if (!repairOk) throw new Error('Scenario AT failed');
 })();
 `;
 try {

@@ -73,6 +73,14 @@
 - Scenario AI validates open furniture vs enclosed room score, bonus, label, and thought.
 - Next room work can split room types (bedroom/dining), wall quality, or a compact room panel.
 
+## v1.56 building repair
+
+- Accepted and completed a paused Claude slice for building repair.
+- Construction work now falls back from `tryBuild()` to `tryRepair()` when there are no active blueprints.
+- Builders claim damaged completed buildings, move to them, restore HP, and log when repair reaches max HP.
+- Scenario AT validates full repair of a damaged fence and false/no-op when no damaged buildings remain.
+- This is important follow-up to arsonists and building-damage combat.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -86,7 +94,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-AI покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо и приручение лошадей.
+- Автотесты: `_harness.js`, сценарии A-AT покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость и ремонт.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза

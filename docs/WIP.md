@@ -23,11 +23,7 @@
 
 ## Сейчас в работе
 
-- [PAUSED] Claude/unknown 2026-06-02 - Building Repair / Scenario AT
-  - Сделано: в рабочем дереве найдены незакоммиченные изменения `_core.js`, `_harness.js`, `frontier.html`: `tryRepair()`, подключение ремонта к работе строительства, Scenario AT.
-  - Проверено Codex: `node build.js` OK, `node _harness.js` OK, Scenarios A-AT green, runtime errors 0.
-  - Осталось: автору/следующему агенту обновить docs/site/version snapshot, commit/push; желательно несколько прогонов harness из-за правила handoff.
-  - Затронутые файлы: _core.js, _harness.js, frontier.html.
+Пусто.
 
 ---
 
@@ -42,6 +38,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v1.56 - Building Repair. Принят PAUSED-срез Claude: строители чинят повреждённые готовые здания; Scenario AT. Harness A-AT (46) green.
 
 - v1.55 - Marksman Research. Исследование «Меткость»: точнее/больнее стрельба ковбоев. Scenario AS. Harness A-AS (45) green.
 

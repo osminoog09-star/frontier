@@ -179,6 +179,15 @@
 ### Next Step
 - Продолжить Неделю 2 маленьким срезом: загоны/скот, compact animal panel, audio-pass или расширение типов комнат.
 
+## Update 2026-06-02 - v1.56 Building Repair
+- Done: принят PAUSED-срез Claude по ремонту построек.
+- Done: строители чинят повреждённые готовые здания после поджигателя/урона.
+- Done: Scenario AT покрывает ремонт повреждённого забора до полного HP и no-op без повреждений.
+- Done: полный harness A-AT зелёный.
+
+### Next Step
+- Продолжить Неделю 2 маленьким срезом: загоны/скот, compact animal panel, автотайлинг или mobile UX.
+
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.
 - Done: fences are real blockers; gates are passable; A* routes around blockers and through gates.

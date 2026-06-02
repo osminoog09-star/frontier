@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.55';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.56';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -992,7 +992,7 @@ function doSpecificWork(p, workIdx) {
     case 0: return tryChopTree(p);
     case 1: return tryFarm(p);
     case 2: return tryMine(p);
-    case 3: return tryBuild(p);
+    case 3: return tryBuild(p) || tryRepair(p);
     case 4: return tryHunt(p);
     case 5: return tryHeal(p);
     case 6: return tryGuard(p);
@@ -1072,6 +1072,23 @@ function tryMine(p) {
         G.res.gold += 0.1;
       }
     }
+  }
+  p.state = 'working';
+  return true;
+}
+
+// Ремонт: строитель чинит ближайшее повреждённое готовое здание (контра поджигателю/износу).
+function tryRepair(p) {
+  const dmg = G.buildings
+    .filter(b => b.done && !b.blueprint && (b.hp||0) < (b.maxHp||0) && claimCount('rp_'+b.tx+'_'+b.ty) < 2)
+    .sort((a,b) => distTiles(p,a.tx,a.ty) - distTiles(p,b.tx,b.ty))[0];
+  if (!dmg) return false;
+  claimSpot('rp_'+dmg.tx+'_'+dmg.ty);
+  p._wt = 'rp_'+dmg.tx+'_'+dmg.ty;
+  setTarget(p, dmg.tx, dmg.ty);
+  if (distTiles(p, dmg.tx, dmg.ty) <= 2) {
+    dmg.hp = Math.min(dmg.maxHp, (dmg.hp||0) + 0.6 * wmul(p));
+    if (dmg.hp >= dmg.maxHp) { dmg.hp = dmg.maxHp; addLog(`🔧 ${p.name} починил «${BUILDS[dmg.type]?.name||dmg.type}»`, 'good'); }
   }
   p.state = 'working';
   return true;
