@@ -177,3 +177,12 @@
 
 ### Next Architecture Work
 - Convert limit controls into presets/queue depth once the simple numeric limit is stable.
+
+## Update 2026-06-02 - Stockpile Logistics UI Architecture Notes
+- `itemStacksByRes()` groups item stacks for display and diagnostics.
+- `formatResBreakdown()` renders compact resource summaries.
+- `stockpileLogisticsLines()` reports all ground stacks and stacks blocked by current stockpile filters.
+- Scenario N validates the player-facing logistics text.
+
+### Next Architecture Work
+- Reuse the same resource-summary helpers in diagnostics export and future storage panels.

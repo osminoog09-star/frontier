@@ -336,6 +336,20 @@ const test = `
   const limitRaisedCrafts = G.res.food >= 28 && G.res.meat < 20;
   console.log('SCENARIO M (recipe output limit):');
   console.log('   limit blocks:', limitNoConsume?'OK':'FAIL', '| raised limit crafts:', limitRaisedCrafts?'OK':'FAIL');
+
+  // Scenario N: stockpile info exposes ground stacks and blocked resources
+  newGame();
+  const infoStock = G.buildings.find(b=>b.type==='stockpile');
+  infoStock.filters = defaultStockpileFilters();
+  infoStock.filters.meat = false;
+  G.items = [];
+  dropItem('wood', 12, infoStock.tx+3, infoStock.ty);
+  dropItem('meat', 7, infoStock.tx+4, infoStock.ty);
+  const logisticsLines = stockpileLogisticsLines().join(' | ');
+  const hasGroundStacks = logisticsLines.includes('wood:12') && logisticsLines.includes('meat:7');
+  const hasBlockedMeat = logisticsLines.includes('Без склада') && logisticsLines.includes('meat:7');
+  console.log('SCENARIO N (stockpile logistics info):');
+  console.log('   ground stacks:', hasGroundStacks?'OK':'FAIL', '| blocked meat:', hasBlockedMeat?'OK':'FAIL');
 })();
 `;
 try {

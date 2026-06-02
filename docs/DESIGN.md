@@ -122,3 +122,8 @@
 ## Update 2026-06-02 - Public Site Status
 - The project root page now shows the playable build, current roadmap status, latest slices, and documentation links.
 - This makes the GitHub Pages root useful instead of forcing players to know the direct `frontier.html` URL.
+
+## Update 2026-06-02 - Stockpile Logistics UI Design Status
+- Stockpiles now explain what is lying on the map and what cannot be hauled because no stockpile accepts it.
+- This makes filter mistakes visible in normal play, not only through downloaded diagnostics.
+- The UI stays compact: two lines in the stockpile panel instead of a heavy inventory screen.

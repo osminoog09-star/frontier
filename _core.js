@@ -2767,7 +2767,32 @@ function stockpileInfoHtml(b) {
     const on = filters[res] !== false;
     return `<button class="filter-chip ${on?'on':'off'}" data-res="${res}">${on?'✓':'×'} ${res}</button>`;
   }).join('');
-  return `<div class="inf-line">Фильтры склада:</div><div class="filter-row">${buttons}</div>`;
+  const logistics = stockpileLogisticsLines().map(line => `<div class="inf-line">${line}</div>`).join('');
+  return `<div class="inf-line">Фильтры склада:</div><div class="filter-row">${buttons}</div>${logistics}`;
+}
+
+function itemStacksByRes(items) {
+  const byRes = {};
+  for (const it of items || []) {
+    if (!it || it.amount <= 0) continue;
+    byRes[it.res] = (byRes[it.res] || 0) + it.amount;
+  }
+  return byRes;
+}
+
+function formatResBreakdown(byRes) {
+  const entries = Object.entries(byRes).filter(([,amount]) => amount > 0);
+  if (!entries.length) return 'нет';
+  return entries.map(([res, amount]) => `${res}:${Math.floor(amount)}`).join(', ');
+}
+
+function stockpileLogisticsLines() {
+  const ground = itemStacksByRes(G.items || []);
+  const blocked = itemStacksByRes((G.items || []).filter(it=>it.amount>0 && !hasStockpileForRes(it.res)));
+  return [
+    `На земле: <b>${formatResBreakdown(ground)}</b>`,
+    `Без склада: <b>${formatResBreakdown(blocked)}</b>`,
+  ];
 }
 
 function bindStockpileFilterButtons(b) {

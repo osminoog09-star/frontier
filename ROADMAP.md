@@ -276,3 +276,15 @@
 ### Next Autonomous Target
 - [ ] Public GitHub Pages smoke for refreshed `index.html` and `frontier.html`.
 - [ ] Next gameplay slice: production queue depth / desired output presets.
+
+## Update 2026-06-02 - v1.18 Stockpile Logistics UI Slice
+- [x] Created `versions/frontier-v1.18.html` from the current playable build.
+- [x] Added `stockpileLogisticsLines()` for player-facing storage visibility.
+- [x] Stockpile info now shows ground item stacks grouped by resource.
+- [x] Stockpile info now shows resources that have no valid stockpile destination because of filters.
+- [x] Extended `_harness.js` with Scenario N: ground stacks and blocked meat are visible in stockpile logistics text.
+- [x] Regression harness green: Scenarios A-N pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
+- [ ] Production queue depth / desired output presets.
+- [ ] Then scenario/trade content once economy control is stable.

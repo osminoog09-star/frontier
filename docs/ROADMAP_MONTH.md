@@ -237,3 +237,12 @@
 
 ### Next Step
 - Add queue depth or desired output presets, then continue toward richer scenarios/trade.
+
+## Update 2026-06-02 - Stockpile Logistics UI Status
+- Done: logistics UI slice implemented as `versions/frontier-v1.18.html`.
+- Done: stockpile info shows ground stacks by resource.
+- Done: stockpile info shows resources blocked by stockpile filters.
+- Done: `_harness.js` includes Scenario N for logistics info text.
+
+### Next Step
+- Add production queue depth or desired-stock presets.
