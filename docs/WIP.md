@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.63 - Floors / RimWorld-стройка срез 1 (Claude). Полы (дерево/камень) кистью → строитель настилает по клетке; снос; save/load; Scenario AY. Harness A-AY (51) green.
+
+
 - v1.62 - Building Sprite Polish (Claude). Клиника/лаборатория объёмнее (стены/крыша/вывеска), не плоские квадраты. Аудит: у всех 20 зданий есть свой спрайт. Render-only, harness зелёный.
 
 - v1.61 - Herd Details Panel. PC stats показывает компактную animal-панель: табун, приручение, конюшни/ранчо, бонус скорости и доход ранчо. Добавлен `herdDetailRows()` и Scenario AX. Harness A-AX (50) green.

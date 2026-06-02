@@ -8,8 +8,8 @@
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
 - Последний локальный срез: `v1.61 - Herd Details Panel`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.62`. Клиника/лаборатория перерисованы (полировка спрайтов).
-- Harness: Scenarios A-AX (50) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
+- Текущий `GAME_VERSION`: `1.63`. Начат переход стройки на RimWorld-модель: добавлены полы (слой `tile.floor` + `G.floorBlueprints`).
+- Harness: Scenarios A-AY (51) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
 
 ## Что изменилось в v1.61

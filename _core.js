@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.62';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.63';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -37,6 +37,8 @@ const BUILDS = {
   stable: { name:'Конюшня',  icon:'🐴', cost:{wood:25,ore:10},   size:2, prod:'horses',rate:0 },
   ranch:  { name:'Ранчо',    icon:'🤠', cost:{wood:35,ore:8},    size:2, prod:'ranch', rate:0 },
   barrel: { name:'Бочка с порохом', icon:'🛢️', cost:{wood:5,gold:5}, size:1, prod:'trap', rate:0 },
+  floor_wood:  { name:'Деревянный пол', icon:'🟫', cost:{wood:2},          size:1, floor:'wood' },
+  floor_stone: { name:'Каменный пол',   icon:'⬜', cost:{ore:2},           size:1, floor:'stone' },
 };
 
 const RECIPES = {
@@ -1069,7 +1071,8 @@ function doWork(p) {
   const builderCap = clamp(Math.floor(G.pawns.filter(q=>q.alive).length/3), 1, 4);
   let totalBuilders = 0;
   for (const k in (G._claims||{})) if (k[0]==='b' && k[1]==='p') totalBuilders += G._claims[k];
-  if (p.priorities[3] > 0 && totalBuilders < builderCap && G.buildings.some(b=>b.blueprint && !b.done)) {
+  const hasFloorBp = !!(G.floorBlueprints && G.floorBlueprints.length);
+  if (p.priorities[3] > 0 && totalBuilders < builderCap && (G.buildings.some(b=>b.blueprint && !b.done) || hasFloorBp)) {
     if (tryBuild(p)) return;
   }
 
@@ -1200,7 +1203,7 @@ function tryBuild(p) {
   const bp = G.buildings.filter(b=>b.blueprint && !b.done)
     .filter(b=>claimCount('bp_'+b.tx+'_'+b.ty) < 2)
     .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty))[0];
-  if (!bp) return false;
+  if (!bp) return tryBuildFloor(p);
   claimSpot('bp_'+bp.tx+'_'+bp.ty);
   p._wt = 'bp_'+bp.tx+'_'+bp.ty;
   setTarget(p, bp.tx, bp.ty);
@@ -1216,6 +1219,28 @@ function tryBuild(p) {
       Sfx.build();
       FX.build(bp.tx*TILE+TILE*BUILDS[bp.type].size/2, bp.ty*TILE+TILE*BUILDS[bp.type].size/2);
       unlock('first_build');
+    }
+  }
+  p.state = 'working';
+  return true;
+}
+
+function tryBuildFloor(p) {
+  const fbs = G.floorBlueprints || [];
+  if (!fbs.length) return false;
+  const fb = fbs.filter(f=>claimCount('fl_'+f.tx+'_'+f.ty) < 2)
+    .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty))[0];
+  if (!fb) return false;
+  claimSpot('fl_'+fb.tx+'_'+fb.ty);
+  p._wt = 'fl_'+fb.tx+'_'+fb.ty;
+  setTarget(p, fb.tx, fb.ty);
+  if (distTiles(p, fb.tx, fb.ty) <= 1.5) {
+    fb.progress = (fb.progress||0) + 0.012 * wmul(p);
+    if (fb.progress >= 1) {
+      G.map[fb.ty][fb.tx].floor = fb.mat;
+      const i = fbs.indexOf(fb); if (i>=0) fbs.splice(i, 1);
+      addLog(`🔨 ${p.name} настелил пол`, 'good');
+      Sfx.build();
     }
   }
   p.state = 'working';
@@ -1988,6 +2013,7 @@ function normalizeGameState(source='') {
   ensureScenarioStats();
   ensureHerd();
   if (!Array.isArray(G.items)) G.items = [];
+  if (!Array.isArray(G.floorBlueprints)) G.floorBlueprints = [];
   for (const b of G.buildings || []) {
     normalizeStockpileFilters(b);
     normalizeRecipeStation(b);
@@ -2214,6 +2240,7 @@ function render() {
   const endY = Math.min(MAP_H, Math.ceil((cam.y+canvas.height/z)/TILE)+1);
 
   // Draw tiles
+  const floorBpSet = new Set((G.floorBlueprints||[]).map(f=>f.tx+','+f.ty));
   for (let y=startY; y<endY; y++) {
     for (let x=startX; x<endX; x++) {
       const tile = G.map[y][x];
@@ -2244,6 +2271,15 @@ function render() {
         ctx.fillStyle = 'rgba(40,70,20,0.25)';
         ctx.fillRect(x*TILE+TILE*0.3, y*TILE+TILE*0.3, 2, 4);
         ctx.fillRect(x*TILE+TILE*0.6, y*TILE+TILE*0.5, 2, 3);
+      }
+
+      // Floors (constructed) and floor blueprints
+      if (tile.floor) drawFloorTile(x, y, tile.floor);
+      if (floorBpSet.has(x+','+y)) {
+        const px = x*TILE, py = y*TILE;
+        ctx.fillStyle = 'rgba(90,150,220,0.20)'; ctx.fillRect(px, py, TILE, TILE);
+        ctx.strokeStyle = 'rgba(150,195,255,0.7)'; ctx.setLineDash([3,2]);
+        ctx.strokeRect(px+1.5, py+1.5, TILE-3, TILE-3); ctx.setLineDash([]);
       }
 
       // Objects
@@ -2380,6 +2416,23 @@ function drawDayNightOverlay() {
       }
     }
     ctx.globalCompositeOperation = 'source-over';
+  }
+}
+
+function drawFloorTile(x, y, mat) {
+  const px = x*TILE, py = y*TILE;
+  if (mat==='stone') {
+    ctx.fillStyle = '#8d8a82'; ctx.fillRect(px, py, TILE+1, TILE+1);
+    ctx.fillStyle = '#9a978f'; ctx.fillRect(px, py, TILE/2, TILE/2); ctx.fillRect(px+TILE/2, py+TILE/2, TILE/2, TILE/2);
+    ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 1;
+    ctx.strokeRect(px+0.5, py+0.5, TILE, TILE);
+    ctx.beginPath(); ctx.moveTo(px, py+TILE/2); ctx.lineTo(px+TILE, py+TILE/2); ctx.moveTo(px+TILE/2, py); ctx.lineTo(px+TILE/2, py+TILE); ctx.stroke();
+  } else {
+    ctx.fillStyle = '#7a5230'; ctx.fillRect(px, py, TILE+1, TILE+1);
+    ctx.strokeStyle = 'rgba(40,22,8,0.5)'; ctx.lineWidth = 1; ctx.beginPath();
+    for (let i=1;i<3;i++){ ctx.moveTo(px, py+i*TILE/3); ctx.lineTo(px+TILE, py+i*TILE/3); }
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,222,170,0.10)'; ctx.fillRect(px, py, TILE, 2);
   }
 }
 
@@ -3516,7 +3569,16 @@ function handleRightClick(tx, ty) {
 
 function demolishAt(tx, ty) {
   const b = G.buildings.find(b=> tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
-  if (!b) return;
+  if (!b) {
+    // нет здания — может, тут пол или чертёж пола
+    if (G.floorBlueprints && G.floorBlueprints.length) {
+      const fi = G.floorBlueprints.findIndex(f=>f.tx===tx && f.ty===ty);
+      if (fi>=0) { G.floorBlueprints.splice(fi,1); return; }
+    }
+    const tile = G.map[ty] && G.map[ty][tx];
+    if (tile && tile.floor) { tile.floor = null; return; }
+    return;
+  }
   G.buildings = G.buildings.filter(x=>x!==b);
   const def = BUILDS[b.type];
   if (def.cost.wood) G.res.wood += Math.floor(def.cost.wood/2);
@@ -3588,9 +3650,28 @@ function sanitizeBuildings(buildings) {
   return clean;
 }
 
+function placeFloor(tx, ty, def) {
+  const quiet = paintMode === 'build';
+  if (tx<0 || ty<0 || tx>=MAP_W || ty>=MAP_H) return;
+  const tile = G.map[ty][tx];
+  if (tile.type===TERRAIN.WATER || tile.type===TERRAIN.ROCK) {
+    if (!quiet) addLog('❌ Здесь нельзя стелить пол', 'warn'); return;
+  }
+  if (tile.floor === def.floor) return; // уже такой пол
+  if (!G.floorBlueprints) G.floorBlueprints = [];
+  if (G.floorBlueprints.some(f=>f.tx===tx && f.ty===ty)) return; // уже размечено
+  for (const [res, amt] of Object.entries(def.cost)) {
+    if ((G.res[res]||0) < amt) { if(!quiet) addLog(`❌ Недостаточно ресурсов для пола`, 'warn'); return; }
+  }
+  for (const [res, amt] of Object.entries(def.cost)) G.res[res] -= amt;
+  G.floorBlueprints.push({ tx, ty, mat:def.floor, progress:0 });
+  if (!quiet) addLog(`📐 Размечен ${def.name.toLowerCase()}`, '');
+}
+
 function placeBuild(tx, ty) {
   const def = BUILDS[G.buildMode];
   if (!def) return;
+  if (def.floor) { placeFloor(tx, ty, def); return; }
   const quiet = paintMode === 'build'; // во время рисования не спамим лог
   // Check cost
   for (const [res, amt] of Object.entries(def.cost)) {
@@ -3847,6 +3928,7 @@ function setupButtons() {
     'build-tower-btn':'tower','build-barrel-btn':'barrel','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
+    'build-floorwood-btn':'floor_wood','build-floorstone-btn':'floor_stone',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     document.getElementById(id).addEventListener('click', () => {
@@ -4113,6 +4195,7 @@ function updateBuildButtons() {
     'build-tower-btn':'tower','build-barrel-btn':'barrel','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
+    'build-floorwood-btn':'floor_wood','build-floorstone-btn':'floor_stone',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     const btn = document.getElementById(id);
@@ -4172,6 +4255,8 @@ function saveGame() {
       map: G.map.map(row=>row.map(t=>
         t.obj ? [t.type, t.obj.type==='tree'?1:2, Math.round(t.obj.hp), t.obj.marked?1:0] : t.type
       )),
+      floors: G.map.map(row=>row.map(t=> t.floor==='wood'?1:(t.floor==='stone'?2:0) )),
+      floorBlueprints: G.floorBlueprints || [],
       animals: G.animals.filter(a=>a.alive).map(a=>({type:a.type,x:a.x,y:a.y,hp:a.hp,maxHp:a.maxHp,speed:a.speed,meat:a.meat})),
       herd: G.herd,
       items: G.items || [],
@@ -4211,8 +4296,15 @@ function loadGame() {
         }
         return { type:c, v:0, obj:null };
       }));
+      if (save.floors) {
+        for (let y=0; y<G.map.length; y++) for (let x=0; x<G.map[y].length; x++) {
+          const f = save.floors[y] && save.floors[y][x];
+          if (f) G.map[y][x].floor = f===1 ? 'wood' : 'stone';
+        }
+      }
       _miniDirty = true;
     }
+    G.floorBlueprints = Array.isArray(save.floorBlueprints) ? save.floorBlueprints : [];
     if (save.animals) {
       G.animals = save.animals.map(a=>({
         id:G.nextId++, type:a.type, x:a.x, y:a.y, tx:Math.floor(a.x/TILE), ty:Math.floor(a.y/TILE),

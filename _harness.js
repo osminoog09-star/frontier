@@ -1032,6 +1032,36 @@ const test = `
   console.log('SCENARIO AX (herd details panel rows):');
   console.log('   no stable:', noStableHerdOk?'OK':'FAIL', '| rows:', herdRows.map(r=>r.label+'='+r.value).join(' | '), '|', axOk?'OK':'FAIL');
   if (!axOk) throw new Error('Scenario AX failed');
+
+  // Scenario AY: floors — paint a floor blueprint, a builder lays it, tile gets floor
+  newGame('settlers');
+  const ayWood = G.res.wood;
+  const ftx = 20, fty = 20;
+  G.map[fty][ftx] = { type: TERRAIN.GRASS, v:0, obj:null };
+  G.buildMode = 'floor_wood';
+  placeBuild(ftx, fty);
+  const placedOk = G.floorBlueprints.length === 1 &&
+    G.res.wood === ayWood - 2 &&
+    !G.map[fty][ftx].floor;
+  // water rejects floor (no extra blueprint, no extra cost)
+  G.map[15][15] = { type: TERRAIN.WATER, v:0, obj:null };
+  placeBuild(15, 15);
+  const waterRejectOk = G.floorBlueprints.length === 1;
+  G.buildMode = null;
+  // a pinned builder finishes the floor
+  const fp = G.pawns[0];
+  fp.workMul = 1; fp.workLevel = 0; fp.sick = null;
+  fp.x = ftx*TILE + TILE/2; fp.y = fty*TILE + TILE/2; fp.tx = ftx; fp.ty = fty;
+  let fguard = 0;
+  while (G.floorBlueprints.length && fguard < 600) { G._claims = {}; tryBuildFloor(fp); fguard++; }
+  const builtOk = G.map[fty][ftx].floor === 'wood' && G.floorBlueprints.length === 0;
+  // demolish removes a finished floor
+  demolishAt(ftx, fty);
+  const demolishOk = !G.map[fty][ftx].floor;
+  const ayOk = placedOk && waterRejectOk && builtOk && demolishOk;
+  console.log('SCENARIO AY (floors build+demolish):');
+  console.log('   placed:', placedOk?'OK':'FAIL', '| water reject:', waterRejectOk?'OK':'FAIL', '| built:', builtOk?'OK':'FAIL', '(ticks '+fguard+') | demolish:', demolishOk?'OK':'FAIL', '|', ayOk?'OK':'FAIL');
+  if (!ayOk) throw new Error('Scenario AY failed');
 })();
 `;
 try {
