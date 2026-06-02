@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.48';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.49';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -2190,8 +2190,11 @@ function drawTileObj(x, y, obj) {
     ctx.fillStyle = light;
     ctx.beginPath(); ctx.arc(px-2, py-5, 5*healthy+1, 0, Math.PI*2); ctx.fill();
     if (obj.marked) {
-      ctx.strokeStyle = '#e8c97e'; ctx.lineWidth = 1.5;
+      const a = markPulseAlpha();
+      ctx.strokeStyle = `rgba(232,201,126,${a})`; ctx.lineWidth = 1.5;
       ctx.strokeRect(x*TILE+1, y*TILE+1, TILE-2, TILE-2); ctx.lineWidth = 1;
+      ctx.globalAlpha = a; ctx.font = '9px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🪓', px, y*TILE+5); ctx.globalAlpha = 1;
     }
   } else if (obj.type==='rock') {
     // Shadow
@@ -2204,8 +2207,11 @@ function drawTileObj(x, y, obj) {
     ctx.fillStyle = '#969089';
     ctx.beginPath(); ctx.ellipse(px-2, py-2, 2.5, 2, 0, 0, Math.PI*2); ctx.fill();
     if (obj.marked) {
-      ctx.strokeStyle = '#e8a030'; ctx.lineWidth = 1.5;
+      const a = markPulseAlpha();
+      ctx.strokeStyle = `rgba(232,160,48,${a})`; ctx.lineWidth = 1.5;
       ctx.strokeRect(x*TILE+1, y*TILE+1, TILE-2, TILE-2); ctx.lineWidth = 1;
+      ctx.globalAlpha = a; ctx.font = '9px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('⛏️', px, y*TILE+5); ctx.globalAlpha = 1;
     }
   }
 }
@@ -2456,6 +2462,23 @@ function stateGlyph(state) {
   return ({ working:'⚒', joy:'♪', breakdown:'💢', sleeping:'💤' })[state] || '';
 }
 
+// Пульсация подсветки помеченных объектов (0.45..0.9).
+function markPulseAlpha() {
+  return 0.45 + 0.45 * Math.abs(Math.sin(((G && G.tick) || 0) * 0.12));
+}
+
+// Сколько объектов помечено для работы (чистая функция — для HUD и тестов).
+function countMarked() {
+  const out = { trees: 0, rocks: 0, animals: 0 };
+  if (!G) return out;
+  if (G.map) for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) {
+    const o = G.map[y][x] && G.map[y][x].obj;
+    if (o && o.marked) { if (o.type === 'rock') out.rocks++; else if (o.type === 'tree') out.trees++; }
+  }
+  if (G.animals) for (const a of G.animals) if (a.alive && a.marked) out.animals++;
+  return out;
+}
+
 function drawPawn(p) {
   const isSelected = G.selectedPawnId === p.id;
   const x = Math.round(p.x), y = Math.round(p.y);
@@ -2620,12 +2643,15 @@ function drawAnimal(a) {
   ctx.textBaseline = 'middle';
   ctx.fillText(icons[a.type]||'🐾', a.x, a.y);
   if (a.marked) {
-    ctx.strokeStyle = '#c04444';
+    const al = markPulseAlpha();
+    ctx.strokeStyle = `rgba(192,68,68,${al})`;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(a.x, a.y, 10, 0, Math.PI*2);
     ctx.stroke();
     ctx.lineWidth = 1;
+    ctx.globalAlpha = al; ctx.font = '9px serif';
+    ctx.fillText('🎯', a.x, a.y-12); ctx.globalAlpha = 1;
   }
 }
 
@@ -3720,7 +3746,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.48','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ пешек.'],
+    ['now', 'v1.36–1.49','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов.'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>

@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.49 - Marked-Resource Readability (visual pass 2)
+
+- Marked trees/rocks/animals now have a pulsing highlight + a small job icon (🪓/⛏️/🎯), so the player
+  clearly sees what's queued for chopping/mining/hunting.
+- Added pure helpers `markPulseAlpha()` and `countMarked()` (trees/rocks/animals) for HUD/tests.
+- Render-only; no gameplay systems touched.
+- Harness: Scenario AN (countMarked + pulsing-highlight render smoke). A-AN (40) green.
+
 ### v1.48 - Work Animation (visual pass 2 start)
 
 - Working pawns now swing a tool (animated handle + head, oscillating with the tick) instead of a static

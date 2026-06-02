@@ -804,6 +804,27 @@ const test = `
   console.log('SCENARIO AM (work animation + state glyph):');
   console.log('   glyph map:', glyphOk?'OK':'FAIL', '| working render smoke:', amSmokeOk?'OK':'FAIL');
   if (!glyphOk || !amSmokeOk) throw new Error('Scenario AM failed');
+
+  // Scenario AN: marked-resource readability (countMarked + pulsing-highlight render smoke)
+  newGame('settlers');
+  const c0 = countMarked();
+  // пометить пару деревьев, камень и животное
+  let mt = 0, mr = 0;
+  for (let y=0;y<MAP_H && (mt<2||mr<1);y++) for (let x=0;x<MAP_W && (mt<2||mr<1);x++) {
+    const o = G.map[y][x].obj;
+    if (o && o.type==='tree' && mt<2) { o.marked = true; mt++; }
+    else if (o && o.type==='rock' && mr<1) { o.marked = true; mr++; }
+  }
+  if (G.animals[0]) G.animals[0].marked = true;
+  const c1 = countMarked();
+  const countOk = c0.trees===0 && c0.rocks===0 && c0.animals===0
+    && c1.trees===mt && c1.rocks===mr && c1.animals===(G.animals[0]?1:0)
+    && markPulseAlpha() >= 0 && markPulseAlpha() <= 1;
+  let anSmoke = true;
+  try { for (let i=0;i<4;i++){ G.tick++; render(); } } catch(e) { anSmoke = false; }
+  console.log('SCENARIO AN (marked readability):');
+  console.log('   count:', JSON.stringify(c1), '| countOk:', countOk?'OK':'FAIL', '| render smoke:', anSmoke?'OK':'FAIL');
+  if (!countOk || !anSmoke) throw new Error('Scenario AN failed');
 })();
 `;
 try {
