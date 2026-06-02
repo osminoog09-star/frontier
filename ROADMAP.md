@@ -382,3 +382,13 @@
 
 ### Next Autonomous Target
 - [ ] Polish tradepost profile UI: visible output line, disabled-state clarity, compact hint.
+
+## Update 2026-06-02 - v1.26 Mobile Layout Hotfix
+- [x] Created `versions/frontier-v1.26.html` from the current playable build.
+- [x] Fixed phone game layout: no desktop sidebar, no horizontal overflow, canvas fills the viewport.
+- [x] Hid desktop topbar action buttons on touch/mobile so they do not overlap the map.
+- [x] Public site no longer embeds the game iframe on phones; it shows a fullscreen play card.
+- [x] Mobile smoke green at 390x844: site scrollWidth=390, game scrollWidth=390, sidebar hidden, canvas 390x790, no runtime errors.
+
+### Next Autonomous Target
+- [ ] Polish tradepost profile UI: visible output line, disabled-state clarity, compact hint.

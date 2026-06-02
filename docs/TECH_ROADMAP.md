@@ -31,6 +31,7 @@
 7. Обновлены `docs/CHANGELOG.md` и `docs/HANDOFF.md`.
 8. Commit + push в GitHub.
 9. Проверен публичный GitHub Pages URL.
+10. Для mobile-изменений: отдельный smoke 390x844, без horizontal overflow, без desktop sidebar.
 
 ## 3. Ближайшая очередь
 
@@ -79,6 +80,17 @@
 - Диагностика заблокированных ground stacks уже есть.
 - Следующий шаг: лучшая визуальная подсветка blocked stacks на карте.
 - Позже: отдельное хранение по складам вместо глобального `G.res`.
+
+### 3.5 Mobile UX
+
+Цель: телефонная версия должна быть проверяемой, а не случайно сжатой desktop-страницей.
+
+- [x] GitHub Pages открывает игру с телефона.
+- [x] Public site на телефоне показывает fullscreen play card вместо iframe.
+- [x] Game page скрывает desktop sidebar на mobile/touch.
+- [x] Canvas занимает viewport без horizontal overflow.
+- [x] Harness остаётся зелёным после mobile CSS hotfix.
+- [ ] Следующий шаг: компактные mobile-панели для пешек/лога вместо полного desktop sidebar.
 
 ## 4. Среднесрочная очередь
 

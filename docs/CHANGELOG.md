@@ -2,6 +2,15 @@
 
 ## 2026-06-02
 
+### v1.26 - Mobile Layout Hotfix
+
+- Fixed phone layout for the public game page.
+- Mobile game now hides the desktop sidebar at a wider breakpoint and on touch devices.
+- Mobile canvas now uses the full viewport without horizontal overflow.
+- Topbar desktop action buttons are hidden on phones so they do not leak over the map.
+- Public site no longer embeds the game iframe on phones; it shows a fullscreen play card instead.
+- Mobile smoke: 390px viewport, no horizontal scroll, sidebar hidden, canvas 390x790, no runtime errors.
+
 ### v1.25 - Tradepost Deal UI
 
 - Tradepost info panel now shows caravan profile buttons.

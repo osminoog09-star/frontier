@@ -48,6 +48,9 @@
     min-height:620px; overflow:hidden; position:relative;
   }
   .game iframe { width:100%; height:100%; min-height:620px; border:0; display:block; background:#111; }
+  .mobile-game-card { display:none; padding:22px; min-height:0; }
+  .mobile-game-card h1 { font-size:34px; margin-bottom:10px; }
+  .mobile-game-card p { margin:0 0 14px; }
   .open-game {
     position:absolute; right:12px; bottom:12px; display:flex; gap:8px;
   }
@@ -84,13 +87,18 @@
     .game, .game iframe { min-height:560px; }
   }
   @media (max-width:640px) {
+    .wrap { width:min(100% - 20px, 520px); }
     .nav { align-items:flex-start; flex-direction:column; padding:10px 0; }
-    .nav-actions { margin-left:0; justify-content:flex-start; }
+    .nav-actions { width:100%; margin-left:0; justify-content:flex-start; }
+    .nav-actions .btn { flex:1 1 140px; }
     h1 { font-size:31px; }
     .stats { grid-template-columns:1fr; }
-    .game, .game iframe { min-height:540px; }
-    .open-game { left:10px; right:10px; }
-    .open-game .btn { width:100%; }
+    .game { display:none; }
+    .mobile-game-card { display:block; }
+    .mobile-game-card .btn { width:100%; min-height:48px; font-size:16px; }
+    .section { padding:14px; }
+    .side { padding:16px; }
+    .doclinks .btn { flex:1 1 150px; }
   }
 </style>
 </head>
@@ -110,6 +118,12 @@
 </header>
 
 <main class="wrap">
+  <section class="card mobile-game-card">
+    <h1>FRONTIER</h1>
+    <p>На телефоне игра открывается отдельной полноэкранной страницей, без сжатого iframe и боковой панели.</p>
+    <a class="btn primary" href="frontier.html">Играть на весь экран</a>
+  </section>
+
   <section class="top">
     <div class="card game">
       <iframe src="frontier.html" title="Игровая сборка FRONTIER"></iframe>
@@ -126,7 +140,7 @@
         <a href="frontier.html">https://osminoog09-star.github.io/frontier/frontier.html</a>
       </div>
       <div class="stats">
-        <div class="stat"><b>v1.25</b><span>Выбор сделки</span></div>
+        <div class="stat"><b>v1.26</b><span>Мобильный hotfix</span></div>
         <div class="stat"><b>A-U зелёные</b><span>Автотесты боя, экономики, логистики, производства, торговли, сценариев, целей, событий, караванов и UI</span></div>
         <div class="stat"><b>GitHub Pages</b><span>Публичная web-сборка из ветки <code>main</code></span></div>
         <div class="stat"><b>Сейчас</b><span>Полировка торгового поста</span></div>
@@ -160,6 +174,7 @@
         <div class="row done"><b>Сценарные события</b><span>Золотая лихорадка давит на еду, форт получает ранние налёты, караванный путь чаще зовёт торговцев.</span></div>
         <div class="row done"><b>Караванные профили</b><span>Еда, медицина, стройматериалы и понятный результат сделки.</span></div>
         <div class="row done"><b>Выбор сделки</b><span>Торговый пост показывает профили, цену и запускает выбранную сделку.</span></div>
+        <div class="row done"><b>Мобильный hotfix</b><span>Игра на телефоне открывается без iframe, боковой панели, пустой высоты и горизонтального скролла.</span></div>
         <div class="row now"><b>Полировка сделки</b><span>Показать результат профиля прямо в панели, без наведения.</span></div>
       </div>
     </div>

@@ -6,7 +6,7 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.25 - Tradepost Deal UI`.
+- Последний локальный срез: `v1.26 - Mobile Layout Hotfix`.
 - Последний harness: Scenarios A-U pass.
 - Ожидаемая anomaly в harness: Scenario K специально создает заблокированный `meat` stack и проверяет диагностику.
 
@@ -38,6 +38,11 @@
   - `materials`
 - `runCaravanTrade(profileId)` поддерживает детерминированный профиль для harness и будущего UI.
 - Торговый пост показывает кнопки профилей сделок, цену и tooltip с результатом.
+- Исправлен телефонный layout:
+  - игра скрывает desktop sidebar на touch/mobile;
+  - canvas занимает viewport без горизонтального overflow;
+  - topbar desktop-кнопки не торчат над картой;
+  - публичный сайт на телефоне не встраивает игру iframe, а даёт fullscreen-кнопку.
 - Public `index.html` полностью на русском и показывает roadmap/status.
 - Добавлен `docs/TECH_ROADMAP.md`.
 - Добавлены `AGENTS.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
