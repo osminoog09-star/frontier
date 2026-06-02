@@ -21,6 +21,14 @@
    - `https://osminoog09-star.github.io/frontier/`
    - `https://osminoog09-star.github.io/frontier/frontier.html`
 
+## Публичный сайт index.html — обновлять КАЖДЫЙ релиз
+
+- `index.html` (GitHub Pages) использует блоки `.badge` (хедер) и `.row done/now/next` (что готово / что дальше),
+  НЕ `.stat`. Регэкспы по `.stat` молча не сработают — проверяй, что замена реально применилась.
+- На каждом релизном срезе обновлять: бейдж версии `<b>vX.YY</b>`, число harness-сценариев (`A-XX`),
+  бейдж «Сейчас», и переносить завершённые пункты из «Что будет дальше» в «Что уже сделано».
+- После push проверять live: https://osminoog09-star.github.io/frontier/index.html#roadmap
+
 ## Тесты должны быть ДЕТЕРМИНИРОВАННЫМИ
 
 - Сценарий harness не должен зависеть от `Math.random()` в ИИ. Если гоняешь `updatePawns()` в цикле и
