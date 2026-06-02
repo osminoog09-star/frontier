@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.27 - Caravan Deal UI Polish
+
+- Tradepost deal buttons now show the deal output directly in the row, not only in the tooltip.
+- Insufficient-gold deals are dimmed and show how much gold is missing (`не хватает N💰`).
+- Panel shows current gold and a short hint ("выбери сделку").
+- A "last deal" line summarizes the most recent successful caravan trade (`G._lastCaravan`).
+- Harness: Scenario V validates visible outputs, the insufficient-gold hint, and the last-deal line.
+
 ### v1.26 - Mobile Layout Hotfix
 
 - Fixed phone layout for the public game page.

@@ -312,3 +312,9 @@
 
 ### Next Step
 - Show profile outputs directly in the panel and improve disabled-state clarity.
+
+## Update 2026-06-02 - Caravan Deal UI Polish (v1.27)
+- Tradepost deal rows now display outputs inline; insufficient-gold deals show the missing amount.
+- Added a current-gold readout, a "choose a deal" hint, and a last-deal summary line.
+- Harness Scenario V covers the polished trade UI.
+- Next: deepen scenario-specific events (Gold Rush pressure, Fort waves, Caravan route bonuses).

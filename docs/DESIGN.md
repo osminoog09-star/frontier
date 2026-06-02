@@ -169,3 +169,8 @@
 - The tradepost panel now gives the player direct profile buttons instead of hiding all trade behind random events.
 - Cost is visible on each button.
 - Output is available through tooltip; the next polish step is making output visible without hover.
+
+## Update 2026-06-02 - Trade UX Design Status
+- Caravan trading is now readable at a glance: the player sees what each deal gives and whether they can afford it without hovering.
+- A last-deal line gives quick feedback that a trade actually happened.
+- Next design focus: scenario events should make each start feel distinct (Gold Rush economic risk, Fort raid waves, Caravan route trade windows).

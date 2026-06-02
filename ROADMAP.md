@@ -392,3 +392,8 @@
 
 ### Next Autonomous Target
 - [ ] Polish tradepost profile UI: visible output line, disabled-state clarity, compact hint.
+
+## Update 2026-06-02 - v1.27 Caravan Deal UI Polish
+- Tradepost deal UI: inline outputs, insufficient-gold hint, current gold readout, last-deal line.
+- Harness Scenario V added; A-V green, 0 unexpected anomalies.
+- Snapshot: versions/frontier-v1.27.html. Public site index.html updated to v1.27.

@@ -1685,6 +1685,7 @@ function runCaravanTrade(profileId=null) {
   }
   ensureScenarioStats();
   G.stats.caravanDeals++;
+  G._lastCaravan = `${profile.name}: −${profile.cost}💰 → ${caravanOutputText(outputs)}`;
   addLog(`🐎 ${profile.name}: -${profile.cost} золота, ${caravanOutputText(outputs)}`, 'good');
   Diag.action(`${profile.name} @${post.tx},${post.ty}`);
   return { traded:true, profile:selectedProfile, spentGold:profile.cost, outputs, ...outputs };
@@ -2948,12 +2949,23 @@ function showBuildingInfo(b, cx, cy) {
 
 function caravanTradeHtml(b) {
   if (!b || b.type !== 'tradepost' || !b.done || b.blueprint) return '';
+  const gold = Math.floor(G.res.gold || 0);
   const buttons = Object.entries(CARAVAN_PROFILES).map(([id, profile]) => {
-    const canBuy = (G.res.gold || 0) >= profile.cost;
+    const canBuy = gold >= profile.cost;
     const out = caravanOutputText(profile.out);
-    return `<button class="filter-chip ${canBuy?'on':'off'}" data-caravan-profile="${id}" title="${out}">${profile.name}: ${profile.cost}💰</button>`;
+    const lack = canBuy ? '' : ` · не хватает ${profile.cost - gold}💰`;
+    return `<button class="filter-chip ${canBuy?'on':'off'}" data-caravan-profile="${id}"`
+      + ` style="display:block;width:100%;text-align:left;margin:2px 0;${canBuy?'':'opacity:.55;cursor:not-allowed'}"`
+      + ` title="${profile.name}: отдать ${profile.cost}💰, получить ${out}">`
+      + `<b>${profile.name}</b> <span style="float:right">${profile.cost}💰${lack}</span>`
+      + `<br><span style="color:#9cc06a">${out}</span></button>`;
   }).join('');
-  return `<div class="inf-line">🐎 Караванные сделки:</div><div class="filter-row">${buttons}</div>`;
+  const last = G._lastCaravan
+    ? `<div class="inf-line" style="color:#7ca84e">✓ Последняя сделка: ${G._lastCaravan}</div>`
+    : '';
+  return `<div class="inf-line">🐎 Караванные сделки (золото: ${gold}💰):</div>`
+    + `<div class="inf-line" style="color:#888;font-size:10px">Выбери сделку — золото в обмен на припасы</div>`
+    + `<div class="filter-row" style="flex-direction:column">${buttons}</div>${last}`;
 }
 
 function bindCaravanTradeButtons(b) {

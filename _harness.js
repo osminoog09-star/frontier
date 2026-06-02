@@ -456,6 +456,21 @@ const test = `
   const tradeUiOutputs = tradeHtml.includes('+62 food') && tradeHtml.includes('+18 med') && tradeHtml.includes('+58 wood');
   console.log('SCENARIO U (tradepost caravan UI):');
   console.log('   profiles:', tradeUiProfiles?'OK':'FAIL', '| costs:', tradeUiCosts?'OK':'FAIL', '| outputs:', tradeUiOutputs?'OK':'FAIL');
+
+  // Scenario V: caravan deal UI polish (visible outputs, insufficient-gold hint, last-deal result)
+  newGame('caravan');
+  const tpV = G.buildings.find(b=>b.type==='tradepost' && b.done);
+  G.res.gold = 0;
+  G._lastCaravan = null;
+  const poorHtml = caravanTradeHtml(tpV);
+  const lackHint = poorHtml.includes('не хватает');
+  const outRow = poorHtml.includes('+62 food'); // outputs visible in the row, not only tooltip
+  G.res.gold = 100;
+  const vTrade = runCaravanTrade('food');
+  const richHtml = caravanTradeHtml(tpV);
+  const lastShown = vTrade.traded && !!G._lastCaravan && richHtml.includes('Последняя сделка');
+  console.log('SCENARIO V (caravan deal UI polish):');
+  console.log('   outputs in row:', outRow?'OK':'FAIL', '| lack hint:', lackHint?'OK':'FAIL', '| last deal shown:', lastShown?'OK':'FAIL');
 })();
 `;
 try {
