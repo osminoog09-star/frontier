@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.47';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.48';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -2451,6 +2451,11 @@ function drawItemStack(item) {
   ctx.fillText(Math.floor(item.amount), x, y-8);
 }
 
+// Глиф состояния над пешкой (чистая функция — тестируемо). Бой и downed рисуются отдельно.
+function stateGlyph(state) {
+  return ({ working:'⚒', joy:'♪', breakdown:'💢', sleeping:'💤' })[state] || '';
+}
+
 function drawPawn(p) {
   const isSelected = G.selectedPawnId === p.id;
   const x = Math.round(p.x), y = Math.round(p.y);
@@ -2555,10 +2560,21 @@ function drawPawn(p) {
       ctx.beginPath(); ctx.moveTo(x+5, y); ctx.lineTo(x+10, y-2); ctx.stroke();
       ctx.lineWidth = 1;
     }
+    // Tool swing if working — взмах инструмента (рубка/кирка/молот)
+    if (p.state==='working') {
+      const sw = Math.abs(Math.sin((G.tick||0) * 0.35));   // 0..1 мах вверх-вниз
+      const hx = x + 5, hy = y - 1;
+      const tipX = hx + 4, tipY = hy - 7 + sw * 8;
+      ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 2;       // рукоять
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tipX, tipY); ctx.stroke();
+      ctx.fillStyle = '#cfcfcf';                             // головка инструмента
+      ctx.fillRect(tipX - 1, tipY - 2, 4, 3);
+      ctx.lineWidth = 1;
+    }
   }
 
-  // State icon (working tool, etc.)
-  const stateIcon = {working:'⚒', fighting:'', joy:'♪', breakdown:'💢'}[p.state] || '';
+  // State glyph (для не-боевых состояний; downed рисуется отдельно крестом)
+  const stateIcon = stateGlyph(p.state);
   if (stateIcon) {
     ctx.font = '9px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(stateIcon, x+8, y-12);
@@ -3704,7 +3720,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.47','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений (спокойно/ночь/бой).'],
+    ['now', 'v1.36–1.48','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ пешек.'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>

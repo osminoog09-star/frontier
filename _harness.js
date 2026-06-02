@@ -794,6 +794,16 @@ const test = `
   console.log('SCENARIO AL (mood music profile):');
   console.log('   profile select:', musicOk?'OK':'FAIL', '(' + [mCalm,mNight,mCombat].join('/') + ') | setMusic smoke:', (mSmokeOk&&musicProfileSet)?'OK':'FAIL');
   if (!musicOk || !mSmokeOk || !musicProfileSet) throw new Error('Scenario AL failed');
+
+  // Scenario AM: state glyph (pure) + work-animation render smoke
+  newGame('settlers');
+  const glyphOk = stateGlyph('working')==='⚒' && stateGlyph('joy')==='♪'
+    && stateGlyph('idle')==='' && stateGlyph('fighting')==='' && stateGlyph('downed')==='';
+  let amSmokeOk = true;
+  try { const p0 = G.pawns[0]; p0.state='working'; for (let i=0;i<5;i++){ G.tick++; render(); } } catch(e) { amSmokeOk = false; }
+  console.log('SCENARIO AM (work animation + state glyph):');
+  console.log('   glyph map:', glyphOk?'OK':'FAIL', '| working render smoke:', amSmokeOk?'OK':'FAIL');
+  if (!glyphOk || !amSmokeOk) throw new Error('Scenario AM failed');
 })();
 `;
 try {

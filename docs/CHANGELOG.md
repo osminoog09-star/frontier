@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.48 - Work Animation (visual pass 2 start)
+
+- Working pawns now swing a tool (animated handle + head, oscillating with the tick) instead of a static
+  "⚒" glyph — chopping/mining/building reads at a glance.
+- Extracted `stateGlyph(state)` as a pure helper (testable); fighting and downed keep their own visuals.
+- Render-only change, isolated to drawPawn — no gameplay systems touched.
+- Harness: Scenario AM (stateGlyph map + working-render smoke). A-AM (39) green.
+
 ### v1.47 - Mood Music (finishes the audio pass)
 
 - Added a quiet mood music pad layered under ambient: calm (day), darker (night), tense (combat — when
