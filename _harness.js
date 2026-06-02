@@ -1,5 +1,25 @@
 const vm = require('vm');
 const fs = require('fs');
+
+// ---- ENCODING + SYNC GUARD ----
+// Ловит регрессию кодировки/синхронизации ДО игровых сценариев.
+// Класс бага: PowerShell `Get-Content -Raw` читает UTF-8 как CP1251 и портит кириллицу,
+// или frontier.html не пересобран из _core.js. Чинится через `node build.js`.
+(function guardEncodingAndSync() {
+  const MOJIBAKE = /вЂ|РєРёР|Р”Рё|С‚С€/;
+  const core = fs.readFileSync(__dirname + '/_core.js', 'utf8');
+  if (MOJIBAKE.test(core)) { console.error('GUARD FAIL: mojibake в _core.js — пересобери из чистого источника.'); process.exit(1); }
+  if (fs.existsSync(__dirname + '/frontier.html')) {
+    const html = fs.readFileSync(__dirname + '/frontier.html', 'utf8');
+    if (MOJIBAKE.test(html)) { console.error('GUARD FAIL: mojibake в frontier.html — запусти `node build.js`.'); process.exit(1); }
+    if (!html.includes('Дикий Запад')) { console.error('GUARD FAIL: нет «Дикий Запад» в frontier.html — кодировка повреждена.'); process.exit(1); }
+    const s = html.indexOf('<script>') + 8, e = html.lastIndexOf('</script>');
+    const inner = html.slice(s, e).trim();
+    if (inner !== core.trim()) { console.error('GUARD FAIL: frontier.html не синхронизирован с _core.js — запусти `node build.js`.'); process.exit(1); }
+    console.log('GUARD OK: кодировка чистая, frontier.html синхронизирован с _core.js.');
+  }
+})();
+
 const noop = () => {};
 function makeEl() {
   const base = {

@@ -6,8 +6,13 @@
 
 1. Не делать большие изменения без маленького проверяемого среза.
 2. Каждый gameplay-срез должен иметь scenario в `_harness.js`.
-3. После изменения `_core.js` обязательно синхронизировать его в `frontier.html`.
-4. После релизного среза создавать `versions/frontier-vX.Y.html`.
+3. После изменения `_core.js` синхронизировать его в `frontier.html` ТОЛЬКО командой `node build.js`.
+   - НЕЛЬЗЯ синхронизировать вручную через PowerShell `Get-Content -Raw` / `Set-Content`:
+     в Windows PowerShell 5.1 это читает UTF-8 как CP1251 и портит кириллицу (double-encoding, кракозябры).
+   - `build.js` собирает `frontier.html` = `frontier.template.html` (обёртка с маркером `__CORE__`) + `_core.js`,
+     пишет UTF-8 без BOM и имеет mojibake-guard (упадёт, если порча).
+   - `node _harness.js` дополнительно проверяет: нет mojibake и `frontier.html` синхронизирован с `_core.js`.
+4. После релизного среза создавать `versions/frontier-vX.Y.html` (копией собранного `frontier.html`).
 5. Обновлять `ROADMAP.md`, `docs/TECH_ROADMAP.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md` и публичный `index.html`, если меняется статус.
 6. Перед push запускать `node _harness.js`.
 7. После push проверять GitHub Pages:

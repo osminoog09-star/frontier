@@ -2,13 +2,21 @@
 
 ## 2026-06-02
 
-### v1.27 - Caravan Deal UI Polish
+### v1.27 - Caravan Deal UI Polish + Safe Build System
 
 - Tradepost deal buttons now show the deal output directly in the row, not only in the tooltip.
 - Insufficient-gold deals are dimmed and show how much gold is missing (`не хватает N💰`).
 - Panel shows current gold and a short hint ("выбери сделку").
 - A "last deal" line summarizes the most recent successful caravan trade (`G._lastCaravan`).
 - Harness: Scenario V validates visible outputs, the insufficient-gold hint, and the last-deal line.
+
+- ENCODING FIX: a manual PowerShell `Get-Content -Raw` sync corrupted `frontier.html` (UTF-8 read as
+  CP1251 → double-encoded Cyrillic / кракозябры). Rebuilt `frontier.html` cleanly.
+- New safe build: `build.js` (Node, UTF-8) assembles `frontier.html` from `frontier.template.html`
+  (`__CORE__` marker) + `_core.js`, with a built-in mojibake guard that refuses to write garbled output.
+- `_harness.js` now has an encoding+sync guard: fails if `frontier.html` has mojibake or is out of sync
+  with `_core.js`. This whole bug class is now caught automatically by `node _harness.js`.
+- Rule: sync ONLY via `node build.js`; never hand-edit the embedded `<script>` via PowerShell.
 
 ### v1.26 - Mobile Layout Hotfix
 

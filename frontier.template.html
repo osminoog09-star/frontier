@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Frontier — Дикий Запад</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' font-size='48'%3E%F0%9F%A4%A0%3C/text%3E%3C/svg%3E">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body { background: #1a1a1a; color: #ccc; font-family: 'Courier New', monospace; font-size: 13px; user-select: none; overscroll-behavior: none; }
+
+  #topbar {
+    display: flex; align-items: center; gap: 8px;
+    background: #111; border-bottom: 1px solid #333;
+    padding: 4px 8px; height: 38px; flex-wrap: wrap;
+    overflow: hidden;
+  }
+  .res-group { display: flex; gap: 10px; align-items: center; }
+  .res { display: flex; align-items: center; gap: 3px; font-size: 12px; color: #aaa; }
+  .res span { color: #e8c97e; font-weight: bold; }
+  .res-icon { font-size: 14px; }
+  #clock { color: #aaa; font-size: 11px; margin-left: auto; white-space: nowrap; }
+
+  #main { display: flex; height: calc(100dvh - 38px); min-width: 0; overflow: hidden; }
+
+  #canvas-wrap { flex: 1 1 auto; min-width: 0; position: relative; overflow: hidden; background:#101010; }
+  canvas { display: block; cursor: default; width: 100%; height: 100%; }
+
+  #sidebar {
+    width: 290px; background: #161616; border-left: 1px solid #2a2a2a;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  .tabs { display: flex; background: #111; border-bottom: 1px solid #2a2a2a; }
+  .tab-btn {
+    flex: 1; padding: 6px 2px; background: none; border: none; color: #666;
+    cursor: pointer; font-size: 11px; font-family: inherit;
+    border-bottom: 2px solid transparent; transition: all 0.1s;
+  }
+  .tab-btn:hover { color: #aaa; background: #1a1a1a; }
+  .tab-btn.active { color: #e8c97e; border-bottom-color: #e8c97e; background: #161616; }
+
+  .tab-content { flex: 1; overflow-y: auto; padding: 6px; display: none; }
+  .tab-content.active { display: block; }
+  .tab-content::-webkit-scrollbar { width: 4px; }
+  .tab-content::-webkit-scrollbar-thumb { background: #333; }
+
+  /* Pawn cards */
+  .pawn-card {
+    background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 3px;
+    margin-bottom: 6px; padding: 6px; cursor: pointer; transition: border-color 0.1s;
+  }
+  .pawn-card:hover { border-color: #444; }
+  .pawn-card.selected { border-color: #e8c97e; background: #252015; }
+  .pawn-card.dead { border-color: #5a2222; opacity: 0.6; }
+  .pawn-name { color: #e8c97e; font-weight: bold; font-size: 12px; margin-bottom: 4px; }
+  .pawn-status { color: #888; font-size: 11px; margin-bottom: 4px; }
+  .bar-wrap { margin-bottom: 3px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 10px; color: #777; margin-bottom: 1px; }
+  .bar { height: 5px; background: #1a1a1a; border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+  .bar-hp { background: #c04444; }
+  .bar-food { background: #7ca84e; }
+  .bar-mood { background: #5a8fbf; }
+  .bar-energy { background: #8a6cc7; }
+
+  .trait-row { display:flex; flex-wrap:wrap; gap:3px; margin:4px 0 2px; }
+  .trait-chip { font-size:9px; padding:1px 5px; border-radius:8px; cursor:help; }
+  .trait-chip.tg { background:rgba(124,168,78,0.18); color:#9cc06a; }
+  .trait-chip.tb { background:rgba(192,88,88,0.18); color:#d08a8a; }
+  .pawn-thoughts { font-size: 10px; color: #666; margin-top: 3px; }
+  .thought-pos { color: #7ca84e; }
+  .thought-neg { color: #c05050; }
+
+  /* Build panel */
+  .section-title { color: #7a6a4a; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin: 8px 0 4px; padding-bottom: 2px; border-bottom: 1px solid #2a2a2a; }
+  .build-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; }
+  .build-btn {
+    background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 3px;
+    color: #aaa; cursor: pointer; padding: 5px 4px; font-size: 11px;
+    font-family: inherit; text-align: left; transition: all 0.1s;
+  }
+  .build-btn:hover { border-color: #555; background: #252525; color: #ddd; }
+  .build-btn.active { border-color: #e8c97e; background: #2a2515; color: #e8c97e; }
+  .build-btn .cost { font-size: 10px; color: #666; display: block; margin-top: 2px; }
+  .build-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Research */
+  .research-item {
+    background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 3px;
+    padding: 6px; margin-bottom: 4px;
+  }
+  .research-item.done { border-color: #3a5a3a; }
+  .research-item.active { border-color: #5a7a5a; background: #1a231a; }
+  .research-name { font-size: 12px; color: #bbb; margin-bottom: 2px; }
+  .research-item.done .research-name { color: #7ca84e; }
+  .research-desc { font-size: 10px; color: #666; margin-bottom: 4px; }
+  .research-cost { font-size: 10px; color: #888; }
+  .btn-small {
+    background: #2a3a2a; border: 1px solid #3a5a3a; color: #7ca84e;
+    padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: inherit;
+    border-radius: 2px; margin-top: 4px;
+  }
+  .btn-small:hover { background: #334a33; }
+  .btn-small:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Events log */
+  .log-entry { font-size: 11px; color: #888; padding: 3px 0; border-bottom: 1px solid #1e1e1e; }
+  .log-entry .log-time { color: #555; }
+  .log-entry.warn { color: #c07040; }
+  .log-entry.danger { color: #c04444; }
+  .log-entry.good { color: #7ca84e; }
+
+  /* Bottom bar */
+  #bottombar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    padding: 4px 8px 4px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  }
+  .action-btn {
+    background: #1e1e1e; border: 1px solid #333; color: #aaa;
+    padding: 4px 10px; cursor: pointer; font-size: 11px; font-family: inherit;
+    border-radius: 2px; transition: all 0.1s;
+  }
+  .action-btn:hover { border-color: #555; background: #252525; color: #ddd; }
+  .action-btn.active { border-color: #e8c97e; background: #2a2515; color: #e8c97e; }
+  .action-btn.danger-btn { border-color: #5a2222; }
+  .action-btn.danger-btn:hover { background: #2a1515; color: #e05050; }
+
+  /* Info panel overlay */
+  #info-overlay {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(16,16,16,0.92); border: 1px solid #333; border-radius: 4px;
+    padding: 8px 10px; min-width: 200px; max-width: 260px;
+    font-size: 11px; display: none; pointer-events: auto;
+  }
+  #info-overlay .inf-title { color: #e8c97e; font-size: 12px; margin-bottom: 4px; }
+  #info-overlay .inf-line { color: #888; margin: 2px 0; }
+  #info-overlay .inf-line b { color: #bbb; }
+  .filter-row { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+  .filter-chip {
+    background:#1e1e1e; border:1px solid #333; color:#aaa;
+    padding:2px 5px; border-radius:2px; font:10px 'Courier New', monospace;
+    cursor:pointer;
+  }
+  .filter-chip.on { border-color:#4f6a35; color:#9cc06a; background:#1b2618; }
+  .filter-chip.off { border-color:#5a2525; color:#c07070; background:#261818; }
+
+  /* Priority editor */
+  #priority-panel {
+    position: absolute; top: 50px; right: 300px;
+    background: #161616; border: 1px solid #333; border-radius: 4px;
+    padding: 8px; min-width: 280px; display: none; z-index: 100;
+  }
+  #priority-panel h3 { color: #e8c97e; font-size: 12px; margin-bottom: 6px; }
+  .priority-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .priority-label { flex: 1; color: #aaa; font-size: 11px; }
+  .priority-select {
+    background: #1e1e1e; border: 1px solid #333; color: #ddd;
+    padding: 2px 4px; font-size: 11px; font-family: inherit; border-radius: 2px;
+    cursor: pointer;
+  }
+  .priority-select option { background: #1e1e1e; }
+
+  /* Tooltip */
+  #tooltip {
+    position: fixed; background: rgba(16,16,16,0.95); border: 1px solid #444;
+    padding: 5px 8px; font-size: 11px; color: #ccc; border-radius: 3px;
+    pointer-events: none; display: none; max-width: 200px; z-index: 200;
+  }
+
+  /* Season indicator */
+  #season-badge {
+    font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 4px;
+  }
+
+  /* Weather badge */
+  #weather-badge { font-size: 13px; margin-left: 4px; }
+
+  /* Autobattle indicator */
+  #autobattle-btn.active { border-color: #c04444; background: #2a1515; color: #e05050; }
+
+  /* Win/lose overlay */
+  #end-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center; z-index: 500;
+    flex-direction: column; gap: 16px;
+  }
+  #end-overlay h1 { font-size: 32px; color: #e8c97e; }
+  #end-overlay p { color: #aaa; font-size: 14px; }
+  #end-overlay button {
+    background: #2a2a1a; border: 1px solid #e8c97e; color: #e8c97e;
+    padding: 8px 24px; font-size: 14px; cursor: pointer; font-family: inherit;
+    border-radius: 3px;
+  }
+
+  /* Schedule grid */
+  .schedule-grid { display: grid; grid-template-columns: 80px repeat(24, 1fr); gap: 1px; font-size: 9px; }
+  .sched-name { color: #aaa; display: flex; align-items: center; padding: 1px 3px; }
+  .sched-cell {
+    height: 16px; border-radius: 1px; cursor: pointer; transition: filter 0.1s;
+  }
+  .sched-cell:hover { filter: brightness(1.3); }
+  .sched-any { background: #3a4a3a; }
+  .sched-sleep { background: #2a2a5a; }
+  .sched-work { background: #4a3a1a; }
+  .sched-joy { background: #3a2a4a; }
+  .sched-hours { grid-column: 2 / -1; display: grid; grid-template-columns: repeat(24, 1fr); color: #555; text-align: center; }
+
+  /* Keybinds hint */
+  #keyhints { position: absolute; bottom: 44px; left: 8px; font-size: 10px; color: #444; pointer-events: none; }
+
+  /* Minimap */
+  #minimap-wrap {
+    position: absolute; right: 8px; bottom: 44px; z-index: 20;
+    border: 1px solid #4a4028; border-radius: 4px; overflow: hidden;
+    background: #0d0b08; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  #minimap { display: block; cursor: pointer; }
+
+  /* Zoom controls */
+  #zoom-controls {
+    position: absolute; right: 8px; bottom: 188px; z-index: 20;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .zoom-btn {
+    width: 30px; height: 30px; background: rgba(20,17,12,0.85); border: 1px solid #4a4028;
+    color: #d8c89a; font-size: 16px; cursor: pointer; border-radius: 4px; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .zoom-btn:hover { background: #2a2418; border-color: #e8c97e; color: #e8c97e; }
+
+  /* Achievement toast */
+  #toast {
+    position: fixed; top: 50px; left: 50%; transform: translateX(-50%) translateY(-20px);
+    background: linear-gradient(135deg,#2a2415,#1a1610); border: 1px solid #e8c97e;
+    border-radius: 8px; padding: 10px 22px; z-index: 400; text-align: center;
+    opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast-title { color: #e8c97e; font-size: 15px; font-weight: bold; }
+  .toast-sub { color: #aaa; font-size: 11px; margin-top: 2px; }
+
+  /* Objective HUD */
+  #objective-hud {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    background: rgba(16,16,16,0.85); border: 1px solid #3a3320; border-radius: 6px;
+    padding: 6px 14px; text-align: center; min-width: 220px; pointer-events: none;
+  }
+  #obj-title { color: #e8c97e; font-size: 11px; font-weight: bold; }
+  #obj-text { color: #aaa; font-size: 11px; margin: 2px 0 4px; }
+  .obj-bar { height: 5px; background: #1a1a1a; border-radius: 3px; overflow: hidden; }
+  #obj-fill { height: 100%; background: linear-gradient(90deg,#7a6a2a,#e8c97e); width: 0%; transition: width 0.5s; }
+
+  /* Help popup */
+  #help-popup {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: #181818; border: 2px solid #e8c97e; border-radius: 8px;
+    padding: 18px 22px; max-width: 440px; z-index: 300; box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+  }
+  #help-popup h2 { color: #e8c97e; font-size: 18px; margin-bottom: 10px; }
+  #help-popup p { color: #bbb; font-size: 12px; margin: 8px 0; line-height: 1.5; }
+  #help-popup ul { margin: 8px 0 8px 4px; list-style: none; }
+  #help-popup li { color: #aaa; font-size: 12px; margin: 5px 0; line-height: 1.4; }
+  #help-popup b { color: #e8c97e; }
+  #help-popup button {
+    background: #2a2a1a; border: 1px solid #e8c97e; color: #e8c97e; margin-top: 10px;
+    padding: 8px 20px; font-size: 13px; cursor: pointer; font-family: inherit; border-radius: 4px; width: 100%;
+  }
+  #help-popup button:hover { background: #3a3a20; }
+
+  /* Main menu */
+  #main-menu {
+    position: fixed; inset: 0; z-index: 600;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(80,60,30,0.4), transparent 60%),
+      linear-gradient(160deg, #1a1410 0%, #0d0b08 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .menu-box {
+    display: flex; gap: 0; width: 860px; max-width: 94vw; height: 540px; max-height: 92vh;
+    background: rgba(20,18,14,0.6); border: 1px solid #3a3320; border-radius: 12px;
+    overflow: hidden; box-shadow: 0 20px 70px rgba(0,0,0,0.7);
+  }
+  .menu-left {
+    width: 320px; padding: 36px 28px; display: flex; flex-direction: column;
+    background: linear-gradient(180deg, rgba(40,32,18,0.6), rgba(20,16,10,0.6));
+    border-right: 1px solid #2a2418;
+  }
+  .menu-logo { color: #e8c97e; font-size: 40px; letter-spacing: 2px; text-shadow: 0 3px 10px rgba(0,0,0,0.6); }
+  .menu-sub { color: #998a6a; font-size: 12px; margin: 6px 0 30px; }
+  .menu-buttons { display: flex; flex-direction: column; gap: 10px; }
+  .menu-btn-big {
+    background: rgba(40,36,24,0.8); border: 1px solid #4a4028; color: #d8c89a;
+    padding: 12px 16px; font-size: 14px; font-family: inherit; cursor: pointer;
+    border-radius: 6px; text-align: left; transition: all 0.12s;
+  }
+  .menu-btn-big:hover { background: #3a3220; border-color: #e8c97e; color: #e8c97e; transform: translateX(3px); }
+  .menu-ver { margin-top: auto; color: #5a5040; font-size: 10px; }
+  .menu-right { flex: 1; padding: 28px; overflow-y: auto; color: #bbb; }
+  .menu-right::-webkit-scrollbar { width: 6px; }
+  .menu-right::-webkit-scrollbar-thumb { background: #3a3320; border-radius: 3px; }
+  .menu-right h2 { color: #e8c97e; font-size: 20px; margin-bottom: 14px; }
+  .menu-right h3 { color: #d8c89a; font-size: 14px; margin: 16px 0 6px; }
+  .menu-right p, .menu-right li { font-size: 12px; line-height: 1.6; color: #aaa; }
+  .menu-right ul { margin-left: 18px; margin-top: 4px; }
+  .rm-done { color: #7ca84e; }
+  .rm-now { color: #e8c97e; }
+  .rm-soon { color: #888; }
+  .rm-row { padding: 4px 0; border-bottom: 1px solid #221e14; }
+  .rm-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 8px; margin-right: 6px; vertical-align: middle; }
+  .tag-done { background: #2a4a2a; color: #7ca84e; }
+  .tag-now { background: #4a3a1a; color: #e8c97e; }
+  .tag-soon { background: #2a2a2a; color: #888; }
+
+  @media (max-width: 980px), (pointer: coarse) {
+    body { font-size: 12px; position: fixed; inset: 0; }
+    #topbar {
+      height: 54px; min-height: 54px; padding: 3px 6px; gap: 4px;
+      align-content: flex-start; overflow: hidden;
+    }
+    #topbar > b { font-size: 12px !important; }
+    .res-group { gap: 5px; flex-wrap: wrap; max-width: calc(100vw - 8px); }
+    .res { font-size: 10px; gap: 2px; line-height: 1.1; }
+    .res-icon { font-size: 12px; }
+    #clock { position: absolute; top: 32px; left: 0; right: 0; width: 100%; text-align: center; margin-left: 0; font-size: 10px; }
+    #topbar .action-btn { display: none; }
+    #main { width: 100vw; height: calc(100dvh - 54px); display: block; }
+    #sidebar { display: none !important; }
+    #canvas-wrap { width: 100vw; height: calc(100dvh - 54px); min-width: 100vw; max-width: 100vw; }
+    #bottombar {
+      max-height: 104px; overflow-y: auto; padding: 4px 6px 8px; gap: 4px;
+      right: 0; bottom: 0; -webkit-overflow-scrolling: touch;
+    }
+    .action-btn { padding: 4px 7px; font-size: 10px; white-space: nowrap; }
+    #objective-hud { top: 8px; left: 50%; transform: translateX(-50%); width: min(280px, calc(100vw - 20px)); min-width: 0; }
+    #minimap-wrap { width: 112px; height: 84px; right: 8px; bottom: 112px; }
+    #minimap { width: 112px; height: 84px; }
+    #zoom-controls { right: 8px; bottom: 204px; }
+    #info-overlay { max-width: min(270px, calc(100vw - 20px)); left: 8px !important; }
+    #priority-panel { right: 8px; left: 8px; min-width: 0; max-height: calc(100dvh - 90px); overflow: auto; }
+    #help-popup {
+      width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 82px);
+      overflow: auto; padding: 14px 16px;
+    }
+    #help-popup h2 { font-size: 17px; }
+    #help-popup p, #help-popup li { font-size: 11px; line-height: 1.45; }
+    #main-menu { overflow: auto; padding: 10px; align-items: flex-start; justify-content: center; }
+    .menu-box {
+      width: min(430px, 100%); height: auto; min-height: 0; max-height: calc(100dvh - 20px);
+      display: block; overflow: auto; border-radius: 10px;
+    }
+    .menu-right { display: none; }
+    .menu-logo { font-size: 30px; letter-spacing: 1px; }
+    .menu-left { width: 100%; min-height: 0; padding: 18px 16px; border-right: 0; }
+    .menu-sub { margin: 6px 0 16px; line-height: 1.35; }
+    .menu-buttons { gap: 8px; }
+    .menu-btn-big { padding: 10px 12px; font-size: 13px; }
+    .menu-ver { margin-top: 12px; }
+  }
+
+</style>
+</head>
+<body>
+
+<div id="main-menu">
+  <div class="menu-box">
+    <div class="menu-left">
+      <h1 class="menu-logo">🤠 FRONTIER</h1>
+      <p class="menu-sub">Дикий Запад • выживание в стиле RimWorld</p>
+      <div class="menu-buttons">
+        <button class="menu-btn-big" id="mm-new">▶ Новая игра</button>
+        <button class="menu-btn-big" id="mm-scenarios">🗺️ Сценарии старта</button>
+        <button class="menu-btn-big" id="mm-continue">📂 Продолжить</button>
+        <button class="menu-btn-big" id="mm-howto">❓ Как играть</button>
+        <button class="menu-btn-big" id="mm-achv">🏅 Достижения</button>
+        <button class="menu-btn-big" id="mm-roadmap">🗺️ Роадмап / Обновления</button>
+        <a class="menu-btn-big" id="mm-site" href="index.html" style="text-decoration:none;display:block">🌐 Сайт проекта (роадмап, инфо)</a>
+        <button class="menu-btn-big" id="mm-diag">🐞 Скачать лог диагностики</button>
+        <button class="menu-btn-big" id="mm-resume" style="display:none">✖ Закрыть меню</button>
+      </div>
+      <p class="menu-ver">PRE-ALPHA • build 0.8.0 • план: docs/ROADMAP_MONTH.md</p>
+    </div>
+    <div class="menu-right" id="menu-panel">
+      <div id="menu-panel-content"></div>
+    </div>
+  </div>
+</div>
+
+<div id="topbar">
+  <b style="color:#e8c97e;font-size:14px;">🤠 FRONTIER</b>
+  <div class="res-group">
+    <div class="res"><span class="res-icon">🌾</span><span id="res-food">0</span></div>
+    <div class="res"><span class="res-icon">🪵</span><span id="res-wood">0</span></div>
+    <div class="res"><span class="res-icon">⛏️</span><span id="res-ore">0</span></div>
+    <div class="res"><span class="res-icon">🥩</span><span id="res-meat">0</span></div>
+    <div class="res"><span class="res-icon">💊</span><span id="res-med">0</span></div>
+    <div class="res"><span class="res-icon">🔬</span><span id="res-sci">0</span></div>
+    <div class="res"><span class="res-icon">💰</span><span id="res-gold">0</span></div>
+  </div>
+  <span id="season-badge" style="background:#6a5a3a;color:#e8c97e;">Весна</span>
+  <span id="weather-badge">☀️</span>
+  <span id="clock">День 1 • 6:00</span>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <button class="action-btn" id="menu-btn">☰ Меню</button>
+    <button class="action-btn" id="diag-btn" title="Скачать лог диагностики (действия + аномалии)">🐞</button>
+    <button class="action-btn" id="save-btn">💾 Сохр</button>
+    <button class="action-btn" id="load-btn">📂 Загр</button>
+    <button class="action-btn" id="speed-btn">▶ x1</button>
+    <button class="action-btn" id="autobattle-btn">⚔️ Авт.Бой</button>
+    <button class="action-btn" id="sound-btn" title="Звук вкл/выкл">🔊</button>
+    <button class="action-btn" id="fullscreen-btn">⛶ Экран</button>
+  </div>
+</div>
+
+<div id="main">
+  <div id="canvas-wrap">
+    <canvas id="game-canvas"></canvas>
+    <div id="bottombar">
+      <button class="action-btn" id="cancel-btn">✖ Отмена [Esc]</button>
+      <button class="action-btn" id="build-farm-btn">🌾 Ферма</button>
+      <button class="action-btn" id="build-kitchen-btn">🍳 Кухня</button>
+      <button class="action-btn" id="build-mine-btn">⛏️ Шахта</button>
+      <button class="action-btn" id="build-stockpile-btn">▣ Склад</button>
+      <button class="action-btn" id="build-fence-btn">🪵 Забор</button>
+      <button class="action-btn" id="build-gate-btn">▫ Ворота</button>
+      <button class="action-btn" id="build-tower-btn">🗼 Вышка</button>
+      <button class="action-btn" id="build-saloon-btn">🍺 Салун</button>
+      <button class="action-btn" id="build-tradepost-btn">🧳 Торг.</button>
+      <button class="action-btn" id="build-lab-btn">🔬 Лаб.</button>
+      <button class="action-btn" id="build-clinic-btn">💊 Клиника</button>
+      <button class="action-btn" id="build-smithy-btn">🔨 Кузня</button>
+      <button class="action-btn" id="build-camp-btn">🏕️ Лагерь</button>
+      <button class="action-btn" id="build-well-btn">🪣 Колодец</button>
+      <button class="action-btn" id="demolish-btn" style="border-color:#5a2222;">🔥 Снести</button>
+    </div>
+    <div id="info-overlay"></div>
+
+    <div id="minimap-wrap">
+      <canvas id="minimap" width="180" height="135"></canvas>
+    </div>
+
+    <div id="zoom-controls">
+      <button class="zoom-btn" id="zoom-in">＋</button>
+      <button class="zoom-btn" id="zoom-out">－</button>
+      <button class="zoom-btn" id="zoom-reset" title="Сброс масштаба">⊙</button>
+    </div>
+
+    <div id="objective-hud">
+      <div id="obj-title">🎯 Цель</div>
+      <div id="obj-text">Накопи 500 💰 золота</div>
+      <div class="obj-bar"><div id="obj-fill"></div></div>
+    </div>
+
+    <div id="help-popup">
+      <h2>🤠 Добро пожаловать на Фронтир!</h2>
+      <p>Ты управляешь отрядом ковбоев <b>не напрямую</b> — как в RimWorld. Они сами работают по приоритетам.</p>
+      <ul>
+        <li>🌲 <b>Кликни по дереву/камню</b> → ковбой сам придёт и срубит/добудет.</li>
+        <li>🏗️ <b>Снизу выбери постройку</b> → кликни на карту (зелёная зона = можно). Ковбой построит.</li>
+        <li>👥 <b>Клик по ковбою</b> → настрой приоритеты работ.</li>
+        <li>📅 Вкладка «Расп.» → расписание сна/работы/отдыха по часам.</li>
+        <li>⚔️ Кнопка «Авт.Бой» → ковбои сами отстреливают бандитов.</li>
+        <li>🖱️ Тащи мышь = двигать камеру. Колесо = тоже камера.</li>
+      </ul>
+      <p style="color:#7ca84e">Совет: сначала построй <b>2-3 фермы</b> (еда) и <b>лагерь</b> (сон), потом руби лес на постройки.</p>
+      <button id="help-close">Понятно, играть! 🚀</button>
+    </div>
+
+    <div id="keyhints">
+      [ЛКМ] выбрать/построить &nbsp;|&nbsp; [ПКМ] атака &nbsp;|&nbsp; [Колесо] зум &nbsp;|&nbsp; [Тащить] камера &nbsp;|&nbsp; [F] ферма &nbsp;|&nbsp; [M] шахта &nbsp;|&nbsp; [Esc] сброс
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="pawns">👥 Пешки</button>
+      <button class="tab-btn" data-tab="schedule">📅 Расп.</button>
+      <button class="tab-btn" data-tab="research">🔬 Наука</button>
+      <button class="tab-btn" data-tab="log">📜 Лог</button>
+    </div>
+
+    <div class="tab-content active" id="tab-pawns">
+      <div id="pawn-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-schedule">
+      <p class="section-title">Расписание</p>
+      <div id="schedule-wrap"></div>
+    </div>
+
+    <div class="tab-content" id="tab-research">
+      <p class="section-title">Наука</p>
+      <div id="research-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-log">
+      <p class="section-title">Журнал событий</p>
+      <div id="event-log"></div>
+    </div>
+  </div>
+</div>
+
+<div id="priority-panel">
+  <h3 id="priority-title">Приоритеты работ</h3>
+  <div id="priority-rows"></div>
+  <button class="btn-small" id="priority-close">Закрыть</button>
+</div>
+
+<div id="end-overlay" id="end-overlay">
+  <h1 id="end-title">Конец</h1>
+  <p id="end-msg"></p>
+  <button id="end-restart">Новая игра</button>
+</div>
+
+<div id="tooltip"></div>
+<div id="toast"></div>
+
+<script>
+__CORE__
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+

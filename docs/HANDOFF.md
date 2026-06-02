@@ -6,8 +6,10 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.27 - Caravan Deal UI Polish`.
-- Последний harness: Scenarios A-V pass.
+- Последний локальный срез: `v1.27 - Caravan Deal UI Polish + Safe Build System`.
+- Последний harness: Scenarios A-V pass + encoding/sync guard OK.
+- СБОРКА: `frontier.html` собирается ТОЛЬКО через `node build.js` (template + `_core.js`, UTF-8, mojibake-guard).
+  Никаких ручных PowerShell `Get-Content -Raw` синхронизаций — они портят кириллицу.
 - Ожидаемая anomaly в harness: Scenario K специально создает заблокированный `meat` stack и проверяет диагностику.
 
 ## Последние изменения
