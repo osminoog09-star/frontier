@@ -240,3 +240,11 @@
 
 ### Next Architecture Work
 - Expose profile selection through tradepost UI without coupling UI rendering to random events.
+
+## Update 2026-06-02 - Tradepost Deal UI Architecture Notes
+- `caravanTradeHtml()` renders profile buttons from `CARAVAN_PROFILES`.
+- `bindCaravanTradeButtons()` executes the selected profile and refreshes the info panel.
+- Scenario U validates profile ids, costs, and output strings in tradepost UI HTML.
+
+### Next Architecture Work
+- Keep improving tradepost UI through generated profile rows, while preserving `runCaravanTrade(profileId)` as the single execution path.

@@ -164,3 +164,8 @@
 - Caravan trades now have distinct identities: mixed supplies, food, medicine, and building materials.
 - This gives the tradepost a clearer role as a strategic supply tool.
 - The next design step is letting the player choose the profile before paying gold.
+
+## Update 2026-06-02 - Tradepost Deal UI Design Status
+- The tradepost panel now gives the player direct profile buttons instead of hiding all trade behind random events.
+- Cost is visible on each button.
+- Output is available through tooltip; the next polish step is making output visible without hover.

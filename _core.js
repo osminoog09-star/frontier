@@ -2926,6 +2926,7 @@ function showBuildingInfo(b, cx, cy) {
   const recipeLines = recipeStatusLines(b).map(line => `<div class="inf-line">${line}</div>`).join('');
   const recipeControls = recipeControlHtml(b);
   const stockpileLines = stockpileInfoHtml(b);
+  const caravanTrade = caravanTradeHtml(b);
   overlay.style.display = 'block';
   overlay.style.left = Math.min(cx, canvas.width-280) + 'px';
   overlay.style.top = (cy + 10) + 'px';
@@ -2937,10 +2938,35 @@ function showBuildingInfo(b, cx, cy) {
     ${recipeLines}
     ${recipeControls}
     ${stockpileLines}
+    ${caravanTrade}
   `;
   bindRecipeControlButtons(b);
   bindStockpileFilterButtons(b);
+  bindCaravanTradeButtons(b);
   setTimeout(() => { overlay.style.display='none'; }, 3000);
+}
+
+function caravanTradeHtml(b) {
+  if (!b || b.type !== 'tradepost' || !b.done || b.blueprint) return '';
+  const buttons = Object.entries(CARAVAN_PROFILES).map(([id, profile]) => {
+    const canBuy = (G.res.gold || 0) >= profile.cost;
+    const out = caravanOutputText(profile.out);
+    return `<button class="filter-chip ${canBuy?'on':'off'}" data-caravan-profile="${id}" title="${out}">${profile.name}: ${profile.cost}💰</button>`;
+  }).join('');
+  return `<div class="inf-line">🐎 Караванные сделки:</div><div class="filter-row">${buttons}</div>`;
+}
+
+function bindCaravanTradeButtons(b) {
+  if (!b || b.type !== 'tradepost') return;
+  const overlay = document.getElementById('info-overlay');
+  overlay.querySelectorAll('.filter-chip[data-caravan-profile]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      runCaravanTrade(btn.dataset.caravanProfile);
+      updateUI();
+      showBuildingInfo(b, parseInt(overlay.style.left,10)||0, Math.max(0, (parseInt(overlay.style.top,10)||0)-10));
+    });
+  });
 }
 
 function recipeControlHtml(b) {

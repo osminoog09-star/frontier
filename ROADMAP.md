@@ -369,4 +369,16 @@
 - [x] Regression harness green: Scenarios A-T pass, expected Scenario K anomaly is detected, no runtime errors.
 
 ### Next Autonomous Target
-- [ ] Tradepost UI for choosing caravan deal profile.
+- [x] Tradepost UI for choosing caravan deal profile.
+
+## Update 2026-06-02 - v1.25 Tradepost Deal UI Slice
+- [x] Created `versions/frontier-v1.25.html` from the current playable build.
+- [x] Tradepost info panel shows caravan profile buttons.
+- [x] Profile buttons show name and gold cost.
+- [x] Profile tooltips expose output resources.
+- [x] Clicking a profile runs the selected caravan trade and refreshes UI.
+- [x] Extended `_harness.js` with Scenario U: tradepost caravan UI.
+- [x] Regression harness green: Scenarios A-U pass, expected Scenario K anomaly is detected, no runtime errors.
+
+### Next Autonomous Target
+- [ ] Polish tradepost profile UI: visible output line, disabled-state clarity, compact hint.

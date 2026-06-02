@@ -445,6 +445,17 @@ const test = `
   const matProfileOk = matTrade.traded && matTrade.profile === 'materials' && G.res.gold === 80 && G.res.wood >= 58 && G.res.ore >= 18 && G.stats.caravanDeals === 1;
   console.log('SCENARIO T (caravan profiles):');
   console.log('   food:', foodProfileOk?'OK':'FAIL', '| medicine:', medProfileOk?'OK':'FAIL', '| materials:', matProfileOk?'OK':'FAIL');
+
+  // Scenario U: tradepost UI exposes caravan profiles
+  newGame('caravan');
+  G.res.gold = 100;
+  const tradepost = G.buildings.find(b=>b.type==='tradepost' && b.done);
+  const tradeHtml = caravanTradeHtml(tradepost);
+  const tradeUiProfiles = ['mixed','food','medicine','materials'].every(id => tradeHtml.includes('data-caravan-profile="' + id + '"'));
+  const tradeUiCosts = tradeHtml.includes('12💰') && tradeHtml.includes('18💰') && tradeHtml.includes('20💰');
+  const tradeUiOutputs = tradeHtml.includes('+62 food') && tradeHtml.includes('+18 med') && tradeHtml.includes('+58 wood');
+  console.log('SCENARIO U (tradepost caravan UI):');
+  console.log('   profiles:', tradeUiProfiles?'OK':'FAIL', '| costs:', tradeUiCosts?'OK':'FAIL', '| outputs:', tradeUiOutputs?'OK':'FAIL');
 })();
 `;
 try {

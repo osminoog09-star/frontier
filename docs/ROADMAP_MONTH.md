@@ -302,4 +302,13 @@
 - Done: `_harness.js` includes Scenario T for caravan profiles.
 
 ### Next Step
-- Show caravan profile cost/output in tradepost UI and let the player choose a deal.
+- Polish caravan profile UI in the tradepost panel.
+
+## Update 2026-06-02 - Tradepost Deal UI Status
+- Done: tradepost UI slice implemented as `versions/frontier-v1.25.html`.
+- Done: tradepost info panel exposes caravan profile buttons.
+- Done: clicking a profile runs the selected caravan deal.
+- Done: `_harness.js` includes Scenario U for profile UI HTML.
+
+### Next Step
+- Show profile outputs directly in the panel and improve disabled-state clarity.

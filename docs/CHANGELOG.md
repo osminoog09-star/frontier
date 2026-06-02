@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.25 - Tradepost Deal UI
+
+- Tradepost info panel now shows caravan profile buttons.
+- Each button shows profile name and gold cost.
+- Button tooltip exposes profile output.
+- Clicking a profile runs that caravan deal, updates resources, and refreshes the panel.
+- Harness: Scenario U.
+
 ### v1.24 - Caravan Profiles
 
 - Added `CARAVAN_PROFILES`: `mixed`, `food`, `medicine`, `materials`.

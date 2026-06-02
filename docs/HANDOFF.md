@@ -6,8 +6,8 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.24 - Caravan Profiles`.
-- Последний harness: Scenarios A-T pass.
+- Последний локальный срез: `v1.25 - Tradepost Deal UI`.
+- Последний harness: Scenarios A-U pass.
 - Ожидаемая anomaly в harness: Scenario K специально создает заблокированный `meat` stack и проверяет диагностику.
 
 ## Последние изменения
@@ -37,18 +37,19 @@
   - `medicine`
   - `materials`
 - `runCaravanTrade(profileId)` поддерживает детерминированный профиль для harness и будущего UI.
+- Торговый пост показывает кнопки профилей сделок, цену и tooltip с результатом.
 - Public `index.html` полностью на русском и показывает roadmap/status.
 - Добавлен `docs/TECH_ROADMAP.md`.
 - Добавлены `AGENTS.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
 
 ## Что делать дальше
 
-Приоритет 1: UI выбора караванной сделки.
+Приоритет 1: полировка UI караванной сделки.
 
-- Показать доступные профили у торгового поста.
-- Дать игроку выбрать профиль сделки вместо чистого random.
-- Показать стоимость и результат до покупки.
-- Harness для UI/HTML профилей.
+- Сделать вывод ресурсов видимым в строке, а не только tooltip.
+- Лучше показывать недоступные сделки при нехватке золота.
+- Добавить короткую подсказку в торговом посте: "выбери сделку".
+- Harness для улучшенного UI профилей.
 
 Приоритет 2: углубить сценарные события.
 
@@ -77,7 +78,7 @@ node _harness.js
 
 - `_core.js` - игровая логика.
 - `frontier.html` - публичная сборка, должна быть синхронизирована с `_core.js`.
-- `_harness.js` - автотесты A-T.
+- `_harness.js` - автотесты A-U.
 - `index.html` - публичный русский сайт/roadmap.
 - `ROADMAP.md` - общий roadmap.
 - `docs/TECH_ROADMAP.md` - технический roadmap для агентов.
