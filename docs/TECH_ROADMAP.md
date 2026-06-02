@@ -7,7 +7,7 @@
 - Public site is now a player-facing Russian status page, not a raw technical roadmap dump.
 - Mobile smoke must stay part of any UI release: 390x844, no horizontal overflow, desktop sidebar hidden, minimap not overlapping the bottom build bar.
 - Keep `index.html` readable for a player; keep deep agent details in `docs/HANDOFF.md`, `docs/WIP.md`, and this file.
-- Next gameplay slice remains Week 2 content: furniture/rooms or deeper ranch systems, with harness coverage.
+- Next gameplay slice remains Week 2 content: rooms, animal pens/livestock, audio, or visual polish, with harness coverage.
 
 ## v1.37 furniture/rooms start
 
@@ -46,6 +46,15 @@
 - Scenario AG validates no-yield without stable and food/gold yield with stable.
 - Next ranch work can add animal taming or a visible ranch capacity/state.
 
+## v1.42 horse taming
+
+- Added `G.herd` state with wild horses, tamed horses, and taming progress.
+- Stable daily loop now advances taming; Ranches add a small taming-rate support.
+- Tamed horses boost movement and Ranch food/gold output.
+- Save/load persists herd state and `normalizeGameState()` initializes old saves.
+- Scenario AH validates no-stable no-taming, stable taming, boosted ranch yield, and mount-speed boost.
+- Next ranch/animal work can add pens, livestock resources, or a compact animal panel.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -59,7 +68,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-U уже покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарные цели, базовые сценарные события, профили караванов и UI торгового поста.
+- Автотесты: `_harness.js`, сценарии A-AH покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, ранчо и приручение лошадей.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза

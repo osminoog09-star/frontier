@@ -39,6 +39,10 @@
 
 ## Последний завершённый срез
 
+- v1.42 - Horse Taming Slice.
+- Конюшни приручают диких лошадей; приручённые лошади ускоряют ковбоев и усиливают ранчо.
+- Harness A-AH green, local Chrome mobile smoke green.
+
 - v1.41 - Ranch Daily Yield.
 - Добавлено ранчо: при наличии конюшни каждый день даёт еду и золото.
 - Harness A-AG green, local Chrome mobile smoke green.

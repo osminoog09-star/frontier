@@ -2,6 +2,15 @@
 
 ## 2026-06-02
 
+### v1.42 - Horse Taming Slice
+
+- Added a visible herd state: wild horses, tamed horses, and taming progress.
+- Completed Stables now tame wild horses over days; Ranches help the taming rate.
+- Tamed horses add a small movement bonus and boost Ranch daily food/gold output.
+- Stable/Ranch info overlays and the stats panel now show horse state.
+- Save/load persists `herd`; old saves normalize it safely.
+- Harness: Scenario AH validates no-stable no-taming, stable taming, ranch boost, and speed boost.
+
 ### v1.41 - Ranch Daily Yield
 
 - Added **Ranch (Ранчо 🤠)** as the next horses/ranch slice.

@@ -692,6 +692,25 @@ const test = `
   console.log('SCENARIO AG (ranch daily yield):');
   console.log('   requires stable:', noStableOk?'OK':'FAIL', '| yield:', withStableYield.food + ' food / ' + withStableYield.gold + ' gold', '| applied:', withStableOk?'OK':'FAIL');
   if (!noStableOk || !withStableOk) throw new Error('Scenario AG failed');
+
+  // Scenario AH: stables tame wild horses, and tamed horses boost ranch output
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['ranch','stable'].includes(b.type));
+  G.herd = { wild:2, tamed:0, tameProgress:0 };
+  const noStableTaming = processHorseTaming();
+  const noStableOk2 = noStableTaming.tamed === 0 && G.herd.wild === 2 && G.herd.tamed === 0 && G.herd.tameProgress === 0;
+  G.buildings.push({ type:'stable', tx:15, ty:12, done:true, blueprint:false, hp:200, maxHp:200 });
+  processHorseTaming();
+  processHorseTaming();
+  const beforeThird = {...G.herd};
+  const thirdTaming = processHorseTaming();
+  const tamingOk = beforeThird.wild === 2 && beforeThird.tamed === 0 && thirdTaming.tamed === 1 && G.herd.wild === 1 && G.herd.tamed === 1 && G.herd.tameProgress === 5;
+  G.buildings.push({ type:'ranch', tx:12, ty:12, done:true, blueprint:false, hp:200, maxHp:200 });
+  const boostedYield = ranchDailyYield();
+  const boostOk = boostedYield.food === 10 && boostedYield.gold === 3 && mountSpeedMul() > 1.15;
+  console.log('SCENARIO AH (horse taming):');
+  console.log('   no stable:', noStableOk2?'OK':'FAIL', '| tamed:', G.herd.tamed, '| yield:', boostedYield.food + ' food / ' + boostedYield.gold + ' gold', '| boost:', boostOk?'OK':'FAIL');
+  if (!noStableOk2 || !tamingOk || !boostOk) throw new Error('Scenario AH failed');
 })();
 `;
 try {

@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.41';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.42';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -77,6 +77,7 @@ const RESEARCHES = [
 let G = null; // game state
 const DEFAULT_RES = { food:120, wood:60, ore:20, meat:0, med:10, sci:0, gold:30 };
 const STORABLE_RES = ['food','wood','ore','meat','med','gold'];
+const DEFAULT_HERD = { wild:6, tamed:0, tameProgress:0 };
 const SCENARIOS = {
   settlers: { name:'Поселенцы', desc:'Обычный старт: баланс еды, дерева и золота.' },
   goldrush: { name:'Золотая лихорадка', desc:'Больше золота и руды, но меньше еды. Быстрее выход к богатству.' },
@@ -90,6 +91,17 @@ function ensureScenarioStats() {
   for (const [key, value] of Object.entries(defaults)) {
     if (typeof G.stats[key] !== 'number' || isNaN(G.stats[key])) G.stats[key] = value;
   }
+}
+
+function ensureHerd() {
+  if (!G.herd || typeof G.herd !== 'object') G.herd = {...DEFAULT_HERD};
+  for (const [key, value] of Object.entries(DEFAULT_HERD)) {
+    if (typeof G.herd[key] !== 'number' || isNaN(G.herd[key]) || G.herd[key] < 0) G.herd[key] = value;
+  }
+  G.herd.wild = Math.floor(G.herd.wild);
+  G.herd.tamed = Math.floor(G.herd.tamed);
+  G.herd.tameProgress = clamp(G.herd.tameProgress, 0, 99);
+  return G.herd;
 }
 
 function scenarioGoalStatus() {
@@ -203,6 +215,7 @@ function newGame(scenarioId='settlers') {
     buildings: [],
     items: [],
     animals: [],
+    herd: {...DEFAULT_HERD},
     enemies: [],
     projectiles: [],
     bloodSplats: [],
@@ -551,15 +564,41 @@ function spawnEnemy(count) {
 function mountSpeedMul() {
   if (!G || !G.buildings) return 1;
   const stables = G.buildings.filter(b => b.type === 'stable' && b.done && !b.blueprint).length;
-  return 1 + Math.min(stables, 3) * 0.15;
+  const herd = ensureHerd();
+  return 1 + Math.min(stables, 3) * 0.15 + Math.min(herd.tamed, 4) * 0.05;
+}
+function horseTamingRate() {
+  if (!G || !G.buildings) return 0;
+  const stables = G.buildings.filter(b => b.type === 'stable' && b.done && !b.blueprint).length;
+  const ranches = G.buildings.filter(b => b.type === 'ranch' && b.done && !b.blueprint).length;
+  if (!stables) return 0;
+  return stables * 35 + ranches * 10;
+}
+function processHorseTaming() {
+  const herd = ensureHerd();
+  const rate = horseTamingRate();
+  if (!rate || herd.wild <= 0) return { tamed:0, rate, progress:herd.tameProgress };
+  herd.tameProgress += rate;
+  let tamedNow = 0;
+  while (herd.tameProgress >= 100 && herd.wild > 0) {
+    herd.tameProgress -= 100;
+    herd.wild--;
+    herd.tamed++;
+    tamedNow++;
+  }
+  if (herd.wild <= 0) herd.tameProgress = 0;
+  if (tamedNow) addLog(`🐴 Приручено лошадей: +${tamedNow} (в табуне: ${herd.tamed})`, 'good');
+  return { tamed:tamedNow, rate, progress:herd.tameProgress };
 }
 function ranchDailyYield() {
   if (!G || !G.buildings) return { food:0, gold:0 };
+  const herd = ensureHerd();
   const ranches = G.buildings.filter(b=>b.type==='ranch' && b.done && !b.blueprint).length;
   const stables = G.buildings.filter(b=>b.type==='stable' && b.done && !b.blueprint).length;
   if (!ranches || !stables) return { food:0, gold:0 };
-  const food = ranches * 8;
-  const gold = ranches * Math.min(stables, 3) * 2;
+  const herdBonus = Math.min(herd.tamed, ranches * 4);
+  const food = ranches * 8 + herdBonus * 2;
+  const gold = ranches * Math.min(stables, 3) * 2 + herdBonus;
   return { food, gold };
 }
 
@@ -1660,6 +1699,7 @@ function normalizeGameState(source='') {
     if (typeof G.res[k] !== 'number' || isNaN(G.res[k]) || G.res[k] < 0) G.res[k] = v;
   }
   ensureScenarioStats();
+  ensureHerd();
   if (!Array.isArray(G.items)) G.items = [];
   for (const b of G.buildings || []) {
     normalizeStockpileFilters(b);
@@ -1738,6 +1778,7 @@ function onNewDay() {
     G.stats.goldEarned += ranchYield.gold;
     addLog(`🤠 Ранчо дало ${ranchYield.food} еды и ${ranchYield.gold} золота`, 'good');
   }
+  processHorseTaming();
 
   // Research progress
   if (G.activeResearch) {
@@ -2828,6 +2869,7 @@ function renderResearch() {
     <div>🪵 Деревьев срублено: <b style="color:#aaa">${G.stats.treesChopped}</b></div>
     <div>💰 Золота заработано: <b style="color:#aaa">${Math.floor(G.stats.goldEarned)}</b></div>
     <div>🐎 Караванных сделок: <b style="color:#aaa">${Math.floor(G.stats.caravanDeals || 0)}</b></div>
+    <div>🐴 Лошади: <b style="color:#aaa">${ensureHerd().tamed} приручено / ${ensureHerd().wild} диких</b></div>
     <div>🏠 Комфорт усадьбы: <b style="color:#aaa">${homesteadComfortLabel()} (${homesteadComfortScore()}/3)</b></div>
     <div style="margin-top:4px;color:#7a6a4a">🏆 ${SCENARIOS[G.scenario]?.name || SCENARIOS.settlers.name}: ${goal.sidebar}</div>
   `;
@@ -3190,9 +3232,15 @@ function furnitureInfoHtml(b) {
   if (b.type === 'bed') return `<div class="inf-line">Комфорт: <b>сон быстрее, настроение выше</b></div>`;
   if (b.type === 'table') return `<div class="inf-line">Комфорт: <b>еда за столом даёт настроение</b></div>`;
   if (b.type === 'decor') return `<div class="inf-line">Красота: <b>рядом настроение растёт</b></div>`;
+  if (b.type === 'stable') {
+    const herd = ensureHerd();
+    const rate = horseTamingRate();
+    return `<div class="inf-line">Лошади: <b>${herd.tamed} приручено, ${herd.wild} диких</b> · приручение ${rate ? herd.tameProgress + '/100' : 'нужна конюшня'}</div>`;
+  }
   if (b.type === 'ranch') {
+    const herd = ensureHerd();
     const y = ranchDailyYield();
-    return `<div class="inf-line">Ранчо: <b>${y.food || 0} еды / ${y.gold || 0} золота в день</b></div>`;
+    return `<div class="inf-line">Ранчо: <b>${y.food || 0} еды / ${y.gold || 0} золота в день</b> · лошадей ${herd.tamed}</div>`;
   }
   return '';
 }
@@ -3557,7 +3605,8 @@ function showRoadmapPanel(panel) {
     ['done','v1.13–1.20','Логистика и торговля: фильтры складов, диагностика, лимиты крафта, торговый пост, караваны.'],
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
-    ['now', 'v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
+    ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
+    ['now', 'v1.36–1.42','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун и приручение лошадей.'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
@@ -3572,9 +3621,8 @@ function showRoadmapPanel(panel) {
     ${versionRows.map(([st,title,desc]) => rmRow(st, title, desc)).join('')}
     <h3>🔜 Что дальше (Неделя 2)</h3>
     <ul>
-      <li>⚔️ Боевая глубина: состояние «ранен/без сознания» вместо мгновенной смерти, спасение раненых</li>
-      <li>🐴 Лошади и ранчо (транспорт, доход)</li>
-      <li>🛏️ Мебель и комнаты (кровати, столы, «красота» помещений)</li>
+      <li>🏠 Комнаты и стены жилья: спальня/столовая, room-бонусы, понятная оценка помещения</li>
+      <li>🐴 Животноводство: загоны, скот, ресурсы животных и animal-панель</li>
       <li>🔊 Аудио-пасс: эмбиент (ветер/сверчки), музыка настроений</li>
       <li>🎨 Визуал-пасс 2: анимации работ пешек, автотайлинг террейна, полировка интерфейса</li>
     </ul>
@@ -3675,6 +3723,7 @@ function saveGame() {
         t.obj ? [t.type, t.obj.type==='tree'?1:2, Math.round(t.obj.hp), t.obj.marked?1:0] : t.type
       )),
       animals: G.animals.filter(a=>a.alive).map(a=>({type:a.type,x:a.x,y:a.y,hp:a.hp,maxHp:a.maxHp,speed:a.speed,meat:a.meat})),
+      herd: G.herd,
       items: G.items || [],
       pawns:G.pawns.map(p=>({...p, thoughts:[]})),
       buildings:G.buildings,
@@ -3699,6 +3748,7 @@ function loadGame() {
     G.season=save.season||0; G.dayOfYear=save.dayOfYear||0;
     G.weather=save.weather||'clear';
     if (save.nextId) G.nextId = save.nextId;
+    if (save.herd) G.herd = save.herd;
     if (save.camera) G.camera = { x:save.camera.x, y:save.camera.y, zoom:save.camera.zoom||1 };
 
     // Restore terrain map (critical: without this a new map is generated → buildings on water)

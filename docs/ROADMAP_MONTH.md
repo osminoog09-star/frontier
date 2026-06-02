@@ -151,6 +151,16 @@
 4. **Оффлайн всегда работает** даже после введения сети.
 5. **Документация живая** — обновляется вместе с кодом (`docs/`).
 
+## Update 2026-06-02 - v1.42 Horse Taming
+- Done: конюшни теперь приручают диких лошадей через дневной прогресс.
+- Done: добавлено состояние табуна (`wild`, `tamed`, `tameProgress`) с нормализацией старых сейвов.
+- Done: приручённые лошади усиливают скорость ковбоев и дневной доход ранчо.
+- Done: info-overlay конюшни/ранчо и stats показывают состояние лошадей.
+- Done: `_harness.js` включает Scenario AH; полный harness A-AH зелёный.
+
+### Next Step
+- Маленький срез Недели 2: комнаты/стены жилья, загоны/скот, audio-pass или визуальная читаемость.
+
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.
 - Done: fences are real blockers; gates are passable; A* routes around blockers and through gates.
