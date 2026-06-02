@@ -2,6 +2,15 @@
 
 ## 2026-06-02
 
+### v1.45 - Ambient Audio (Week 2 audio pass)
+
+- Added ambient sound layers driven by time/weather: light wind by day, quieter rustle at night,
+  rain during rain/storm, howling during blizzard. Looping filtered-noise bed via WebAudio.
+- `ambientProfile()` is a pure selector (hour/weather → day/night/rain/blizzard); `Sfx.setAmbient()`
+  only restarts the loop when the profile changes; safe no-op without audio (Node/sound off).
+- Hooked into `updateUI()`; toggled by the existing 🔊 button.
+- Harness: Scenario AJ validates the profile selector + setAmbient smoke. A-AJ (36) green.
+
 ### v1.44-hotfix - Deterministic harness (fix flaky Scenario AC)
 
 - FIX: Scenario AC (bed comfort sleep) was flaky — it ran 60 ticks of RNG-driven pawn AI and the pawn

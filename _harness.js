@@ -744,6 +744,22 @@ const test = `
   console.log('SCENARIO AI (basic room comfort):');
   console.log('   score:', openScore + '->' + closedScore, '| tiles:', room ? room.tiles : 0, '| bonus:', openBonus.toFixed(2) + '->' + closedBonus.toFixed(2), '| thought:', roomThought?'OK':'FAIL');
   if (!roomOk) throw new Error('Scenario AI failed');
+
+  // Scenario AJ: ambient profile selection (deterministic) + setAmbient smoke (no audio in Node)
+  newGame('settlers');
+  G.weather = 'clear'; G.hour = 12; const pDay = ambientProfile();
+  G.hour = 1; const pNight = ambientProfile();
+  G.hour = 22; const pNight2 = ambientProfile();
+  G.hour = 12; G.weather = 'rain'; const pRain = ambientProfile();
+  G.weather = 'storm'; const pStorm = ambientProfile();
+  G.weather = 'blizzard'; const pBliz = ambientProfile();
+  const profOk = pDay==='day' && pNight==='night' && pNight2==='night' && pRain==='rain' && pStorm==='rain' && pBliz==='blizzard';
+  let smokeOk = true;
+  try { ['day','night','rain','blizzard','day'].forEach(p => Sfx.setAmbient(p)); } catch(e) { smokeOk = false; }
+  const smokeProfileSet = Sfx.ambient && Sfx.ambient.profile === 'day';
+  console.log('SCENARIO AJ (ambient audio profile):');
+  console.log('   profile select:', profOk?'OK':'FAIL', '(' + [pDay,pNight,pRain,pBliz].join('/') + ') | setAmbient smoke:', (smokeOk&&smokeProfileSet)?'OK':'FAIL');
+  if (!profOk || !smokeOk || !smokeProfileSet) throw new Error('Scenario AJ failed');
 })();
 `;
 try {

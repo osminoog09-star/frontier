@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.44';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.45';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -558,6 +558,17 @@ function spawnEnemy(count) {
       alive: true,
     });
   }
+}
+
+// Какой эмбиент-слой играть сейчас (чистая функция от состояния — тестируемо).
+function ambientProfile() {
+  if (!G) return 'day';
+  const w = G.weather;
+  if (w === 'rain' || w === 'storm') return 'rain';
+  if (w === 'blizzard') return 'blizzard';
+  const h = G.hour;
+  if (h < 6 || h >= 21) return 'night';
+  return 'day';
 }
 
 // Лошади из конюшен ускоряют передвижение колонии: каждая готовая конюшня +15%, максимум +45%.
@@ -2725,6 +2736,7 @@ miniCanvas.addEventListener('mousedown', (e) => {
 // ==================== UI UPDATE ====================
 function updateUI() {
   if (!G) return;
+  if (Sfx.on) Sfx.setAmbient(ambientProfile());   // эмбиент по времени/погоде (сам не дёргается зря)
   document.getElementById('res-food').textContent = Math.floor(G.res.food);
   document.getElementById('res-wood').textContent = Math.floor(G.res.wood);
   document.getElementById('res-ore').textContent = Math.floor(G.res.ore);
@@ -3678,7 +3690,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.44','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки и первые room-бонусы.'],
+    ['now', 'v1.36–1.45','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук (ветер/сверчки/дождь).'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
@@ -3968,6 +3980,43 @@ const Sfx = {
     const src = this.ctx.createBufferSource(); src.buffer = buf;
     const g = this.ctx.createGain(); g.gain.value = vol;
     src.connect(g); g.connect(this.master); src.start(t);
+  },
+  // ---- ambient loop (ветер/сверчки/дождь/метель) ----
+  ambient: { profile: null, src: null, gain: null, filter: null },
+  setAmbient(profile) {
+    if (this.ambient.profile === profile && (this.ambient.src || !this.ctx)) { this.ambient.profile = profile; return; }
+    this.ambient.profile = profile;
+    if (!this.on || !this.ctx) return;       // в Node/без звука — только запоминаем профиль
+    this._stopAmbient();
+    this._startAmbient(profile);
+  },
+  _stopAmbient() {
+    try { if (this.ambient.src) { this.ambient.src.stop(); this.ambient.src.disconnect(); } } catch(e) {}
+    this.ambient.src = null;
+  },
+  _startAmbient(profile) {
+    if (!this.ctx) return;
+    try {
+      const ctx = this.ctx;
+      const len = Math.floor(ctx.sampleRate * 2);
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+      const filter = ctx.createBiquadFilter(); filter.type = 'lowpass';
+      const g = ctx.createGain();
+      const cfg = ({
+        day:      { freq: 600,  gain: 0.05 },   // лёгкий ветер днём
+        night:    { freq: 1800, gain: 0.03 },   // тихий шелест/сверчки
+        rain:     { freq: 3500, gain: 0.10 },   // дождь
+        blizzard: { freq: 900,  gain: 0.09 },   // вой метели
+      })[profile] || { freq: 700, gain: 0.04 };
+      filter.frequency.value = cfg.freq;
+      g.gain.value = cfg.gain;
+      src.connect(filter); filter.connect(g); g.connect(this.master);
+      src.start();
+      this.ambient.src = src; this.ambient.gain = g; this.ambient.filter = filter;
+    } catch(e) {}
   },
   // game sounds
   shot()  { this.beep(220, 0.08, 'square', 0.5, -160); this.noise(0.06, 0.4); },
