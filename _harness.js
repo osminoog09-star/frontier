@@ -1082,6 +1082,35 @@ const test = `
   console.log('SCENARIO AZ (material walls):');
   console.log('   hp fence/wall/stone:', azWoodHp+'/'+azWallHp+'/'+azStoneHp, azHpOk?'OK':'FAIL', '| blocks:', azBlocksOk?'OK':'FAIL', '| room wall:', azRoomWallOk?'OK':'FAIL', '| stone:', azStoneOk?'OK':'FAIL', '|', azOk?'OK':'FAIL');
   if (!azOk) throw new Error('Scenario AZ failed');
+
+  // Scenario BA: floors covering a room raise its comfort bonus (RimWorld-style beauty)
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['bed','table','decor','fence','gate'].includes(b.type));
+  for (let y=24; y<=32; y++) for (let x=24; x<=32; x++) forceDry(x, y, 1);
+  G.buildings.push({ type:'bed', tx:28, ty:28, done:true, blueprint:false, hp:120, maxHp:120 });
+  G.buildings.push({ type:'table', tx:29, ty:28, done:true, blueprint:false, hp:100, maxHp:100 });
+  G.buildings.push({ type:'decor', tx:28, ty:29, done:true, blueprint:false, hp:100, maxHp:100 });
+  for (let x=26; x<=31; x++) {
+    G.buildings.push({ type:'fence', tx:x, ty:26, done:true, blueprint:false, hp:100, maxHp:100 });
+    G.buildings.push({ type:'fence', tx:x, ty:31, done:true, blueprint:false, hp:100, maxHp:100 });
+  }
+  for (let y=27; y<=30; y++) {
+    G.buildings.push({ type:'fence', tx:26, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+    G.buildings.push({ type:'fence', tx:31, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+  }
+  const baRoom = enclosedRoomAt(28, 28);
+  const baBare = roomComfortBonus();
+  const baFlooredBefore = roomIsFloored(baRoom);
+  for (let y=27; y<=30; y++) for (let x=27; x<=30; x++) G.map[y][x].floor = 'wood';
+  const baFloored = roomIsFloored(enclosedRoomAt(28, 28));
+  const baWithFloor = roomComfortBonus();
+  const baRows = roomDetailRows();
+  const baRowFloorOk = baRows.length && baRows[0].floor.includes('дерево') && baRows[0].floor.includes('✔');
+  const baOk = !!baRoom && baFlooredBefore === false && baFloored === true &&
+    baWithFloor > baBare && Math.abs((baWithFloor - baBare) - 0.04) < 1e-9 && baRowFloorOk;
+  console.log('SCENARIO BA (floors raise room comfort):');
+  console.log('   floored:', baFlooredBefore+'->'+baFloored, '| bonus:', baBare.toFixed(2)+'->'+baWithFloor.toFixed(2), '| row floor:', baRows[0]?baRows[0].floor:'-', '|', baOk?'OK':'FAIL');
+  if (!baOk) throw new Error('Scenario BA failed');
 })();
 `;
 try {

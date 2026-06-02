@@ -1,5 +1,13 @@
 # FRONTIER changelog
 
+## v1.65 - Floors raise room comfort
+
+- Полы теперь влияют на уют комнаты (как красота пола в RimWorld).
+- Комната, где полом покрыто >=60% клеток, получает бонус к настроению (+0.04 к delta).
+- Панель комнат показывает строку «пол: <материал> <%>✔».
+- Хелперы roomFloorInfo/roomIsFloored/anyFlooredRoom/roomFloorBonus вынесены чисто (тестируемо).
+- Scenario BA: голая комната vs застеленная — рост бонуса и floored-флаг. Harness A-BA (53) green.
+
 ## v1.64 - Walls (RimWorld-style, slice 2a)
 
 - Срез 2a перехода стройки на RimWorld: настоящие **стены из материалов**.

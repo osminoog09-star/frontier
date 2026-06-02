@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.64';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.65';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -945,6 +945,33 @@ function roomFurnitureCounts(room) {
 function roomFurnitureScore(counts) {
   return (counts.bed ? 1 : 0) + (counts.table ? 1 : 0) + (counts.decor ? 1 : 0);
 }
+function roomFloorInfo(room) {
+  if (!room || !room.cells || !G || !G.map) return { covered:0, total:0, ratio:0, mat:null };
+  let covered=0, wood=0, stone=0;
+  for (const key of room.cells) {
+    const c = key.split(',');
+    const x = +c[0], y = +c[1];
+    const f = G.map[y] && G.map[y][x] && G.map[y][x].floor;
+    if (f) { covered++; if (f==='stone') stone++; else wood++; }
+  }
+  const total = room.cells.size;
+  return { covered, total, ratio: total ? covered/total : 0, mat: stone>=wood && stone>0 ? 'камень' : (wood>0 ? 'дерево' : null) };
+}
+function roomIsFloored(room) { return roomFloorInfo(room).ratio >= 0.6; }
+function anyFlooredRoom() {
+  if (!G || !G.buildings) return false;
+  const seen = new Set();
+  for (const b of G.buildings) {
+    if (!b.done || b.blueprint || !['bed','table','decor'].includes(b.type)) continue;
+    const room = enclosedRoomAt(b.tx, b.ty);
+    if (!room) continue;
+    const k = roomKey(room);
+    if (seen.has(k)) continue; seen.add(k);
+    if (roomIsFloored(room)) return true;
+  }
+  return false;
+}
+function roomFloorBonus() { return anyFlooredRoom() ? 0.04 : 0; }
 function roomWallQuality(room) {
   if (!room) return { label:'нет', score:0, ratio:0 };
   const ratio = room.tiles > 0 ? room.walls / room.tiles : 0;
@@ -987,7 +1014,8 @@ function roomTypeEntries() {
       label: roomComfortLabelForScore(score),
       wall: roomWallQuality(entry.room),
       tiles: entry.room.tiles,
-      counts: entry.counts
+      counts: entry.counts,
+      floor: roomFloorInfo(entry.room)
     };
   });
 }
@@ -997,12 +1025,15 @@ function roomDetailRows() {
     if (r.counts.bed) furniture.push('кровати: ' + r.counts.bed);
     if (r.counts.table) furniture.push('столы: ' + r.counts.table);
     if (r.counts.decor) furniture.push('декор: ' + r.counts.decor);
+    const fl = r.floor || { ratio:0, mat:null };
+    const floorText = fl.mat ? `${fl.mat} ${Math.round(fl.ratio*100)}%${fl.ratio>=0.6?' ✔':''}` : 'нет';
     return {
       id: idx + 1,
       title: r.type,
       comfort: `${r.label} (${r.score}/3)`,
       walls: `${r.wall.label} · ${r.wall.ratio.toFixed(2)}`,
       size: `${r.tiles} клеток`,
+      floor: floorText,
       furniture: furniture.length ? furniture.join(', ') : 'пусто'
     };
   });
@@ -1025,10 +1056,11 @@ function roomComfortScore() {
 }
 function roomComfortBonus() {
   const score = roomComfortScore();
-  if (score >= 3) return 0.12;
-  if (score >= 2) return 0.06;
-  if (score >= 1) return 0.03;
-  return 0;
+  let base = 0;
+  if (score >= 3) base = 0.12;
+  else if (score >= 2) base = 0.06;
+  else if (score >= 1) base = 0.03;
+  return base + roomFloorBonus();
 }
 function roomComfortLabel() {
   return roomComfortLabelForScore(roomComfortScore());
@@ -3320,6 +3352,7 @@ function renderResearch() {
           <div>уют: <b style="color:#aaa">${r.comfort}</b></div>
           <div>стены: <b style="color:#aaa">${r.walls}</b></div>
           <div>размер: <b style="color:#aaa">${r.size}</b></div>
+          <div>пол: <b style="color:#aaa">${r.floor}</b></div>
           <div>мебель: <b style="color:#aaa">${r.furniture}</b></div>
         </div>
       `).join('')}
