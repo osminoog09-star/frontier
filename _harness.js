@@ -865,6 +865,25 @@ const test = `
   console.log('SCENARIO AP (powder barrel trap):');
   console.log('   no early boom:', noEarlyBoom?'OK':'FAIL', '| exploded+consumed:', barrelGone?'OK':'FAIL', '| AoE damage:', damaged?'OK':'FAIL');
   if (!trapOk) throw new Error('Scenario AP failed');
+
+  // Scenario AQ: arsonist enemy attacks buildings (breaks walls), and joins big raids
+  const arsDef = ENEMY_TYPES.arsonist;
+  const arsDefOk = arsDef && arsDef.burns === true;
+  newGame('settlers'); G.enemies = []; G.buildings = G.buildings.filter(b => b.type !== 'fence');
+  const fX = 40, fY = 30; G.map[fY][fX].type = TERRAIN.GRASS; G.map[fY][fX].obj = null;
+  G.buildings.push({ type:'fence', tx:fX, ty:fY, done:true, blueprint:false, hp:30, maxHp:100 });
+  G.enemies.push({ id:G.nextId++, type:'arsonist', x:(fX+1)*TILE, y:fY*TILE, tx:fX+1, ty:fY, hp:50, maxHp:65, speed:1.35, atk:6, range:1.5, ranged:false, reload:45, attackCooldown:0, path:[], targetX:0, targetY:0, alive:true });
+  const fenceHp0 = G.buildings.find(b => b.type==='fence').hp;
+  for (let i = 0; i < 220; i++) updateEnemies();
+  const fenceGone = !G.buildings.some(b => b.type === 'fence');
+  // big raid includes an arsonist at slot 2
+  newGame('settlers'); G.enemies = [];
+  spawnEnemy(6);
+  const raidHasArsonist = G.enemies[2] && G.enemies[2].type === 'arsonist';
+  const arsOk = arsDefOk && fenceHp0 === 30 && fenceGone && raidHasArsonist;
+  console.log('SCENARIO AQ (arsonist breaks buildings):');
+  console.log('   def burns:', arsDefOk?'OK':'FAIL', '| destroyed fence:', fenceGone?'OK':'FAIL', '| in big raid:', raidHasArsonist?'OK':'FAIL');
+  if (!arsOk) throw new Error('Scenario AQ failed');
 })();
 `;
 try {

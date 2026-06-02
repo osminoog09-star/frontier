@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.52';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.53';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -528,6 +528,7 @@ const ENEMY_TYPES = {
   gunner: { name:'Стрелок',   hp:65, speed:1.1, atk:9,  range:7.0,  ranged:true,  color:'#a04428', reload:110, icon:'🔫' },
   boss:   { name:'Главарь',   hp:160,speed:1.0, atk:16, range:6.0,  ranged:true,  color:'#6a1818', reload:90,  icon:'🤠' },
   sniper: { name:'Снайпер',   hp:45, speed:0.9, atk:22, range:11.0, ranged:true,  color:'#7a5a2a', reload:170, icon:'🎯' },
+  arsonist:{ name:'Поджигатель',hp:50,speed:1.35,atk:6, range:1.5,  ranged:false, color:'#b8602a', reload:45,  icon:'🔥', burns:true },
 };
 
 function spawnEnemy(count) {
@@ -542,6 +543,7 @@ function spawnEnemy(count) {
     let type;
     if (i===0 && count>=4) type='boss';
     else if (i===1 && count>=5) type='sniper';
+    else if (i===2 && count>=6) type='arsonist';
     else type = Math.random()<0.5 ? 'gunner' : 'knifer';
     const def = ENEMY_TYPES[type];
     G.enemies.push({
@@ -1439,10 +1441,39 @@ function updateBarrels() {
   G.buildings = G.buildings.filter(b => !(b.type === 'barrel' && b._spent));
 }
 
+// Поджигатель идёт к ближайшей постройке и поджигает её (урон по HP), ломая оборону.
+// Возвращает true, если занят зданием; false — если построек нет (тогда ведёт себя как обычный враг).
+function updateArsonist(e) {
+  const targets = G.buildings.filter(b => b.done && !b.blueprint);
+  if (!targets.length) return false;
+  let best = null, bestD = Infinity;
+  for (const b of targets) {
+    const bx = b.tx + (BUILDS[b.type]?.size||1)/2, by = b.ty + (BUILDS[b.type]?.size||1)/2;
+    const dd = Math.hypot((e.x/TILE) - bx, (e.y/TILE) - by);
+    if (dd < bestD) { bestD = dd; best = b; }
+  }
+  if (!best) return false;
+  setTarget(e, best.tx, best.ty);
+  moveTowardsTarget(e, e.speed);
+  if (bestD <= 1.7 && e.attackCooldown <= 0) {
+    e.attackCooldown = e.reload;
+    best.hp = (best.hp || 0) - 12;
+    FX.spark && FX.spark(best.tx*TILE + TILE/2, best.ty*TILE + TILE/2);
+    spawnParticles(best.tx*TILE + TILE/2, best.ty*TILE + TILE/2, { count:6, colors:['#ff8030','#ffd060','#553'], speed:1.2, life:20, size:2.4, lift:0.5 });
+    if (best.hp <= 0) {
+      addLog(`🔥 Поджигатель уничтожил постройку «${BUILDS[best.type]?.name||best.type}»!`, 'danger');
+      G.buildings = G.buildings.filter(b => b !== best);
+    }
+  }
+  return true;
+}
+
 function updateEnemies() {
   G.enemies = G.enemies.filter(e=>e.alive);
   for (const e of G.enemies) {
     e.attackCooldown = Math.max(0, e.attackCooldown-1);
+    // Поджигатель целит в постройки (ломает стены/здания), а не в ковбоев
+    if (e.type === 'arsonist' && updateArsonist(e)) continue;
     // Find nearest standing pawn (лежачих без сознания враги не добивают)
     const standing = G.pawns.filter(p=>p.alive && !p.downed);
     const target = (standing.length ? standing : G.pawns.filter(p=>p.alive))
@@ -3805,7 +3836,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.52','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом (ловушка).'],
+    ['now', 'v1.36–1.53','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом, враг «Поджигатель» (ломает постройки).'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>

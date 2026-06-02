@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.53 - Arsonist Enemy (attacks buildings)
+
+- New enemy «Поджигатель» (🔥): targets the nearest building instead of pawns, damaging its HP and destroying it (breaching walls/defenses). Falls back to normal behavior if there are no buildings. Joins raids of 6+ (slot after boss/sniper).
+- updateArsonist() with fire particles + log on destruction; building removal uses live walkability so paths reopen.
+- Harness: Scenario AQ (def, fence destroyed by adjacent arsonist, present in big raid). A-AQ (43) green.
+
 ### v1.52 - Powder Barrel Trap (defense)
 
 - New building «Бочка с порохом» (🛢️, defense group): explodes when an enemy comes within ~1.6 tiles, dealing area damage (radius ~3.2, up to 55, falling off with distance), then is consumed.
