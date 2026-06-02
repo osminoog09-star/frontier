@@ -588,6 +588,35 @@ const test = `
   } catch (e) { simOk = false; }
   console.log('SCENARIO AB (stable mount speed):');
   console.log('   bonus 0/1/cap:', bonusOk?'OK':'FAIL', '(' + m0 + '/' + m1.toFixed(2) + '/' + mCap.toFixed(2) + ') | sim stable:', simOk?'OK':'FAIL');
+  if (!bonusOk || !simOk) throw new Error('Scenario AB failed');
+
+  // Scenario AC: bed comfort improves sleep and is preferred over camp
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => b.type !== 'bed' && b.type !== 'camp');
+  let pSleep = G.pawns[0];
+  pSleep.x = 10*TILE; pSleep.y = 10*TILE; pSleep.energy = 20; pSleep.mood = 50; pSleep.state = 'sleeping'; G.hour = 23;
+  for (let i = 0; i < 60; i++) { G.tick++; updatePawns(); }
+  const roughEnergy = pSleep.energy;
+  const roughMood = pSleep.mood;
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => b.type !== 'bed' && b.type !== 'camp');
+  pSleep = G.pawns[0];
+  pSleep.x = 10*TILE; pSleep.y = 10*TILE; pSleep.energy = 20; pSleep.mood = 50; pSleep.state = 'sleeping'; G.hour = 23;
+  G.buildings.push({ type:'bed', tx:10, ty:10, done:true, blueprint:false, hp:120, maxHp:120 });
+  for (let i = 0; i < 60; i++) { G.tick++; updatePawns(); }
+  const bedEnergy = pSleep.energy;
+  const bedMood = pSleep.mood;
+  const comfortOk = sleepComfortAt(pSleep) >= 2 && bedEnergy > roughEnergy + 1 && bedMood > roughMood;
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => b.type !== 'bed' && b.type !== 'camp');
+  pSleep = G.pawns[0]; pSleep.x = 20*TILE; pSleep.y = 20*TILE;
+  G.buildings.push({ type:'camp', tx:20, ty:20, done:true, blueprint:false, hp:200, maxHp:200 });
+  G.buildings.push({ type:'bed', tx:24, ty:20, done:true, blueprint:false, hp:120, maxHp:120 });
+  doSleep(pSleep);
+  const prefersBed = pSleep.targetX === 24 && pSleep.targetY === 20;
+  console.log('SCENARIO AC (bed comfort sleep):');
+  console.log('   comfort bonus:', comfortOk?'OK':'FAIL', '| energy:', roughEnergy.toFixed(1), '->', bedEnergy.toFixed(1), '| mood:', roughMood.toFixed(1), '->', bedMood.toFixed(1), '| prefers bed:', prefersBed?'OK':'FAIL');
+  if (!comfortOk || !prefersBed) throw new Error('Scenario AC failed');
 })();
 `;
 try {

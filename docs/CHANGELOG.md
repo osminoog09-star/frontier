@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.37 - Beds Comfort Slice
+
+- Added the **Bed (Кровать 🛏️)** as the first furniture/rooms slice.
+- Sleeping pawns prefer a free bed over a camp.
+- Sleeping near a bed restores energy faster and gives a small mood/comfort benefit.
+- Added a drawn bed sprite, bottom build button, and building info line.
+- Harness: Scenario AC validates bed comfort vs rough sleep and bed preference over camp.
+
 ### v1.36 - Public Site + Mobile Map Fix
 
 - Rebuilt the public `index.html` into a clear Russian project/status page: playable link, done/next sections, weekly plan, and document links.

@@ -9,6 +9,14 @@
 - Keep `index.html` readable for a player; keep deep agent details in `docs/HANDOFF.md`, `docs/WIP.md`, and this file.
 - Next gameplay slice remains Week 2 content: furniture/rooms or deeper ranch systems, with harness coverage.
 
+## v1.37 furniture/rooms start
+
+- Added bed as the first small furniture slice.
+- Sleep preference now checks free beds before camps.
+- Bed comfort improves energy recovery and mood during sleep.
+- Scenario AC validates the comfort delta and bed preference.
+- Next furniture work should add tables/room beauty without turning it into a large refactor.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:

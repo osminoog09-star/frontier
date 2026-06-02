@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.36';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.37';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -30,6 +30,7 @@ const BUILDS = {
   clinic: { name:'Клиника',  icon:'💊', cost:{wood:20,med:0},    size:2, prod:'heal',  rate:0.3 },
   smithy: { name:'Кузня',    icon:'🔨', cost:{wood:20,ore:20},   size:2, prod:'gold',  rate:0.1 },
   camp:   { name:'Лагерь',   icon:'🏕️', cost:{wood:15},          size:2, prod:'rest',  rate:0.2 },
+  bed:    { name:'Кровать',  icon:'🛏️', cost:{wood:12},          size:1, prod:'comfort',rate:0 },
   well:   { name:'Колодец',  icon:'🪣', cost:{wood:10,ore:5},    size:1, prod:'water', rate:0.1 },
   stable: { name:'Конюшня',  icon:'🐴', cost:{wood:25,ore:10},   size:2, prod:'horses',rate:0 },
 };
@@ -562,8 +563,10 @@ function updatePawns() {
     // Passive stats
     if (G.tick % 60 === 0) { // once per in-game minute (approx)
       p.food = clamp(p.food - 0.5, 0, p.maxFood);
-      const dE = (p.state==='sleeping' ? 3 : -0.3);
+      const comfort = sleepComfortAt(p);
+      const dE = (p.state==='sleeping' ? sleepEnergyRate(comfort) : -0.3);
       p.energy = clamp(p.energy + dE, 0, p.maxEnergy);
+      if (p.state==='sleeping' && comfort >= 2) p.mood = clamp(p.mood + 0.5, 0, 100);
       if (p.food <= 0) p.hp = Math.max(0, p.hp - 2);
       if (p.hp <= 0) downPawn(p);
     }
@@ -692,6 +695,7 @@ function calcMoodDelta(p) {
   if (G.season===3) delta -= 0.1; // winter
   if (hasResearch('cooking') && p.food > 60) delta += 0.1;
   if (p.sick) delta -= 0.3 * p.sick.severity;
+  if (p.state === 'sleeping' && sleepComfortAt(p) >= 2) delta += 0.15;
 
   // Traits
   if (p.traits.includes('optimist')) delta += 0.15;
@@ -719,6 +723,7 @@ function updateThoughts(p) {
   if (G.weather === 'rain') p.thoughts.push({text:'🌧️ Мокнет', neg:true});
   if (G.season===3) p.thoughts.push({text:'❄️ Зябко', neg:true});
   if (p.sick) p.thoughts.push({text:`🤒 ${p.sick.name}`, neg:true});
+  if (sleepComfortAt(p) >= 2 && p.energy > 50) p.thoughts.push({text:'🛏️ Спал в кровати', neg:false});
 }
 
 function addThought(p, text, duration, positive) {
@@ -730,8 +735,29 @@ function addThought(p, text, duration, positive) {
 }
 
 const CAMP_CAP = 3; // сколько ковбоев помещается в один лагерь/палатку
+const BED_CAP = 1;
+function sleepComfortAt(p) {
+  if (!p || !G || !G.buildings) return 0;
+  if (G.buildings.some(b=>b.type==='bed' && b.done && !b.blueprint && distTiles(p,b.tx,b.ty)<=1.2)) return 2;
+  if (G.buildings.some(b=>b.type==='camp' && b.done && !b.blueprint && distTiles(p,b.tx,b.ty)<=1.8)) return 1;
+  return 0;
+}
+function sleepEnergyRate(comfort) {
+  if (comfort >= 2) return 4.4;
+  if (comfort >= 1) return 3.2;
+  return 2.4;
+}
 function doSleep(p) {
   p.state = 'sleeping';
+  const beds = G.buildings.filter(b=>b.type==='bed' && b.done)
+    .filter(b=> claimCount('sleep_bed_'+b.tx+'_'+b.ty) < BED_CAP)
+    .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty));
+  const bed = beds[0];
+  if (bed) {
+    claimSpot('sleep_bed_'+bed.tx+'_'+bed.ty);
+    setTarget(p, bed.tx, bed.ty);
+    return;
+  }
   // already resting at a camp this night? keep the slot
   const camps = G.buildings.filter(b=>b.type==='camp' && b.done)
     .filter(b=> claimCount('sleep_'+b.tx+'_'+b.ty) < CAMP_CAP)
@@ -2189,6 +2215,14 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.strokeStyle='#8a7050'; ctx.beginPath(); ctx.moveTo(cx, y+1); ctx.lineTo(cx, y+S-3); ctx.stroke();
       break;
     }
+    case 'bed': {
+      ctx.fillStyle = '#5a3b24'; ctx.fillRect(x+3, y+4, S-6, S-7);
+      ctx.fillStyle = '#d9c6a0'; ctx.fillRect(x+5, y+6, S-10, S*0.28);
+      ctx.fillStyle = '#7a3f3f'; ctx.fillRect(x+5, y+S*0.38, S-10, S*0.42);
+      ctx.fillStyle = '#2f2018'; ctx.fillRect(x+3, y+S-5, 4, 3); ctx.fillRect(x+S-7, y+S-5, 4, 3);
+      ctx.strokeStyle = '#2a1a10'; ctx.strokeRect(x+3.5, y+4.5, S-7, S-8);
+      break;
+    }
     case 'well': {
       ctx.fillStyle = '#6a6560'; ctx.beginPath(); ctx.arc(cx, cy, S*0.32, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = '#2a4560'; ctx.beginPath(); ctx.arc(cx, cy, S*0.2, 0, Math.PI*2); ctx.fill();
@@ -3050,6 +3084,7 @@ function showBuildingInfo(b, cx, cy) {
   const recipeControls = recipeControlHtml(b);
   const stockpileLines = stockpileInfoHtml(b);
   const caravanTrade = caravanTradeHtml(b);
+  const furnitureInfo = furnitureInfoHtml(b);
   overlay.style.display = 'block';
   overlay.style.left = Math.min(cx, canvas.width-280) + 'px';
   overlay.style.top = (cy + 10) + 'px';
@@ -3062,11 +3097,18 @@ function showBuildingInfo(b, cx, cy) {
     ${recipeControls}
     ${stockpileLines}
     ${caravanTrade}
+    ${furnitureInfo}
   `;
   bindRecipeControlButtons(b);
   bindStockpileFilterButtons(b);
   bindCaravanTradeButtons(b);
   setTimeout(() => { overlay.style.display='none'; }, 3000);
+}
+
+function furnitureInfoHtml(b) {
+  if (!b || b.blueprint || !b.done) return '';
+  if (b.type === 'bed') return `<div class="inf-line">Комфорт: <b>сон быстрее, настроение выше</b></div>`;
+  return '';
 }
 
 function caravanTradeHtml(b) {
@@ -3250,7 +3292,7 @@ function setupButtons() {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
-    'build-camp-btn':'camp','build-well-btn':'well',
+    'build-camp-btn':'camp','build-bed-btn':'bed','build-well-btn':'well',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     document.getElementById(id).addEventListener('click', () => {
@@ -3501,7 +3543,7 @@ function updateBuildButtons() {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
-    'build-camp-btn':'camp','build-well-btn':'well',
+    'build-camp-btn':'camp','build-bed-btn':'bed','build-well-btn':'well',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     const btn = document.getElementById(id);
@@ -3917,4 +3959,3 @@ function startLoop() {
   });
 }
 startLoop();
-
