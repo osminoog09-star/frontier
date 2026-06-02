@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.58 - Room Type Labels
+
+- PC-first room slice: enclosed rooms now classify furniture layouts as `спальня`, `столовая`, `жилая комната`, or `украшенный угол`.
+- Furniture overlays show the concrete room type plus room quality/score for the selected bed/table/decor.
+- Stats now includes a readable room-type summary instead of only a generic room score.
+- Harness: Scenario AU validates bedroom/dining/living-room labels, summary text, and open non-room fallback. A-AU (47) green.
+- Mobile feature work is intentionally parked for about four weeks per user direction; current work returns to PC roadmap slices.
+
 ### v1.57 - Mobile Pawn Drawer
 
 - Mobile builds now show a compact bottom-left drawer for pawns and the event log instead of losing that information with the hidden desktop sidebar.

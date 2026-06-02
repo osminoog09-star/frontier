@@ -938,6 +938,35 @@ const test = `
   console.log('SCENARIO AT (building repair):');
   console.log('   hp', dmgBefore, '-> ', fence?fence.hp:'?', '| repaired:', repaired?'OK':'FAIL', '| none-left false:', noneToRepair?'OK':'FAIL');
   if (!repairOk) throw new Error('Scenario AT failed');
+
+  // Scenario AU: enclosed furniture rooms get readable room-type labels
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['bed','table','decor','fence','gate'].includes(b.type));
+  function makeRoom(x0, y0, furniture) {
+    for (let y = y0; y <= y0 + 4; y++) for (let x = x0; x <= x0 + 4; x++) forceDry(x, y, 1);
+    for (let x = x0; x <= x0 + 4; x++) for (let y = y0; y <= y0 + 4; y++) {
+      if (x === x0 || x === x0 + 4 || y === y0 || y === y0 + 4) {
+        G.buildings.push({ type:'fence', tx:x, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+      }
+    }
+    for (const f of furniture) {
+      G.buildings.push({ type:f.type, tx:x0 + f.dx, ty:y0 + f.dy, done:true, blueprint:false, hp:120, maxHp:120 });
+    }
+  }
+  makeRoom(12, 12, [{ type:'bed', dx:2, dy:2 }]);
+  makeRoom(22, 12, [{ type:'table', dx:2, dy:2 }]);
+  makeRoom(32, 12, [{ type:'bed', dx:2, dy:2 }, { type:'table', dx:2, dy:3 }, { type:'decor', dx:3, dy:2 }]);
+  const bedroom = roomTypeLabelAt(14, 14);
+  const dining = roomTypeLabelAt(24, 14);
+  const living = roomTypeLabelAt(34, 14);
+  const auSummary = roomTypeSummary();
+  const entries = roomTypeEntries();
+  const auOk = entries.length === 3 && bedroom.includes('спальня') && dining.includes('столовая') &&
+    living.includes('жилая комната') && auSummary.includes('спальня') && auSummary.includes('столовая') &&
+    auSummary.includes('жилая комната') && roomTypeLabelAt(2, 2).includes('не закрыта');
+  console.log('SCENARIO AU (room type labels):');
+  console.log('   bedroom:', bedroom, '| dining:', dining, '| living:', living, '| summary:', auOk?'OK':'FAIL');
+  if (!auOk) throw new Error('Scenario AU failed');
 })();
 `;
 try {

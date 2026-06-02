@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.58 - Room Type Labels. Mobile-направление отложено; закрытые комнаты теперь показывают тип (спальня/столовая/жилая/украшенный угол), overlay/stats обновлены, Scenario AU. Harness A-AU (47) green.
+
 - v1.57 - Mobile Pawn Drawer. На телефоне появилась компактная панель `Пешки`/`Лог` вместо скрытого desktop sidebar; локальный mobile smoke 390x844 green.
 
 - v1.56 - Building Repair. Принят PAUSED-срез Claude: строители чинят повреждённые готовые здания; Scenario AT. Harness A-AT (46) green.

@@ -8,6 +8,7 @@
 - Mobile smoke must stay part of any UI release: 390x844, no horizontal overflow, desktop sidebar hidden, minimap not overlapping the bottom build bar.
 - Keep `index.html` readable for a player; keep deep agent details in `docs/HANDOFF.md`, `docs/WIP.md`, and this file.
 - Next gameplay slice remains Week 2 content: rooms, animal pens/livestock, audio, or visual polish, with harness coverage.
+- User direction 2026-06-02: mobile theme is enough for now; postpone mobile work for about four weeks and focus on PC-first roadmap slices.
 
 ## v1.37 furniture/rooms start
 
@@ -89,6 +90,14 @@
 - `renderLog()` now writes to both desktop and mobile log containers.
 - Local mobile smoke verifies 390x844 layout, no horizontal overflow, no minimap overlap, visible pawn cards/log entries, and no console errors.
 
+## v1.58 room type labels
+
+- Added room classification for enclosed furniture layouts: bedroom, dining room, living room, and decorated corner.
+- `enclosedRoomAt()` now returns room cells so furniture can be grouped by one actual room instead of only global room score.
+- Stats shows room type summary; furniture overlays show the selected furniture's concrete room type and score.
+- Scenario AU covers three separate rooms and the open non-room fallback.
+- PC-first direction: continue room/animal/visual/content slices; do not expand mobile UI for now.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -102,7 +111,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-AT покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость и ремонт.
+- Автотесты: `_harness.js`, сценарии A-AU покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт и типы комнат.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза

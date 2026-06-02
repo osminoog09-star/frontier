@@ -195,7 +195,16 @@
 - Done: local mobile browser smoke covers build 1.57, drawer tabs, pawn/log content, no horizontal overflow, no console errors.
 
 ### Next Step
-- Continue mobile UX with compact schedule/research panels or take the next Week 2 content slice.
+- Mobile work is paused for about four weeks by user direction; continue PC-first Week 2 content.
+
+## Update 2026-06-02 - v1.58 Room Type Labels
+
+- Done: closed furniture rooms are classified as bedroom, dining room, living room, or decorated corner.
+- Done: stats and furniture overlays now expose room type plus room quality score.
+- Done: `_harness.js` includes Scenario AU; full harness A-AU is green.
+
+### Next Step
+- Continue PC roadmap: animal pens/livestock, wall quality, room panel, autotiling, or desktop UI polish.
 
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.

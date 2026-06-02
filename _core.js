@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.57';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.58';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -906,10 +906,75 @@ function enclosedRoomAt(tx, ty, maxTiles=80) {
     q.push([x+1,y], [x-1,y], [x,y+1], [x,y-1]);
   }
   if (reachedEdge || seen.size < 4 || walls < 8) return null;
-  return { tiles: seen.size, walls };
+  return { tiles: seen.size, walls, cells: seen };
 }
 function isFurnitureInRoom(type) {
   return !!(G && G.buildings && G.buildings.some(b => b.type === type && b.done && !b.blueprint && enclosedRoomAt(b.tx, b.ty)));
+}
+function roomHasTile(room, tx, ty) {
+  return !!(room && room.cells && room.cells.has(tx + ',' + ty));
+}
+function roomFurnitureCounts(room) {
+  const counts = { bed:0, table:0, decor:0 };
+  if (!room || !G || !G.buildings) return counts;
+  for (const b of G.buildings) {
+    if (!b.done || b.blueprint || !(b.type in counts)) continue;
+    if (roomHasTile(room, b.tx, b.ty)) counts[b.type]++;
+  }
+  return counts;
+}
+function roomFurnitureScore(counts) {
+  return (counts.bed ? 1 : 0) + (counts.table ? 1 : 0) + (counts.decor ? 1 : 0);
+}
+function roomComfortLabelForScore(score) {
+  if (score >= 3) return 'хорошая комната';
+  if (score >= 2) return 'жилая комната';
+  if (score >= 1) return 'укрытый угол';
+  return 'нет';
+}
+function classifyRoom(counts) {
+  if (counts.bed && counts.table) return 'жилая комната';
+  if (counts.bed) return 'спальня';
+  if (counts.table) return 'столовая';
+  if (counts.decor) return 'украшенный угол';
+  return 'пустая комната';
+}
+function roomKey(room) {
+  return room && room.cells ? Array.from(room.cells).sort().join(';') : '';
+}
+function roomTypeEntries() {
+  const rooms = new Map();
+  if (!G || !G.buildings) return [];
+  for (const b of G.buildings) {
+    if (!b.done || b.blueprint || !['bed','table','decor'].includes(b.type)) continue;
+    const room = enclosedRoomAt(b.tx, b.ty);
+    if (!room) continue;
+    const key = roomKey(room);
+    if (!rooms.has(key)) rooms.set(key, { room, counts:{ bed:0, table:0, decor:0 } });
+    rooms.get(key).counts[b.type]++;
+  }
+  return Array.from(rooms.values()).map(entry => {
+    const score = roomFurnitureScore(entry.counts);
+    return {
+      type: classifyRoom(entry.counts),
+      score,
+      label: roomComfortLabelForScore(score),
+      tiles: entry.room.tiles,
+      counts: entry.counts
+    };
+  });
+}
+function roomTypeSummary() {
+  const entries = roomTypeEntries();
+  if (!entries.length) return 'нет';
+  return entries.map(r => `${r.type} (${r.label})`).join(', ');
+}
+function roomTypeLabelAt(tx, ty) {
+  const room = enclosedRoomAt(tx, ty);
+  if (!room) return 'не закрыта стенами';
+  const counts = roomFurnitureCounts(room);
+  const score = roomFurnitureScore(counts);
+  return `${classifyRoom(counts)} · ${roomComfortLabelForScore(score)} (${score}/3)`;
 }
 function roomComfortScore() {
   return (isFurnitureInRoom('bed') ? 1 : 0) + (isFurnitureInRoom('table') ? 1 : 0) + (isFurnitureInRoom('decor') ? 1 : 0);
@@ -922,11 +987,7 @@ function roomComfortBonus() {
   return 0;
 }
 function roomComfortLabel() {
-  const score = roomComfortScore();
-  if (score >= 3) return 'хорошая комната';
-  if (score >= 2) return 'жилая комната';
-  if (score >= 1) return 'укрытый угол';
-  return 'нет';
+  return roomComfortLabelForScore(roomComfortScore());
 }
 function doSleep(p) {
   p.state = 'sleeping';
@@ -3128,7 +3189,7 @@ function renderResearch() {
     <div>🐎 Караванных сделок: <b style="color:#aaa">${Math.floor(G.stats.caravanDeals || 0)}</b></div>
     <div>🐴 Лошади: <b style="color:#aaa">${ensureHerd().tamed} приручено / ${ensureHerd().wild} диких</b></div>
     <div>🏠 Комфорт усадьбы: <b style="color:#aaa">${homesteadComfortLabel()} (${homesteadComfortScore()}/3)</b></div>
-    <div>🧱 Комнаты: <b style="color:#aaa">${roomComfortLabel()} (${roomComfortScore()}/3)</b></div>
+    <div>🧱 Комнаты: <b style="color:#aaa">${roomComfortLabel()} (${roomComfortScore()}/3)</b> · ${roomTypeSummary()}</div>
     <div>🎯 В очереди работ: <b style="color:#aaa">${markedSummaryText()}</b></div>
     <div style="margin-top:4px;color:#7a6a4a">🏆 ${SCENARIOS[G.scenario]?.name || SCENARIOS.settlers.name}: ${goal.sidebar}</div>
   `;
@@ -3513,7 +3574,7 @@ function showBuildingInfo(b, cx, cy) {
 function furnitureInfoHtml(b) {
   if (!b || b.blueprint || !b.done) return '';
   const roomLine = ['bed','table','decor'].includes(b.type)
-    ? `<div class="inf-line">Комната: <b>${enclosedRoomAt(b.tx, b.ty) ? roomComfortLabel() : 'не закрыта стенами'}</b></div>`
+    ? `<div class="inf-line">Комната: <b>${roomTypeLabelAt(b.tx, b.ty)}</b></div>`
     : '';
   if (b.type === 'bed') return `<div class="inf-line">Комфорт: <b>сон быстрее, настроение выше</b></div>${roomLine}`;
   if (b.type === 'table') return `<div class="inf-line">Комфорт: <b>еда за столом даёт настроение</b></div>${roomLine}`;
