@@ -362,6 +362,21 @@ const test = `
   const presetStatus = presetLines.includes(String(RECIPES.kitchen.outAmount * 3)) && presetLines.includes('food');
   console.log('SCENARIO O (recipe limit presets):');
   console.log('   preset buttons:', hasPresetButtons?'OK':'FAIL', '| preset status:', presetStatus?'OK':'FAIL');
+
+  // Scenario P: tradepost caravan trade spends gold and brings supplies
+  newGame();
+  const txp = Math.floor(80/2)+6, typ = Math.floor(60/2)+6;
+  for (const [tx, ty] of [[txp,typ],[txp+1,typ],[txp,typ+1],[txp+1,typ+1]]) {
+    G.map[ty][tx].type = 1;
+    G.map[ty][tx].obj = null;
+  }
+  G.buildings.push({type:'tradepost',tx:txp,ty:typ,blueprint:false,done:true,progress:1,hp:200,maxHp:200,selected:false});
+  G.res.gold = 30; G.res.food = 0; G.res.wood = 0; G.res.med = 0;
+  const trade = runCaravanTrade();
+  const tradeSpentGold = G.res.gold === 15;
+  const tradeDelivered = trade.traded && G.res.food >= 35 && G.res.wood >= 18 && G.res.med >= 5;
+  console.log('SCENARIO P (tradepost caravan trade):');
+  console.log('   spent gold:', tradeSpentGold?'OK':'FAIL', '| delivered:', tradeDelivered?'OK':'FAIL', '| food:', Math.floor(G.res.food), '| wood:', Math.floor(G.res.wood), '| med:', Math.floor(G.res.med));
 })();
 `;
 try {

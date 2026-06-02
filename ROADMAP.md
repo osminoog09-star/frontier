@@ -299,3 +299,18 @@
 ### Next Autonomous Target
 - [ ] Start scenario/trade content now that core production/logistics controls are stable.
 - [ ] First candidate: caravan/trader event with clear UI/log feedback and harness coverage.
+
+## Update 2026-06-02 - v1.20 Tradepost Caravan Slice
+- [x] Created `versions/frontier-v1.20.html` from the current playable build.
+- [x] Added buildable `tradepost` building with a bottom-bar button.
+- [x] Added drawn tradepost structure.
+- [x] Added `runCaravanTrade()`: completed tradepost + 15 gold buys food, wood, and medicine.
+- [x] Existing `trading` research improves caravan deal output.
+- [x] Random events can now trigger a caravan trade.
+- [x] Extended `_harness.js` with Scenario P: caravan trade spends gold and delivers supplies.
+- [x] Regression harness green: Scenarios A-P pass, expected Scenario K anomaly is detected, no runtime errors.
+- [x] Rebuilt public site `index.html` in Russian and added `docs/TECH_ROADMAP.md`.
+
+### Next Autonomous Target
+- [ ] Start scenarios: Gold Rush, Fort Defense, Caravan Route.
+- [ ] Add harness coverage for scenario initialization.

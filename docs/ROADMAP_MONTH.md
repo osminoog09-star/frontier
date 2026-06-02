@@ -254,3 +254,14 @@
 
 ### Next Step
 - Move from economy controls into scenario/trade content.
+
+## Update 2026-06-02 - Tradepost Caravan Status
+- Done: tradepost caravan slice implemented as `versions/frontier-v1.20.html`.
+- Done: tradepost is buildable and has a drawn map structure.
+- Done: caravan trade converts gold into food, wood, and medicine.
+- Done: `trading` research improves caravan output.
+- Done: `_harness.js` includes Scenario P for caravan trade.
+- Done: public site was rebuilt in Russian and now links the technical roadmap.
+
+### Next Step
+- Start scenario initialization: Gold Rush, Fort Defense, Caravan Route.

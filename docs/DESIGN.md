@@ -132,3 +132,8 @@
 - Station output limits are now quick to set with x1/x3/x5 chips.
 - This keeps the control usable on both desktop and phone, where repeated tiny clicks are annoying.
 - Production/logistics controls are now stable enough to start adding more world content.
+
+## Update 2026-06-02 - Tradepost Caravan Design Status
+- The colony now has its first external economy hook: a trading post can turn gold into useful supplies.
+- Caravan events have clearer meaning once the player invests in trade infrastructure.
+- This prepares the "Caravan Route" scenario and later faction/trade systems.

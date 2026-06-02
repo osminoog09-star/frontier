@@ -194,3 +194,13 @@
 
 ### Next Architecture Work
 - Add scenario/trade systems using the now-stable resource and production helpers.
+
+## Update 2026-06-02 - Tradepost Caravan Architecture Notes
+- `tradepost` is a normal build type and persists through the existing building serializer.
+- `runCaravanTrade()` is a deterministic trade helper that can be called by events and harness.
+- Caravan trade requires a completed tradepost and enough gold; no tradepost falls back to a small food gift.
+- `trading` research increases caravan output.
+- Scenario P validates the trade helper.
+
+### Next Architecture Work
+- Add scenario initialization helpers that can compose starting buildings/resources/events.

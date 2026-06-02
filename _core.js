@@ -24,6 +24,7 @@ const BUILDS = {
   gate:   { name:'Ворота',   icon:'▫', cost:{wood:8},            size:1, prod:null,   hp:120, passable:true },
   tower:  { name:'Вышка',    icon:'🗼', cost:{wood:20,ore:10},   size:1, prod:null,   range:12 },
   saloon: { name:'Салун',    icon:'🍺', cost:{wood:30,gold:10},  size:2, prod:'mood',  rate:0.1 },
+  tradepost:{ name:'Торг. пост',icon:'🧳', cost:{wood:35,gold:20}, size:2, prod:'trade', rate:0 },
   lab:    { name:'Лаборатория',icon:'🔬',cost:{wood:25,ore:15},  size:2, prod:'sci',   rate:0.15 },
   clinic: { name:'Клиника',  icon:'💊', cost:{wood:20,med:0},    size:2, prod:'heal',  rate:0.3 },
   smithy: { name:'Кузня',    icon:'🔨', cost:{wood:20,ore:20},   size:2, prod:'gold',  rate:0.1 },
@@ -1447,6 +1448,7 @@ function onNewDay() {
 function triggerEvent(peaceful) {
   const events = [
     { name:'Торговец', fn: () => { G.res.food+=30; G.res.med+=5; addLog('🤠 Торговец привёз еду и медикаменты!', 'good'); } },
+    { name:'Караван', fn: () => runCaravanTrade() },
     { name:'Засуха', fn: () => { G.buildings.filter(b=>b.type==='farm').forEach(f=>f.growth=0); addLog('☀️ Засуха! Все фермы сгорели.', 'warn'); } },
     { name:'Налёт бандитов', fn: () => { const n=2+randInt(0,3)+Math.floor(G.day/6); spawnEnemy(n); Sfx.alarm(); addLog(`🔫 Налёт! ${n} бандитов атакуют!`, 'danger'); } },
     { name:'Золотая жила', fn: () => { G.res.gold+=30; addLog('💰 Нашли золотую жилу! +30 золота', 'good'); } },
@@ -1473,6 +1475,30 @@ function triggerEvent(peaceful) {
   if (peaceful) pool = events.filter(e=>!['Налёт бандитов','Эпидемия'].includes(e.name));
   const ev = pool[randInt(0, pool.length-1)];
   ev.fn();
+}
+
+function runCaravanTrade() {
+  const post = G.buildings.find(b=>b.done && !b.blueprint && b.type==='tradepost');
+  if (!post) {
+    G.res.food += 20;
+    addLog('🐎 Малый караван оставил немного провианта. Построй торг. пост для сделок.', 'good');
+    return { traded:false, reason:'no_tradepost', food:20 };
+  }
+  if ((G.res.gold || 0) < 15) {
+    addLog('🐎 Караван пришёл, но золота для сделки не хватило.', 'warn');
+    return { traded:false, reason:'no_gold' };
+  }
+  const bonus = hasResearch('trading') ? 1.35 : 1;
+  G.res.gold -= 15;
+  const food = Math.floor(35 * bonus);
+  const wood = Math.floor(18 * bonus);
+  const med = hasResearch('trading') ? 8 : 5;
+  G.res.food += food;
+  G.res.wood += wood;
+  G.res.med += med;
+  addLog(`🐎 Караванная сделка: -15 золота, +${food} еды, +${wood} дерева, +${med} медикаментов`, 'good');
+  Diag.action(`Караванная сделка @${post.tx},${post.ty}`);
+  return { traded:true, spentGold:15, food, wood, med };
 }
 
 function updateWeather() {
@@ -1852,6 +1878,15 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.beginPath(); ctx.moveTo(x, y+S*0.35); ctx.lineTo(cx, y+2); ctx.lineTo(x+S, y+S*0.35); ctx.fill();
       ctx.fillStyle = '#3a2510'; ctx.fillRect(cx-4, y+S*0.6, 8, S*0.4); // door
       ctx.fillStyle = '#c8a040'; ctx.fillRect(x+4, y+S*0.5, 5, 5); ctx.fillRect(x+S-9, y+S*0.5, 5, 5); // windows
+      break;
+    }
+    case 'tradepost': {
+      ctx.fillStyle = '#6b5130'; ctx.fillRect(x+2, y+S*0.3, S-4, S*0.68);
+      ctx.fillStyle = '#3a2815'; ctx.fillRect(x+4, y+S*0.18, S-8, S*0.16);
+      ctx.fillStyle = '#caa45a'; ctx.fillRect(x+S*0.18, y+S*0.48, S*0.22, S*0.18);
+      ctx.fillStyle = '#8a5a2e'; ctx.fillRect(x+S*0.55, y+S*0.5, S*0.25, S*0.22);
+      ctx.strokeStyle = '#d0a45a'; ctx.strokeRect(x+S*0.16, y+S*0.46, S*0.68, S*0.3);
+      ctx.fillStyle = '#1d140a'; ctx.fillRect(cx-4, y+S*0.65, 8, S*0.33);
       break;
     }
     case 'lab': {
@@ -2859,7 +2894,7 @@ function setupButtons() {
   // Build buttons
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-well-btn':'well',
   };
@@ -3086,7 +3121,7 @@ function showHowtoPanel(panel) {
 function updateBuildButtons() {
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-well-btn':'well',
   };
