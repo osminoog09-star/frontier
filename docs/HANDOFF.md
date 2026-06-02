@@ -6,11 +6,17 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.58 - Room Type Labels`.
+- Последний локальный срез: `v1.59 - Room Wall Quality`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.58`. Наука: tools/medicine/cooking/walls/hunting/trading/marksman.
-- Harness: Scenarios A-AU (47) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
+- Текущий `GAME_VERSION`: `1.59`. Наука: tools/medicine/cooking/walls/hunting/trading/marksman.
+- Harness: Scenarios A-AV (48) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
+
+## Что изменилось в v1.59
+
+- Комнаты теперь показывают качество стен/формы: `тесная защита`, `крепкие стены`, `широкая комната`.
+- Stats и overlay мебели показывают wall quality вместе с типом комнаты.
+- Scenario AV проверяет компактную и просторную комнаты, summary и label.
 
 ## Что изменилось в v1.58
 

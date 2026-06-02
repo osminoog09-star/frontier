@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.59 - Room Wall Quality
+
+- PC-first room slice: enclosed rooms now show wall/shape quality as `тесная защита`, `крепкие стены`, or `широкая комната`.
+- Room type labels and stats now include both furniture quality and wall quality.
+- Harness: Scenario AV validates compact vs spacious room wall quality and summary text. A-AV (48) green.
+
 ### v1.58 - Room Type Labels
 
 - PC-first room slice: enclosed rooms now classify furniture layouts as `спальня`, `столовая`, `жилая комната`, or `украшенный угол`.

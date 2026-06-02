@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.59 - Room Wall Quality. Комнаты показывают качество стен/формы (тесная защита/крепкие стены/широкая комната), overlay/stats обновлены, Scenario AV. Harness A-AV (48) green.
+
 - v1.58 - Room Type Labels. Mobile-направление отложено; закрытые комнаты теперь показывают тип (спальня/столовая/жилая/украшенный угол), overlay/stats обновлены, Scenario AU. Harness A-AU (47) green.
 
 - v1.57 - Mobile Pawn Drawer. На телефоне появилась компактная панель `Пешки`/`Лог` вместо скрытого desktop sidebar; локальный mobile smoke 390x844 green.

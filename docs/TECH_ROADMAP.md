@@ -98,6 +98,13 @@
 - Scenario AU covers three separate rooms and the open non-room fallback.
 - PC-first direction: continue room/animal/visual/content slices; do not expand mobile UI for now.
 
+## v1.59 room wall quality
+
+- Added `roomWallQuality()` based on wall-to-floor ratio for enclosed rooms.
+- Room labels now include wall quality: compact rooms read as protected, spacious rooms read as wide.
+- Stats summary includes wall quality alongside room type and furniture quality.
+- Scenario AV validates compact vs spacious room labels and summary text.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -111,7 +118,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-AU покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт и типы комнат.
+- Автотесты: `_harness.js`, сценарии A-AV покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат и качество стен.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза

@@ -206,6 +206,15 @@
 ### Next Step
 - Continue PC roadmap: animal pens/livestock, wall quality, room panel, autotiling, or desktop UI polish.
 
+## Update 2026-06-02 - v1.59 Room Wall Quality
+
+- Done: enclosed rooms now expose wall/shape quality (`тесная защита`, `крепкие стены`, `широкая комната`).
+- Done: stats and furniture overlays include wall quality together with room type.
+- Done: `_harness.js` includes Scenario AV; full harness A-AV is green.
+
+### Next Step
+- Continue PC roadmap: animal pens/livestock, room panel, autotiling, or desktop UI polish.
+
 ## Update 2026-06-02 - Week 1 Status
 - Done: defense/pathfinding slice from Week 1 is now implemented as `versions/frontier-v1.8.html`.
 - Done: fences are real blockers; gates are passable; A* routes around blockers and through gates.

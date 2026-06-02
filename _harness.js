@@ -967,6 +967,33 @@ const test = `
   console.log('SCENARIO AU (room type labels):');
   console.log('   bedroom:', bedroom, '| dining:', dining, '| living:', living, '| summary:', auOk?'OK':'FAIL');
   if (!auOk) throw new Error('Scenario AU failed');
+
+  // Scenario AV: room wall quality labels distinguish compact vs spacious rooms
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['bed','table','decor','fence','gate'].includes(b.type));
+  function makeRoomBox(x0, y0, size, furniture) {
+    for (let y = y0; y <= y0 + size; y++) for (let x = x0; x <= x0 + size; x++) forceDry(x, y, 1);
+    for (let x = x0; x <= x0 + size; x++) for (let y = y0; y <= y0 + size; y++) {
+      if (x === x0 || x === x0 + size || y === y0 || y === y0 + size) {
+        G.buildings.push({ type:'fence', tx:x, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+      }
+    }
+    for (const f of furniture) G.buildings.push({ type:f.type, tx:x0 + f.dx, ty:y0 + f.dy, done:true, blueprint:false, hp:120, maxHp:120 });
+  }
+  makeRoomBox(10, 10, 4, [{ type:'bed', dx:2, dy:2 }]);
+  makeRoomBox(24, 10, 8, [{ type:'table', dx:4, dy:4 }]);
+  const compactRoom = enclosedRoomAt(12, 12);
+  const wideRoom = enclosedRoomAt(28, 14);
+  const compactWall = roomWallQuality(compactRoom);
+  const wideWall = roomWallQuality(wideRoom);
+  const compactLabel = roomTypeLabelAt(12, 12);
+  const wideLabel = roomTypeLabelAt(28, 14);
+  const avOk = compactWall.score > wideWall.score && compactLabel.includes('тесная защита') &&
+    wideLabel.includes('широкая комната') && roomTypeSummary().includes('тесная защита') &&
+    roomTypeSummary().includes('широкая комната');
+  console.log('SCENARIO AV (room wall quality):');
+  console.log('   compact:', compactWall.label, compactWall.ratio.toFixed(2), '| wide:', wideWall.label, wideWall.ratio.toFixed(2), '|', avOk?'OK':'FAIL');
+  if (!avOk) throw new Error('Scenario AV failed');
 })();
 `;
 try {

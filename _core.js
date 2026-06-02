@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.58';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.59';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -926,6 +926,13 @@ function roomFurnitureCounts(room) {
 function roomFurnitureScore(counts) {
   return (counts.bed ? 1 : 0) + (counts.table ? 1 : 0) + (counts.decor ? 1 : 0);
 }
+function roomWallQuality(room) {
+  if (!room) return { label:'нет', score:0, ratio:0 };
+  const ratio = room.tiles > 0 ? room.walls / room.tiles : 0;
+  if (ratio >= 1.25) return { label:'тесная защита', score:3, ratio };
+  if (ratio >= 0.8) return { label:'крепкие стены', score:2, ratio };
+  return { label:'широкая комната', score:1, ratio };
+}
 function roomComfortLabelForScore(score) {
   if (score >= 3) return 'хорошая комната';
   if (score >= 2) return 'жилая комната';
@@ -959,6 +966,7 @@ function roomTypeEntries() {
       type: classifyRoom(entry.counts),
       score,
       label: roomComfortLabelForScore(score),
+      wall: roomWallQuality(entry.room),
       tiles: entry.room.tiles,
       counts: entry.counts
     };
@@ -967,14 +975,15 @@ function roomTypeEntries() {
 function roomTypeSummary() {
   const entries = roomTypeEntries();
   if (!entries.length) return 'нет';
-  return entries.map(r => `${r.type} (${r.label})`).join(', ');
+  return entries.map(r => `${r.type} (${r.label}, ${r.wall.label})`).join(', ');
 }
 function roomTypeLabelAt(tx, ty) {
   const room = enclosedRoomAt(tx, ty);
   if (!room) return 'не закрыта стенами';
   const counts = roomFurnitureCounts(room);
   const score = roomFurnitureScore(counts);
-  return `${classifyRoom(counts)} · ${roomComfortLabelForScore(score)} (${score}/3)`;
+  const wall = roomWallQuality(room);
+  return `${classifyRoom(counts)} · ${roomComfortLabelForScore(score)} (${score}/3) · ${wall.label}`;
 }
 function roomComfortScore() {
   return (isFurnitureInRoom('bed') ? 1 : 0) + (isFurnitureInRoom('table') ? 1 : 0) + (isFurnitureInRoom('decor') ? 1 : 0);
