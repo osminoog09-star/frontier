@@ -2,6 +2,16 @@
 
 ## 2026-06-02
 
+### v1.33 - Menu Scroll Fix + Clear Roadmap + Agent Coordination
+
+- FIX: the main-menu left column was not scrollable — bottom buttons (site, diagnostics) were cut off on
+  shorter screens. Added `overflow-y:auto` so all menu buttons are reachable.
+- Rewrote the in-game roadmap panel: all Russian, fixed broken `<\span>`/`<\b>` tags, current statuses
+  (Week 1 DONE, Week 2 NOW), version history grouped by milestone (v1.0–1.33), and a clear "what's next".
+- Agent coordination: added `docs/WIP.md` (a lock listing in-progress tasks) and an AGENTS.md rule —
+  read WIP before starting, mark tasks IN PROGRESS, leave PAUSED notes if interrupted so the other agent
+  doesn't restart the same work.
+
 ### v1.32 - Pre-Week-2 Audit Pass
 
 - Full audit before starting Week 2: harness A-Z green, encoding/sync guard OK, no mojibake, git clean.

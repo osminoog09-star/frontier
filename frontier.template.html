@@ -288,7 +288,10 @@
     width: 320px; padding: 36px 28px; display: flex; flex-direction: column;
     background: linear-gradient(180deg, rgba(40,32,18,0.6), rgba(20,16,10,0.6));
     border-right: 1px solid #2a2418;
+    overflow-y: auto; min-height: 0;           /* кнопки прокручиваются, если не влезают */
   }
+  .menu-left::-webkit-scrollbar { width: 6px; }
+  .menu-left::-webkit-scrollbar-thumb { background: #3a3320; border-radius: 3px; }
   .menu-logo { color: #e8c97e; font-size: 40px; letter-spacing: 2px; text-shadow: 0 3px 10px rgba(0,0,0,0.6); }
   .menu-sub { color: #998a6a; font-size: 12px; margin: 6px 0 30px; }
   .menu-buttons { display: flex; flex-direction: column; gap: 10px; }
