@@ -491,6 +491,19 @@ const test = `
   const lastShown = vTrade.traded && !!G._lastCaravan && richHtml.includes('Последняя сделка');
   console.log('SCENARIO V (caravan deal UI polish):');
   console.log('   outputs in row:', outRow?'OK':'FAIL', '| lack hint:', lackHint?'OK':'FAIL', '| last deal shown:', lastShown?'OK':'FAIL');
+
+  // Scenario W: fort waves escalate (1/3,2/3,3/3) and award gold for holding
+  newGame('fort'); G.day = 2; G.enemies = []; G.res.gold = 0; G.res.med = 0;
+  const fw2 = triggerScenarioDayEvent();
+  const wave2ok = fw2 && fw2.type==='fort_raid_pressure' && fw2.wave===1 && fw2.total===3 && fw2.count===2 && G.enemies.length===2 && fw2.reward===0;
+  newGame('fort'); G.day = 3; G.enemies = []; G.res.gold = 0; G.res.med = 0;
+  const fw3 = triggerScenarioDayEvent();
+  const wave3ok = fw3 && fw3.wave===2 && fw3.count===3 && G.enemies.length===3 && fw3.reward>0 && G.res.gold===fw3.reward && G.res.med===2 && (G.stats.fortWavesHeld||0)===1;
+  newGame('fort'); G.day = 4; G.enemies = []; G.res.gold = 0;
+  const fw4 = triggerScenarioDayEvent();
+  const wave4ok = fw4 && fw4.wave===3 && fw4.count===4 && G.enemies.length===4 && fw4.reward>fw3.reward;
+  console.log('SCENARIO W (fort waves + hold reward):');
+  console.log('   wave 1/3:', wave2ok?'OK':'FAIL', '| wave 2/3 reward:', wave3ok?'OK':'FAIL', '| wave 3/3 escalates:', wave4ok?'OK':'FAIL');
 })();
 `;
 try {

@@ -318,3 +318,8 @@
 - Added a current-gold readout, a "choose a deal" hint, and a last-deal summary line.
 - Harness Scenario V covers the polished trade UI.
 - Next: deepen scenario-specific events (Gold Rush pressure, Fort waves, Caravan route bonuses).
+
+## Update 2026-06-02 - Fort Defense Waves (v1.28)
+- Fort scenario now has readable escalating waves (1/3,2/3,3/3) and a gold/medicine reward for holding.
+- Harness Scenario W covers wave numbering, escalation, and reward.
+- Next scenario depth: Gold Rush economic risk (drought/raids on miners), Caravan Route trade bonuses.

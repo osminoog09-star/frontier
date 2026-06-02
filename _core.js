@@ -80,7 +80,7 @@ const SCENARIOS = {
 
 function ensureScenarioStats() {
   if (!G.stats) G.stats = {};
-  const defaults = { days:0, kills:0, foodHarvested:0, treesChopped:0, goldEarned:0, caravanDeals:0 };
+  const defaults = { days:0, kills:0, foodHarvested:0, treesChopped:0, goldEarned:0, caravanDeals:0, fortWavesHeld:0 };
   for (const [key, value] of Object.entries(defaults)) {
     if (typeof G.stats[key] !== 'number' || isNaN(G.stats[key])) G.stats[key] = value;
   }
@@ -102,10 +102,11 @@ function scenarioGoalStatus() {
   if (scenario === 'fort') {
     const target = 5;
     const value = Math.max(1, Math.floor(G.day || 1));
+    const held = Math.floor((G.stats && G.stats.fortWavesHeld) || 0);
     return {
       scenario, value, target,
       pct: clamp((value - 1) / (target - 1), 0, 1) * 100,
-      text: `Удержи форт до дня ${target} (сейчас: день ${value})`,
+      text: `Удержи форт до дня ${target} (день ${value}, удержано волн: ${held})`,
       sidebar: `удержать форт до дня ${target} (сейчас: ${value})`,
     };
   }
@@ -150,12 +151,24 @@ function triggerScenarioDayEvent() {
     addLog(`💰 Золотая лихорадка давит на припасы: старатели съели ${loss} еды.`, 'warn');
     return { type:'goldrush_food_pressure', loss };
   }
-  if (G.scenario === 'fort' && G.day >= 2 && G.day <= 4 && G.day % 2 === 0) {
-    const count = 1 + Math.floor(G.day / 2);
+  if (G.scenario === 'fort' && G.day >= 2 && G.day <= 4) {
+    const total = 3;
+    const wave = G.day - 1;           // дни 2,3,4 → волны 1,2,3
+    const count = wave + 1;           // 2,3,4 бандита — нарастающие волны
+    // награда за удержание ПРЕДЫДУЩЕЙ волны (со 2-й волны и далее)
+    let reward = 0;
+    if (wave >= 2) {
+      reward = 15 + 5 * (wave - 2);   // волна2: +15, волна3: +20
+      G.res.gold += reward;
+      G.res.med = (G.res.med || 0) + 2;
+      ensureScenarioStats();
+      G.stats.fortWavesHeld = (G.stats.fortWavesHeld || 0) + 1;
+    }
     spawnEnemy(count);
     Sfx.alarm();
-    addLog(`🛡️ Форт проверяют на прочность: разведотряд бандитов (${count}) идёт к стенам.`, 'danger');
-    return { type:'fort_raid_pressure', count };
+    const rewardText = reward ? ` (+${reward}💰 и медикаменты за удержание прошлой волны)` : '';
+    addLog(`🛡️ Волна ${wave}/${total}: ${count} бандитов штурмуют форт!${rewardText}`, 'danger');
+    return { type:'fort_raid_pressure', wave, total, count, reward };
   }
   if (G.scenario === 'caravan' && G.day >= 2 && G.day % 2 === 0) {
     G.eventTimer = Math.min(G.eventTimer || 999, 80);

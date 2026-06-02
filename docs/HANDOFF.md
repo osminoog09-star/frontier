@@ -6,8 +6,8 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.27 - Caravan Deal UI Polish + Safe Build System`.
-- Последний harness: Scenarios A-V pass + encoding/sync guard OK.
+- Последний локальный срез: `v1.28 - Fort Defense Waves + Hold Reward`.
+- Последний harness: Scenarios A-W pass + encoding/sync guard OK.
 - СБОРКА: `frontier.html` собирается ТОЛЬКО через `node build.js` (template + `_core.js`, UTF-8, mojibake-guard).
   Никаких ручных PowerShell `Get-Content -Raw` синхронизаций — они портят кириллицу.
 - Ожидаемая anomaly в harness: Scenario K специально создает заблокированный `meat` stack и проверяет диагностику.
@@ -58,11 +58,11 @@
 - [x] Короткая подсказка "выбери сделку" + строка последней сделки.
 - [x] Harness Scenario V.
 
-Приоритет 2 (следующий): углубить сценарные события.
+Приоритет 2 (в работе): углубить сценарные события.
 
-- Gold Rush: риск засухи/налётов на добытчиков.
-- Fort Defense: более читаемые волны и награды за удержание.
-- Caravan Route: торговые бонусы и выбор сделки.
+- [x] Fort Defense: нумерованные волны 1/3–3/3 + награда за удержание (v1.28).
+- [ ] Gold Rush: риск засухи/налётов на добытчиков.
+- [ ] Caravan Route: торговые бонусы и выбор сделки.
 
 Приоритет 3: улучшить UX сценариев.
 

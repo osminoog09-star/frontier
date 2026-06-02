@@ -2,6 +2,15 @@
 
 ## 2026-06-02
 
+### v1.28 - Fort Defense Waves + Hold Reward
+
+- Fort Defense raids are now numbered, escalating waves: day 2 → wave 1/3 (2 enemies), day 3 → 2/3 (3), day 4 → 3/3 (4).
+- Holding a wave pays off: from wave 2 the colony gets gold (+15, then +20) and medicine for surviving the previous wave.
+- `stats.fortWavesHeld` tracks held waves; the fort objective text shows the count.
+- Save/load normalizes `fortWavesHeld` for older saves.
+- Harness: Scenario W validates wave numbering, escalation, and the hold reward; Scenario S still green.
+
+
 ### v1.27 - Caravan Deal UI Polish + Safe Build System
 
 - Tradepost deal buttons now show the deal output directly in the row, not only in the tooltip.
