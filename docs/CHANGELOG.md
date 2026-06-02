@@ -2,6 +2,12 @@
 
 ## 2026-06-02
 
+### v1.50 - Queued-Work Counter (visual pass 2)
+
+- Stats panel now shows what is queued for work: 🪓 trees / ⛏️ rocks / 🎯 animals via markedSummaryText().
+- Pure helper markedSummaryText() (built on countMarked). Harness: Scenario AN extended. A-AN (40) green.
+- Public site index.html refreshed to current state (was stale at v1.44; earlier updates targeted .stat, site uses .badge). Added AGENTS rule to keep the site current each release.
+
 ### v1.49 - Marked-Resource Readability (visual pass 2)
 
 - Marked trees/rocks/animals now have a pulsing highlight + a small job icon (🪓/⛏️/🎯), so the player

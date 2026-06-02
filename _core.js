@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.49';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.50';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -2479,6 +2479,16 @@ function countMarked() {
   return out;
 }
 
+// Короткая сводка «что в очереди работ» для HUD (чистая функция — тестируемо).
+function markedSummaryText() {
+  const m = countMarked();
+  const parts = [];
+  if (m.trees) parts.push('🪓 ' + m.trees);
+  if (m.rocks) parts.push('⛏️ ' + m.rocks);
+  if (m.animals) parts.push('🎯 ' + m.animals);
+  return parts.length ? parts.join(' · ') : 'нет';
+}
+
 function drawPawn(p) {
   const isSelected = G.selectedPawnId === p.id;
   const x = Math.round(p.x), y = Math.round(p.y);
@@ -2993,6 +3003,7 @@ function renderResearch() {
     <div>🐴 Лошади: <b style="color:#aaa">${ensureHerd().tamed} приручено / ${ensureHerd().wild} диких</b></div>
     <div>🏠 Комфорт усадьбы: <b style="color:#aaa">${homesteadComfortLabel()} (${homesteadComfortScore()}/3)</b></div>
     <div>🧱 Комнаты: <b style="color:#aaa">${roomComfortLabel()} (${roomComfortScore()}/3)</b></div>
+    <div>🎯 В очереди работ: <b style="color:#aaa">${markedSummaryText()}</b></div>
     <div style="margin-top:4px;color:#7a6a4a">🏆 ${SCENARIOS[G.scenario]?.name || SCENARIOS.settlers.name}: ${goal.sidebar}</div>
   `;
   list.appendChild(stats);
@@ -3746,7 +3757,7 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.49','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов.'],
+    ['now', 'v1.36–1.50','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач в очереди.'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>

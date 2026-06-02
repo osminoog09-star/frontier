@@ -822,9 +822,14 @@ const test = `
     && markPulseAlpha() >= 0 && markPulseAlpha() <= 1;
   let anSmoke = true;
   try { for (let i=0;i<4;i++){ G.tick++; render(); } } catch(e) { anSmoke = false; }
+  const summary = markedSummaryText();
+  const sWithMarksOk = (mt > 0 ? summary.includes('🪓 ' + mt) : true);
+  newGame('settlers');
+  const sEmptyOk = markedSummaryText() === 'нет';
+  const summaryOk = sWithMarksOk && sEmptyOk;
   console.log('SCENARIO AN (marked readability):');
-  console.log('   count:', JSON.stringify(c1), '| countOk:', countOk?'OK':'FAIL', '| render smoke:', anSmoke?'OK':'FAIL');
-  if (!countOk || !anSmoke) throw new Error('Scenario AN failed');
+  console.log('   count:', JSON.stringify(c1), '| countOk:', countOk?'OK':'FAIL', '| summary:', summaryOk?'OK':'FAIL', '| render smoke:', anSmoke?'OK':'FAIL');
+  if (!countOk || !anSmoke || !summaryOk) throw new Error('Scenario AN failed');
 })();
 `;
 try {
