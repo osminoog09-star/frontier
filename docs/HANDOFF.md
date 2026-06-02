@@ -6,10 +6,12 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v1.31 - Caravan Route Trade Bonus`.
-- Последний harness: Scenarios A-Z pass + encoding/sync guard OK.
-- v1.29: Gold Rush claim raids (X). v1.30: sidebar pawn select fix (Y). v1.31: caravan route +20% (Z).
-- Сценарные события углублены для всех трёх сценариев (fort/goldrush/caravan). Следующий блок — визуал/аудио-пассы Недели 2.
+- Последний локальный срез: `v1.32 - Pre-Week-2 Audit Pass`.
+- Последний harness: Scenarios A-Z pass + encoding/sync guard OK, 0 FAIL, 0 mojibake, git clean.
+- v1.29: Gold Rush claim raids (X). v1.30: sidebar pawn select fix (Y). v1.31: caravan route +20% (Z). v1.32: аудит + фикс версии в меню.
+- ПЕРЕХОД НА НЕДЕЛЮ 2. Готово из Недели 1: логистика, крафт, стены+ворота+A*, частицы/береговая.
+  Отложено (опционально, заберём в визуал-пассах): рефакторинг в модули, автотайлинг террейна.
+- Неделя 2 (следующее): аудио-пасс (эмбиент/музыка), визуал-пасс 2 (анимации работ, UI), лошади/ранчо, мебель/комнаты, боевая глубина.
 - СБОРКА: `frontier.html` собирается ТОЛЬКО через `node build.js` (template + `_core.js`, UTF-8, mojibake-guard).
   Никаких ручных PowerShell `Get-Content -Raw` синхронизаций — они портят кириллицу.
 - Ожидаемая anomaly в harness: Scenario K специально создает заблокированный `meat` stack и проверяет диагностику.

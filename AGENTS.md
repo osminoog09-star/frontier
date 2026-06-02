@@ -13,6 +13,8 @@
      пишет UTF-8 без BOM и имеет mojibake-guard (упадёт, если порча).
    - `node _harness.js` дополнительно проверяет: нет mojibake и `frontier.html` синхронизирован с `_core.js`.
 4. После релизного среза создавать `versions/frontier-vX.Y.html` (копией собранного `frontier.html`).
+   - Перед сборкой обновлять номер версии в `frontier.template.html` (`class="menu-ver"`), чтобы меню игры
+     не рассинхронизировалось с `versions/`, `index.html` и `docs/CHANGELOG.md`.
 5. Обновлять `ROADMAP.md`, `docs/TECH_ROADMAP.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md` и публичный `index.html`, если меняется статус.
 6. Перед push запускать `node _harness.js`.
 7. После push проверять GitHub Pages:

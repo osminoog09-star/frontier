@@ -2,6 +2,14 @@
 
 ## 2026-06-02
 
+### v1.32 - Pre-Week-2 Audit Pass
+
+- Full audit before starting Week 2: harness A-Z green, encoding/sync guard OK, no mojibake, git clean.
+- FIX: in-game menu version label was stale (`build 0.8.0`) vs actual v1.31 — synced to current build.
+- Added a protocol rule: bump `menu-ver` in `frontier.template.html` on every version snapshot to avoid drift.
+- Week 1 status confirmed: logistics, production chains, walls+gates+A*, particles/shoreline DONE.
+  Deferred (optional): full module refactor, terrain autotiling — folded into later visual passes.
+
 ### v1.31 - Caravan Route Trade Bonus
 
 - Caravan Route scenario now grants a +20% route bonus to all caravan deal outputs (stacks with `trading` research).
