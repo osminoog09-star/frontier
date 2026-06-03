@@ -1,5 +1,13 @@
 # FRONTIER changelog
 
+## 2026-06-03 - Roadmap identity sync
+
+- Roadmap/site/docs синхронизированы с текущим направлением: **RimWorld-like фундамент + Frontier-идентичность**.
+- `ROADMAP.md` переписан как понятный русский план: что уже сделано, что сейчас, что дальше, и почему игра не должна быть копией RimWorld.
+- `index.html` обновлён до актуального v1.66/A-BA и объясняет свежие срезы: полы, стены, уют комнат, Architect-панель.
+- `docs/TECH_ROADMAP.md`, `docs/DESIGN.md`, `docs/HANDOFF.md` приведены к v1.66 и текущей очереди.
+- Gameplay не менялся; harness-сценарии не добавлялись. Проверка `node _harness.js` зелёная (A-BA, 53), runtime errors = 0.
+
 ## v1.66 - Architect side menu (RimWorld-style, slice 2b)
 
 - Категории построек переехали с нижних папок в боковую панель **«Архитектор»** слева (вертикальный аккордеон), как Architect в RimWorld.

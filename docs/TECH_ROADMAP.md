@@ -7,7 +7,8 @@
 - Public site is now a player-facing Russian status page, not a raw technical roadmap dump.
 - Mobile smoke must stay part of any UI release: 390x844, no horizontal overflow, desktop sidebar hidden, minimap not overlapping the bottom build bar.
 - Keep `index.html` readable for a player; keep deep agent details in `docs/HANDOFF.md`, `docs/WIP.md`, and this file.
-- Next gameplay slice remains Week 2 content: rooms, animal pens/livestock, audio, or visual polish, with harness coverage.
+- Current direction is explicit: RimWorld-like colony sim foundations, but with Frontier identity (horses, ranches, saloons, caravans, gold, forts, bandits).
+- Next gameplay slice remains Week 2 content: construction/rooms depth, animal pens/livestock, saloon/caravan depth, or visual readability, with harness coverage.
 - User direction 2026-06-02: mobile theme is enough for now; postpone mobile work for about four weeks and focus on PC-first roadmap slices.
 
 ## v1.37 furniture/rooms start
@@ -130,7 +131,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-AX покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат, качество стен, room-панель и animal-панель.
+- Автотесты: `_harness.js`, сценарии A-BA покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат, качество стен, room-панель, animal-панель, полы, стены и бонус уюта от пола.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза
@@ -142,7 +143,7 @@
 3. `node _harness.js` зеленый.
 4. `frontier.html` синхронизирован с `_core.js`.
 5. Создан `versions/frontier-vX.Y.html`.
-6. Обновлены `ROADMAP.md`, `docs/ROADMAP_MONTH.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`, сайт `index.html`.
+6. Обновлены `ROADMAP.md`, `docs/TECH_ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`, сайт `index.html`, если меняется статус или направление.
 7. Обновлены `docs/CHANGELOG.md` и `docs/HANDOFF.md`.
 8. Commit + push в GitHub.
 9. Проверен публичный GitHub Pages URL.
@@ -150,7 +151,34 @@
 
 ## 3. Ближайшая очередь
 
-### 3.1 Торговля и караваны
+### 3.1 Стройка и комнаты
+
+Цель: довести RimWorld-like строительство до понятной базы, но без большого refactor.
+
+- [x] Полы как отдельный tile-layer: деревянный и каменный.
+- [x] Чертежи полов, работа строителя, снос пола.
+- [x] Деревянные и каменные стены как material walls.
+- [x] Стены блокируют проход и считаются стенами комнаты.
+- [x] Полы повышают уют комнаты, room-панель показывает покрытие.
+- [x] Architect-панель слева вместо длинной нижней простыни.
+- [ ] Следующий шаг: визуальная проверка Architect-панели на desktop.
+- [ ] Следующий шаг: подвоз материалов к чертежам вместо слишком магического списания.
+- [ ] Следующий шаг: крыша/укрытие как отдельный слой качества комнаты.
+
+### 3.2 Frontier-идентичность
+
+Цель: игра должна ощущаться не копией RimWorld, а colony sim про Дикий Запад.
+
+- [x] Конюшня и приручение диких лошадей.
+- [x] Табун ускоряет ковбоев.
+- [x] Ранчо дает дневной доход при поддержке конюшни.
+- [x] Караваны и торговый пост с профилями сделок.
+- [x] Форт/налёты/поджигатель/ремонт построек.
+- [ ] Следующий шаг: загоны и скот как ресурсный цикл.
+- [ ] Следующий шаг: салун глубже: отдых, найм, риск настроения.
+- [ ] Следующий шаг: риски торговых маршрутов.
+
+### 3.3 Торговля и караваны
 
 Цель: после стабилизации логистики дать игроку внешний экономический контур.
 
@@ -165,7 +193,7 @@
 - [x] Harness: Scenario U проверяет HTML профилей.
 - [ ] Следующий шаг: полировка UI профилей, видимый результат сделки без tooltip.
 
-### 3.2 Сценарии старта
+### 3.4 Сценарии старта
 
 Цель: добавить разные способы начать колонию.
 
@@ -179,7 +207,7 @@
 - [x] Harness: Scenario S проверяет сценарное давление.
 - [x] Профили караванных сделок.
 
-### 3.3 Production queues
+### 3.5 Production queues
 
 Цель: сделать производство управляемым, но не перегрузить UI.
 
@@ -187,7 +215,7 @@
 - Следующий шаг: понятные presets и состояние "почему станция не работает".
 - Позже: очередь из нескольких рецептов, если появится больше рецептов.
 
-### 3.4 Логистика
+### 3.6 Логистика
 
 Цель: склады и перевозка должны быть понятны игроку.
 
@@ -196,7 +224,7 @@
 - Следующий шаг: лучшая визуальная подсветка blocked stacks на карте.
 - Позже: отдельное хранение по складам вместо глобального `G.res`.
 
-### 3.5 Mobile UX
+### 3.7 Mobile UX
 
 Цель: телефонная версия должна быть проверяемой, а не случайно сжатой desktop-страницей.
 
@@ -205,7 +233,8 @@
 - [x] Game page скрывает desktop sidebar на mobile/touch.
 - [x] Canvas занимает viewport без horizontal overflow.
 - [x] Harness остаётся зелёным после mobile CSS hotfix.
-- [ ] Следующий шаг: компактные mobile-панели для пешек/лога вместо полного desktop sidebar.
+- [x] Компактные mobile-панели для пешек/лога вместо полного desktop sidebar.
+- [ ] Следующий шаг: глубокую мобильную тему не трогать до отдельной mobile-недели, кроме критических поломок.
 
 ## 4. Среднесрочная очередь
 

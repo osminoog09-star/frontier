@@ -41,7 +41,7 @@
   .hero-shot { min-height:430px; overflow:hidden; position:relative; background:#111; }
   .hero-shot img { width:100%; height:100%; min-height:430px; object-fit:cover; display:block; image-rendering:auto; }
   .hero-shot .fallback {
-    position:absolute; inset:0; display:grid; place-items:center; padding:30px; text-align:center;
+    position:absolute; inset:0; display:none; place-items:center; padding:30px; text-align:center;
     background:
       linear-gradient(90deg, rgba(111,154,74,.9) 0 24%, rgba(156,123,78,.9) 24% 48%, rgba(47,110,168,.9) 48% 66%, rgba(217,189,134,.9) 66% 100%);
   }
@@ -106,21 +106,21 @@
   <section class="hero">
     <div class="card hero-copy">
       <h1>FRONTIER</h1>
-      <p class="lead">Играбельная pre-alpha про поселение на Диком Западе: ковбои работают сами, строят базу, добывают ресурсы, отбиваются от налётов и торгуют с караванами.</p>
+      <p class="lead">Играбельная pre-alpha: RimWorld-like colony sim про Дикий Запад. Ковбои работают сами, строят базу, таскают ресурсы, обустраивают комнаты, отбиваются от бандитов и торгуют с караванами.</p>
       <div class="cta">
         <a class="btn primary" href="frontier.html">Играть на весь экран</a>
         <a class="btn" href="#roadmap">Посмотреть roadmap</a>
       </div>
       <div class="badges">
-        <div class="badge"><b>v1.66</b><span>Полировка спрайтов зданий: клиника и лаборатория объёмнее (стены/крыша), меньше плоских квадратов.</span></div>
-        <div class="badge"><b>A-AX</b><span>50 harness-сценариев зелёные, guard OK.</span></div>
-        <div class="badge"><b>Звук</b><span>Эмбиент (ветер/сверчки/дождь) и музыка настроений (спокойно/ночь/бой).</span></div>
-        <div class="badge"><b>Сейчас</b><span>Фокус на ПК: комнаты, животные, визуальная полировка и контент Недели 2.</span></div>
+        <div class="badge"><b>v1.66</b><span>RimWorld-стройка: полы, стены, уют комнат и боковая панель «Архитектор».</span></div>
+        <div class="badge"><b>A-BA</b><span>53 harness-сценария, guard синхронизации и кодировки.</span></div>
+        <div class="badge"><b>Frontier</b><span>Лошади, ранчо, салуны, караваны, золото, форты и бандиты вместо sci-fi колонии.</span></div>
+        <div class="badge"><b>Сейчас</b><span>Фокус на ПК: стройка, комнаты, логистика, визуальная читаемость и контент Недели 2.</span></div>
       </div>
     </div>
 
     <div class="card hero-shot">
-      <img src="assets/site-game-preview.png" alt="Скриншот игры FRONTIER" onerror="this.style.display='none'">
+      <img src="assets/site-game-preview.png" alt="Скриншот игры FRONTIER" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
       <div class="fallback">
         <div>
           <h2>Живая карта</h2>
@@ -137,6 +137,7 @@
         <div class="row done"><b>Навыки работы</b><span>Ковбои набирают опыт за труд и растут в уровне (до 10), ускоряя работу. Уровень виден в карточке (⭐).</span></div>
         <div class="row done"><b>База симуляции</b><span>Пешки, роли, приоритеты работ, расписание, настроение, еда, энергия, save/load.</span></div>
         <div class="row done"><b>Стройка и логистика</b><span>Фермы, шахты, склады с фильтрами, перенос ресурсов, заборы, ворота, вышки, торговый пост, конюшня.</span></div>
+        <div class="row done"><b>RimWorld-стройка</b><span>Полы кистью, деревянные и каменные стены, Architect-панель слева, слим-панель действий снизу.</span></div>
         <div class="row done"><b>Ремонт построек</b><span>Строители автоматически чинят повреждённые готовые здания, если нет активных blueprint-строек.</span></div>
         <div class="row done"><b>Производство</b><span>Кухня и кузня работают по рецептам, есть лимиты выпуска и понятные причины простоя.</span></div>
         <div class="row done"><b>Бой</b><span>Автобой, типы врагов (головорез/стрелок/снайпер/главарь), волны форта, раненые падают без сознания и спасаются.</span></div>
@@ -146,8 +147,8 @@
         <div class="row done"><b>Мобильный UX</b><span>На телефоне есть компактная панель «Пешки / Лог»; она открывается над нижней панелью и не перекрывает миникарту.</span></div>
         <div class="row done"><b>Мебель: комфорт</b><span>Кровать, стол и декор теперь складываются в общий комфорт усадьбы.</span></div>
         <div class="row done"><b>Ранчо и лошади</b><span>Ранчо работает вместе с конюшней, конюшня приручает диких лошадей, табун усиливает скорость и доход; stats показывает отдельную animal-панель.</span></div>
-        <div class="row done"><b>UI стройки</b><span>Нижняя панель собрана в папки, а миникарта держится выше панели на desktop и телефоне.</span></div>
-        <div class="row done"><b>Комнаты</b><span>Мебель внутри замкнутой зоны даёт room-бонус; stats и overlay показывают тип комнаты, качество стен и отдельную room-панель.</span></div>
+        <div class="row done"><b>UI стройки</b><span>Строительство сгруппировано по смыслу: еда, логистика, оборона, город, ранчо, дом, полы.</span></div>
+        <div class="row done"><b>Комнаты</b><span>Мебель внутри замкнутой зоны даёт room-бонус; stats и overlay показывают тип комнаты, качество стен, пол и отдельную room-панель.</span></div>
         <div class="row done"><b>Жильё-прогрессия</b><span>земля → палатка → кровать → кровать в доме (замкнутая комната) = лучший сон. Палатка осталась ранним укрытием.</span></div>
         <div class="row done"><b>Звук</b><span>Эмбиент по времени/погоде (ветер, сверчки, дождь, метель) и тихая музыка настроений (спокойно/ночь/бой), кнопка 🔊.</span></div>
         <div class="row done"><b>Визуал-пасс 2</b><span>Ковбои машут инструментом во время работы; помеченные ресурсы пульсируют с иконками 🪓/⛏️/🎯.</span></div>
@@ -157,10 +158,10 @@
     <div class="card section" id="roadmap">
       <h2>Что будет дальше</h2>
       <div class="rows">
-        <div class="row now"><b>Визуал-пасс 2 — в процессе</b><span>✅ анимация работ · ✅ подсветка помеченных · ✅ счётчик задач. ⏳ осталось: автотайлинг террейна (плавные переходы биомов), полировка панелей/иконок UI.</span></div>
-        <div class="row now"><b>Боевая глубина — в процессе</b><span>✅ без сознания/спасение · ✅ снайпер · ✅ бочка-ловушка · ✅ поджигатель · ✅ ремонт после урона. ⏳ осталось: ближний бой, динамит-бросок.</span></div>
-        <div class="row now"><b>Животноводство — частично</b><span>✅ конюшня · ✅ ранчо-доход · ✅ приручение лошадей · ✅ animal-панель. ⏳ осталось: загоны, скот, ресурсы животных.</span></div>
-        <div class="row done"><b>Комнаты глубже</b><span>✅ базовые комнаты · ✅ типы комнат · ✅ качество стен · ✅ наглядная room-панель.</span></div>
+        <div class="row now"><b>Стройка глубже — сейчас</b><span>✅ полы · ✅ стены · ✅ Architect-панель · ✅ уют от пола. ⏳ дальше: подвоз материалов к чертежам, крыша/укрытие, визуальная проверка панели.</span></div>
+        <div class="row now"><b>Frontier-контент — сейчас</b><span>✅ лошади · ✅ ранчо · ✅ караваны · ✅ форт/налёты. ⏳ дальше: загоны, скот, салун глубже, риски торговых маршрутов.</span></div>
+        <div class="row now"><b>Читаемость — постоянно</b><span>✅ анимация работ · ✅ подсветка помеченных · ✅ счётчик задач. ⏳ дальше: автотайлинг биомов, понятные панели, причины простоя.</span></div>
+        <div class="row done"><b>Комнаты глубже</b><span>✅ базовые комнаты · ✅ типы комнат · ✅ качество стен · ✅ пол · ✅ наглядная room-панель.</span></div>
         <div class="row next"><b>Мобильный UX</b><span>⏸ Отложено примерно на 4 недели: текущий фокус — ПК-версия и контент.</span></div>
         <div class="row next"><b>Неделя 3 — онлайн-фундамент</b><span>⏳ Детерминизм + команды, save v2, бэкенд-скелет, облачные сохранения.</span></div>
         <div class="row next"><b>Неделя 4 — ALPHA</b><span>⏳ Кооп на двоих по интернету на общей карте + дизайн глобального мира.</span></div>
@@ -173,9 +174,9 @@
       <h2>План по неделям</h2>
       <div class="week">
         <div class="week-card done"><b>Неделя 1</b><span>Core loop: строительство, логистика, рецепты, склады, события, сценарии, публичный web.</span></div>
-        <div class="week-card now"><b>Неделя 2</b><span>Контент и качество: бой глубже, лошади, кровати/мебель, комнаты, звук, визуальная полировка.</span></div>
-        <div class="week-card"><b>Неделя 3</b><span>Больше экономики, фракции, торговые цепочки, расширение карты.</span></div>
-        <div class="week-card"><b>Неделя 4</b><span>Alpha-кандидат: баланс, UX, стабильность, публичные smoke-проверки.</span></div>
+        <div class="week-card now"><b>Неделя 2</b><span>RimWorld-фундамент + Frontier-идентичность: комнаты, стройка, лошади, караваны, читаемый UI.</span></div>
+        <div class="week-card"><b>Неделя 3</b><span>Онлайн-фундамент: детерминизм, save v2, backend skeleton, cloud saves.</span></div>
+        <div class="week-card"><b>Неделя 4</b><span>Alpha-track: кооп на двоих, общая карта/соседние колонии, публичные smoke-проверки.</span></div>
       </div>
     </div>
 
