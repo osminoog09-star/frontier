@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.84';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.85';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -41,9 +41,24 @@ function gainSkill(p, id, amt) {
   const sk = ensureSkills(p);
   if (!sk[id]) sk[id] = { lvl:0, xp:0 };
   const s = sk[id];
+  s.usedToday = true;                 // практиковался сегодня — не угаснет на смене дня
   if (s.lvl >= SKILL_MAX) return;
   s.xp += amt;
   while (s.lvl < SKILL_MAX && s.xp >= skillNextReq(s.lvl)) { s.xp -= skillNextReq(s.lvl); s.lvl++; }
+}
+// Деградация без практики: раз в день навыки, которые не использовались, медленно угасают.
+function decaySkills() {
+  for (const p of G.pawns || []) {
+    if (!p.alive || !p.skills) continue;
+    for (const id in p.skills) {
+      const s = p.skills[id];
+      if (s.usedToday) { s.usedToday = false; continue; }
+      if (s.lvl > 0 || s.xp > 0) {
+        s.xp -= 10;
+        if (s.xp < 0) { if (s.lvl > 0) { s.lvl--; s.xp = skillNextReq(s.lvl) - 10; } else s.xp = 0; }
+      }
+    }
+  }
 }
 function skillSpeedMul(p, id) { return 1 + 0.05 * skillLvl(p, id); }   // +5% за уровень (до +100%)
 function topSkills(p, n=3) {
@@ -2342,6 +2357,7 @@ function updateTime() {
 }
 
 function onNewDay() {
+  decaySkills();   // навыки без практики медленно угасают
   // Science from labs
   const labs = G.buildings.filter(b=>b.type==='lab'&&b.done).length;
   G.res.sci += labs * 5;

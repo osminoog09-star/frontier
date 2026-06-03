@@ -1398,6 +1398,24 @@ const test = `
   console.log('SCENARIO BP (skill drives work speed):');
   console.log('   wmul 1.0->'+skilledW.toFixed(2)+' (lvl2)', bpSkillOk?'OK':'FAIL', '| legacy off-work:', bpLegacyOk?'OK':'FAIL', '|', bpOk?'OK':'FAIL');
   if (!bpOk) throw new Error('Scenario BP failed');
+
+  // Scenario BQ: skill degradation — unused skills fade, practiced ones don't (Phase 2)
+  newGame('settlers');
+  const dqp = G.pawns[0]; dqp.skills = {};
+  gainSkill(dqp,'mining',250);              // уровень 2, usedToday=true
+  const startLvl = skillLvl(dqp,'mining');
+  decaySkills();                           // практиковался -> только сбрасывает флаг, без потерь
+  const usedKeepOk = skillLvl(dqp,'mining')===startLvl && dqp.skills.mining.usedToday===false;
+  for (let i=0;i<40;i++) decaySkills();     // без практики -> угасает
+  const decayedOk = skillLvl(dqp,'mining') < startLvl;
+  // навык, который практикуют каждый день, не угасает
+  gainSkill(dqp,'farming',250);
+  for (let i=0;i<40;i++){ gainSkill(dqp,'farming',1); decaySkills(); }
+  const farmKeepOk = skillLvl(dqp,'farming') >= 2;
+  const bqOk = startLvl===2 && usedKeepOk && decayedOk && farmKeepOk;
+  console.log('SCENARIO BQ (skill degradation):');
+  console.log('   used keeps:', usedKeepOk?'OK':'FAIL', '| unused decays 2->'+skillLvl(dqp,'mining'), decayedOk?'OK':'FAIL', '| practiced keeps:', farmKeepOk?'OK':'FAIL', '|', bqOk?'OK':'FAIL');
+  if (!bqOk) throw new Error('Scenario BQ failed');
 })();
 `;
 try {

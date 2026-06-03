@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.85 - Skill degradation (Claude, Phase 2). Навыки без практики угасают раз в день (decaySkills); используемые сохраняются. Scenario BQ. Harness A-BQ (69) green.
+
+
 - v1.84 - Skills drive work speed (Claude, Phase 2). wmul во время работы идёт через skillSpeedMul активного навыка; p._activeSkill в doSpecificWork. Пины не задеты. Scenario BP. Harness A-BP (68) green.
 
 
