@@ -1,5 +1,12 @@
 # FRONTIER changelog
 
+## v1.76 - Route all randomness through rng()
+
+- Все 26 вызовов Math.random() в логике заменены на rng() (кроме самого fallback в rng()).
+- Поведение не изменилось: без сидирования rng()===Math.random. Но теперь вся случайность идёт через одну точку.
+- Это завершает подготовку: при включении seedRng на старте игра станет полностью детерминированной (следующий срез, с многократной проверкой harness).
+- Harness A-BI (61) green, 0 DIAG-аномалий.
+
 ## v1.75 - Seeded PRNG foundation (Week 3 start)
 
 - Первый шаг к онлайну: фундамент детерминизма. Добавлен seeded-PRNG (mulberry32) + rng()/rngInt()/seedRng()/clearRng().

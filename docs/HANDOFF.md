@@ -8,7 +8,7 @@
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
 - Последний локальный срез: `v1.70 - Construction material delivery`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.75`. Старт Недели 3: seeded-PRNG фундамент (rng/seedRng, randInt через rng, G.seed в сейве). Миграция Math.random -> rng последующими срезами.
+- Текущий `GAME_VERSION`: `1.76`. Детерминизм: rng-фундамент (1.75) + вся случайность через rng() (1.76). СЛЕД: seedRng на старте newGame -> полная воспроизводимость (проверять harness многократно).
 - Harness: Scenarios A-BI (61) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
 - Дизайн-курс: **RimWorld-like фундамент + Frontier-идентичность**. Не копировать RimWorld как тему; брать понятные жанровые паттерны и наполнять их Диким Западом.

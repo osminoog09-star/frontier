@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.75';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.76';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -251,7 +251,7 @@ function newGame(scenarioId='settlers') {
     achievements: {},
     camera: { x: MAP_W*TILE/2 - 400, y: MAP_H*TILE/2 - 300, zoom: 1.0 },
     nextId: 1,
-    eventTimer: 600 + Math.random()*600,
+    eventTimer: 600 + rng()*600,
     gameOver: false,
     scenario: scenarioId,
   };
@@ -358,7 +358,7 @@ function applyScenario(id, cx=Math.floor(MAP_W/2), cy=Math.floor(MAP_H/2)) {
 
 function generateMap() {
   // Build smooth value-noise fields for large coherent biomes
-  const seedA = Math.random()*1000, seedB = Math.random()*1000;
+  const seedA = rng()*1000, seedB = rng()*1000;
   const elev = buildNoiseField(seedA, 5.5);   // height -> water / land / mountains
   const moist = buildNoiseField(seedB, 4.0);  // moisture -> grass vs sand
 
@@ -484,7 +484,7 @@ function spawnPawn(tx, ty, name, priorities) {
 }
 
 function rollTraits() {
-  const n = Math.random()<0.5 ? 1 : 2;
+  const n = rng()<0.5 ? 1 : 2;
   const pool = [...TRAIT_KEYS];
   const out = [];
   for (let i=0; i<n; i++) {
@@ -567,7 +567,7 @@ function spawnEnemy(count) {
     else if (i===1 && count>=5) type='sniper';
     else if (i===2 && count>=6) type='arsonist';
     else if (i===3 && count>=7) type='brute';
-    else type = Math.random()<0.5 ? 'gunner' : 'knifer';
+    else type = rng()<0.5 ? 'gunner' : 'knifer';
     const def = ENEMY_TYPES[type];
     G.enemies.push({
       id: G.nextId++,
@@ -701,7 +701,7 @@ function updatePawns() {
     const moodDelta = calcMoodDelta(p);
     p.mood = clamp(p.mood + moodDelta * 0.02, 0, 100);
 
-    if (p.mood < 10 && Math.random() < 0.002) {
+    if (p.mood < 10 && rng() < 0.002) {
       addLog(`😡 ${p.name} устроил срыв!`, 'warn');
       p.state = 'breakdown';
       setTimeout(() => { if(p.alive) p.state='idle'; }, 5000);
@@ -769,9 +769,9 @@ function updateSocial(p) {
   if (p.traits.includes('pessimist')) change -= 2;
   p.opinions[other.id] = clamp(p.opinions[other.id] + change, -100, 100);
   const op = p.opinions[other.id];
-  if (op > 40 && Math.random()<0.3) { addThought(p,'😊 Поболтал с другом',6,true); p.mood=Math.min(100,p.mood+3); }
-  else if (op < -40 && Math.random()<0.3) { addThought(p,'😠 Поссорился',6,false); p.mood=Math.max(0,p.mood-3);
-    if (Math.random()<0.15) addLog(`💢 ${p.name} и ${other.name} поругались`, ''); }
+  if (op > 40 && rng()<0.3) { addThought(p,'😊 Поболтал с другом',6,true); p.mood=Math.min(100,p.mood+3); }
+  else if (op < -40 && rng()<0.3) { addThought(p,'😠 Поссорился',6,false); p.mood=Math.max(0,p.mood-3);
+    if (rng()<0.15) addLog(`💢 ${p.name} и ${other.name} поругались`, ''); }
 }
 
 function updateIllness(p) {
@@ -780,7 +780,7 @@ function updateIllness(p) {
     let chance = 0.004;
     if (G.season===3) chance *= 2;
     if (p.food < 30) chance *= 2;
-    if (Math.random() < chance) {
+    if (rng() < chance) {
       const diseases = ['Лихорадка','Простуда','Дизентерия','Инфекция'];
       p.sick = { name: diseases[randInt(0,diseases.length-1)], severity: 1, timer: 0 };
       addLog(`🤒 ${p.name} заболел: ${p.sick.name}`, 'warn');
@@ -1689,7 +1689,7 @@ function fightEnemy(p, e) {
     const cover = getCover(e.x, e.y);
     const hitChance = pawnHitChance(d, cover);
     const dmg = pawnShotDamage();
-    fireProjectile(p.x, p.y-4, e, true, Math.random()<hitChance ? dmg : 0);
+    fireProjectile(p.x, p.y-4, e, true, rng()<hitChance ? dmg : 0);
   }
 }
 
@@ -1747,7 +1747,7 @@ function applyHit(target, dmg, friendly) {
   } else {
     // target is pawn — random wound
     if (target.hp <= 0) downPawn(target);
-    else if (Math.random()<0.3) {
+    else if (rng()<0.3) {
       target.woundSeverity = Math.min(3, (target.woundSeverity||0)+1);
       addThought(target, '🩸 Ранен пулей', 8, false);
     }
@@ -1851,7 +1851,7 @@ function updateEnemies() {
       if (d <= range && e.attackCooldown <= 0) {
         e.attackCooldown = e.reload;
         const cover = getCover(target.x, target.y);
-        const hit = Math.random() < enemyHitChance(d, cover);
+        const hit = rng() < enemyHitChance(d, cover);
         fireProjectile(e.x, e.y-4, target, false, hit ? e.atk+randInt(0,4) : 0);
       }
     } else {
@@ -2135,7 +2135,7 @@ function killPawn(p) {
 }
 
 function addSplat(x, y) {
-  G.bloodSplats.push({x, y, opacity:1, size:4+Math.random()*4});
+  G.bloodSplats.push({x, y, opacity:1, size:4+rng()*4});
 }
 
 // ---- Particle system (visual juice) ----
@@ -2144,16 +2144,16 @@ function spawnParticles(x, y, opts={}) {
   const n = opts.count || 6;
   const colors = opts.colors || ['#cab184'];
   for (let i=0; i<n; i++) {
-    const a = Math.random()*Math.PI*2;
-    const sp = (opts.speed||0.6) * (0.4+Math.random()*0.8);
+    const a = rng()*Math.PI*2;
+    const sp = (opts.speed||0.6) * (0.4+rng()*0.8);
     G.particles.push({
       x, y,
       vx: Math.cos(a)*sp + (opts.vx||0),
       vy: Math.sin(a)*sp + (opts.vy||0) - (opts.lift||0.3),
-      life: (opts.life||30) * (0.6+Math.random()*0.6),
+      life: (opts.life||30) * (0.6+rng()*0.6),
       maxLife: opts.life||30,
-      size: (opts.size||2.5) * (0.6+Math.random()*0.8),
-      color: colors[(Math.random()*colors.length)|0],
+      size: (opts.size||2.5) * (0.6+rng()*0.8),
+      color: colors[(rng()*colors.length)|0],
       grav: opts.grav!==undefined ? opts.grav : 0.03,
       fade: opts.fade!==false,
     });
@@ -2393,7 +2393,7 @@ function runCaravanTrade(profileId=null) {
 function updateWeather() {
   G.weatherTimer = Math.max(0, G.weatherTimer - 1);
   if (G.weatherTimer <= 0) {
-    if (Math.random() < 0.002) {
+    if (rng() < 0.002) {
       const weathers = G.season===3 ? ['clear','snow','blizzard'] : ['clear','rain','storm','sandstorm'];
       G.weather = weathers[randInt(0, weathers.length-1)];
       G.weatherTimer = 200 + randInt(0,400);
@@ -3247,7 +3247,7 @@ function drawWeather() {
     ctx.fillStyle = 'rgba(200,150,80,0.08)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
-  if (G.season === 3 && (G.weather==='blizzard'||Math.random()<0.01)) {
+  if (G.season === 3 && (G.weather==='blizzard'||rng()<0.01)) {
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     for (let i=0; i<20; i++) {
       const rx = (Math.sin(G.tick*0.007+i*53.1)*0.5+0.5)*canvas.width;
@@ -4586,7 +4586,7 @@ function loadGame() {
 function noopFS(){}
 // ── Seeded PRNG (фундамент детерминизма для онлайна) ──
 // mulberry32: компактный детерминированный генератор. Пока опционален: если
-// _rng не засеян, rng() ведёт себя как Math.random() — нулевое изменение поведения.
+// _rng не засеян, rng() ведёт себя как rng() — нулевое изменение поведения.
 function mulberry32(a) {
   return function() {
     a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -4688,7 +4688,7 @@ const Sfx = {
     const n = Math.floor(this.ctx.sampleRate*dur);
     const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
     const d = buf.getChannelData(0);
-    for (let i=0;i<n;i++) d[i] = (Math.random()*2-1) * (1-i/n);
+    for (let i=0;i<n;i++) d[i] = (rng()*2-1) * (1-i/n);
     const src = this.ctx.createBufferSource(); src.buffer = buf;
     const g = this.ctx.createGain(); g.gain.value = vol;
     src.connect(g); g.connect(this.master); src.start(t);
@@ -4713,7 +4713,7 @@ const Sfx = {
       const len = Math.floor(ctx.sampleRate * 2);
       const buf = ctx.createBuffer(1, len, ctx.sampleRate);
       const d = buf.getChannelData(0);
-      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      for (let i = 0; i < len; i++) d[i] = rng() * 2 - 1;
       const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
       const filter = ctx.createBiquadFilter(); filter.type = 'lowpass';
       const g = ctx.createGain();
@@ -4759,7 +4759,7 @@ const Sfx = {
       const oscs = [];
       for (const f of cfg.notes) {
         const o = ctx.createOscillator(); o.type = cfg.type;
-        o.frequency.value = f * (0.999 + Math.random()*0.002); // лёгкая расстройка для «живости»
+        o.frequency.value = f * (0.999 + rng()*0.002); // лёгкая расстройка для «живости»
         o.connect(g); o.start();
         oscs.push(o);
       }

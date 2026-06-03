@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.76 - All randomness via rng() (Claude). 26 Math.random() -> rng() в логике; поведение идентично (fallback), но случайность централизована. Готово к сидированию-на-старте. Harness A-BI (61) green, 0 аномалий.
+
+
 - v1.75 - Seeded PRNG foundation (Claude). mulberry32 + rng/rngInt/seedRng; randInt через rng (по умолчанию = Math.random); G.seed в сейве. Старт Недели 3 (детерминизм). Scenario BI. Harness A-BI (61) green.
 
 
