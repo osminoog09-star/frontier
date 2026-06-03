@@ -1292,6 +1292,20 @@ const test = `
   console.log('SCENARIO BJ (seed reproduces map + spawns):');
   console.log('   map identical:', mapSame?'OK':'FAIL', '| spawns identical:', spawnSame?'OK':'FAIL', '|', bjOk?'OK':'FAIL');
   if (!bjOk) throw new Error('Scenario BJ failed');
+
+  // Scenario BK: day/night rework — slower clock + phase helpers (Phase 1)
+  const ticksPerDay = 1440 / MINUTES_PER_TICK;
+  const slowOk = MINUTES_PER_TICK <= 0.2 && ticksPerDay >= 7000; // ~4x медленнее старых 2880
+  const phaseOk = dayPhase(0)==='night' && dayPhase(6)==='dawn' && dayPhase(12)==='day' && dayPhase(20)==='dusk' && dayPhase(23)==='night';
+  const lightOk = daylight(12) > daylight(0) && daylight(0) < 0.1 && daylight(12) > 0.9 && daylight(6) > 0.3 && daylight(6) < 0.7;
+  newGame('settlers'); G.day=0; G.hour=0; G.minute=0; G.speed=1;
+  for (let i=0; i<1000; i++) updateTime();
+  const minsAfter = G.day*1440 + G.hour*60 + G.minute;
+  const advanceOk = Math.abs(minsAfter - 1000*MINUTES_PER_TICK) < 1;
+  const bkOk = slowOk && phaseOk && lightOk && advanceOk;
+  console.log('SCENARIO BK (day/night rework):');
+  console.log('   ticks/day:', ticksPerDay, slowOk?'OK':'FAIL', '| phases:', phaseOk?'OK':'FAIL', '| light:', lightOk?'OK':'FAIL', '| clock advance:', advanceOk?'OK':'FAIL', '|', bkOk?'OK':'FAIL');
+  if (!bkOk) throw new Error('Scenario BK failed');
 })();
 `;
 try {

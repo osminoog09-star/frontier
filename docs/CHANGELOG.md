@@ -1,5 +1,12 @@
 # FRONTIER changelog
 
+## v1.79 - Day/night rework (Phase 1)
+
+- Время суток замедлено ~x4: сутки ~3.2 мин на x1 (было ~48с) — фазы дня успевают читаться. Константа MINUTES_PER_TICK.
+- Нужды/работа/события тик-based и не зависят от константы → реальный темп игры не изменился, сценарий B чист (0 аномалий).
+- Добавлены чистые хелперы dayPhase(h) и daylight(h) (для тинта и будущих эффектов работа/бой/животные).
+- Scenario BK. Harness A-BK (63) green.
+
 ## v1.78 - Roadmap revision (full audit)
 
 - Проведён полный аудит проекта; roadmap переписан под 7 фаз (Playable Core → Colony Mgmt → World Sim → Wild West → Multiplayer → Steam EA → Mobile).

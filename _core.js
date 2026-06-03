@@ -1,8 +1,11 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.78';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.79';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
+// Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
+// 0.125 => сутки ~3.2 мин на x1: фазы дня успевают читаться. Нужды/работа/события — тик-based, не зависят от этой константы.
+const MINUTES_PER_TICK = 0.125;
 
 const TERRAIN = { DIRT:0, GRASS:1, SAND:2, WATER:3, ROCK:4, SNOW:5 };
 const TCOLORS = ['#9c7b4e','#6f9a4a','#d9bd86','#2f6ea8','#7a7570','#dfe6ef'];
@@ -2262,7 +2265,7 @@ function gameOver(type) {
 
 // ==================== TIME & EVENTS ====================
 function updateTime() {
-  G.minute += 0.5 * G.speed;
+  G.minute += MINUTES_PER_TICK * G.speed;
   if (G.minute >= 60) {
     G.minute = 0;
     G.hour++;
@@ -2589,6 +2592,18 @@ function render() {
   drawWeather();
   drawDayNightOverlay();
   drawMinimap();
+}
+
+// Фаза суток по часу (чистая функция — тестируемо). Используется для тинта и будущих эффектов.
+function dayPhase(h) {
+  if (h < 5 || h >= 21) return 'night';
+  if (h < 7) return 'dawn';
+  if (h < 19) return 'day';
+  return 'dusk';
+}
+// Уровень освещённости 0..1 (полночь=0, полдень=1), плавно.
+function daylight(h) {
+  return clamp(0.5 - 0.5 * Math.cos((h / 24) * Math.PI * 2), 0, 1);
 }
 
 function drawDayNightOverlay() {
