@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.72';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.73';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -39,6 +39,7 @@ const BUILDS = {
   stable: { name:'Конюшня',  icon:'🐴', cost:{wood:25,ore:10},   size:2, prod:'horses',rate:0 },
   ranch:  { name:'Ранчо',    icon:'🤠', cost:{wood:35,ore:8},    size:2, prod:'ranch', rate:0 },
   barrel: { name:'Бочка с порохом', icon:'🛢️', cost:{wood:5,gold:5}, size:1, prod:'trap', rate:0 },
+  sandbag:{ name:'Мешки с песком', icon:'🛡️', cost:{wood:3},        size:1, prod:null, passable:true, cover:0.3 },
   floor_wood:  { name:'Деревянный пол', icon:'🟫', cost:{wood:2},          size:1, floor:'wood' },
   floor_stone: { name:'Каменный пол',   icon:'⬜', cost:{ore:2},           size:1, floor:'stone' },
 };
@@ -1754,9 +1755,10 @@ function getCover(wx, wy) {
     if (x2<0||y2<0||x2>=MAP_W||y2>=MAP_H) continue;
     const t = G.map[y2][x2];
     if (t.obj && (t.obj.type==='rock'||t.obj.type==='tree')) cover += 0.12;
-    if (G.buildings.find(b=>b.tx===x2&&b.ty===y2 && !b.blueprint)) cover += 0.15;
+    const b = G.buildings.find(b=>b.tx===x2&&b.ty===y2 && !b.blueprint);
+    if (b) cover += (BUILDS[b.type] && BUILDS[b.type].cover) ? BUILDS[b.type].cover : 0.15;
   }
-  return Math.min(cover, 0.4);
+  return Math.min(cover, 0.5);
 }
 
 // Бочки с порохом: взрываются, когда враг подходит вплотную, и бьют по площади.
@@ -2770,6 +2772,19 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.fillStyle = '#7a5530';
       ctx.fillRect(x+3, y+4, 3, S-8); ctx.fillRect(x+S-6, y+4, 3, S-8);
       ctx.lineWidth = 1;
+      break;
+    }
+    case 'sandbag': {
+      ctx.fillStyle = '#b8a86a';                                  // ряд мешков
+      for (let i=0; i<3; i++) {
+        ctx.beginPath(); ctx.ellipse(x+S*(0.25+i*0.25), y+S*0.62, S*0.16, S*0.13, 0, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.fillStyle = '#9a8a50';                                  // нижний ряд
+      for (let i=0; i<2; i++) {
+        ctx.beginPath(); ctx.ellipse(x+S*(0.38+i*0.25), y+S*0.8, S*0.16, S*0.12, 0, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.strokeStyle = 'rgba(60,50,20,0.4)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x+S*0.12, y+S*0.62); ctx.lineTo(x+S*0.88, y+S*0.62); ctx.stroke();
       break;
     }
     case 'wall': {
@@ -4153,7 +4168,7 @@ function setupButtons() {
   // Build buttons
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-wall-btn':'wall','build-wallstone-btn':'wall_stone','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-barrel-btn':'barrel','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-barrel-btn':'barrel','build-sandbag-btn':'sandbag','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
     'build-floorwood-btn':'floor_wood','build-floorstone-btn':'floor_stone',
@@ -4420,7 +4435,7 @@ function showHowtoPanel(panel) {
 function updateBuildButtons() {
   const buildMap = {
     'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-wall-btn':'wall','build-wallstone-btn':'wall_stone','build-gate-btn':'gate',
-    'build-tower-btn':'tower','build-barrel-btn':'barrel','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
+    'build-tower-btn':'tower','build-barrel-btn':'barrel','build-sandbag-btn':'sandbag','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
     'build-floorwood-btn':'floor_wood','build-floorstone-btn':'floor_stone',

@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.73 - Sandbag cover (Claude). Мешки с песком: проходимое укрытие с усиленным cover (0.3); getCover учитывает поле cover. Scenario BG. Harness A-BG (59) green.
+
+
 - v1.72 - Brute enemy (Claude). Враг «Громила»: танк ближнего боя в налётах 7+, награда 16. Scenario BF. Harness A-BF (58) green.
 
 

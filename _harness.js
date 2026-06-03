@@ -1224,6 +1224,22 @@ const test = `
   console.log('SCENARIO BF (brute enemy type):');
   console.log('   def:', bruteDefOk?'OK':'FAIL', '| 7+ raid has brute:', bruteBigOk?'OK':'FAIL', '| 6 raid none:', bruteNoneOk?'OK':'FAIL');
   if (!bfOk) throw new Error('Scenario BF failed');
+
+  // Scenario BG: sandbags give stronger ranged cover than a normal building
+  newGame('settlers'); G.buildings = [];
+  const sbDef = BUILDS.sandbag;
+  const sbDefOk = sbDef && sbDef.passable === true && sbDef.cover >= 0.25;
+  for (const t of [[40,40],[50,40]]) for (const d of [[1,0],[-1,0],[0,1],[0,-1]]) G.map[t[1]+d[1]][t[0]+d[0]] = { type:TERRAIN.GRASS, v:0, obj:null };
+  G.buildings.push({ type:'farm', tx:41, ty:40, done:true, blueprint:false, hp:200, maxHp:200 });
+  const coverPlain = getCover(40*TILE+TILE/2, 40*TILE+TILE/2);
+  G.buildings.push({ type:'sandbag', tx:51, ty:40, done:true, blueprint:false, hp:80, maxHp:80 });
+  const coverSand = getCover(50*TILE+TILE/2, 40*TILE+TILE/2);
+  const coverOk = coverSand > coverPlain;
+  const hitOk = pawnHitChance(5, coverSand) < pawnHitChance(5, coverPlain);
+  const bgOk = sbDefOk && coverOk && hitOk;
+  console.log('SCENARIO BG (sandbag cover):');
+  console.log('   def:', sbDefOk?'OK':'FAIL', '| cover plain/sand:', coverPlain.toFixed(2)+'/'+coverSand.toFixed(2), coverOk?'OK':'FAIL', '| hit lower:', hitOk?'OK':'FAIL', '|', bgOk?'OK':'FAIL');
+  if (!bgOk) throw new Error('Scenario BG failed');
 })();
 `;
 try {
