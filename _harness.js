@@ -1111,6 +1111,32 @@ const test = `
   console.log('SCENARIO BA (floors raise room comfort):');
   console.log('   floored:', baFlooredBefore+'->'+baFloored, '| bonus:', baBare.toFixed(2)+'->'+baWithFloor.toFixed(2), '| row floor:', baRows[0]?baRows[0].floor:'-', '|', baOk?'OK':'FAIL');
   if (!baOk) throw new Error('Scenario BA failed');
+
+  // Scenario BB: building blueprints reserve intent first; builders consume materials when work starts
+  newGame('settlers');
+  const bbx = 18, bby = 18;
+  forceDry(bbx, bby, TERRAIN.GRASS);
+  G.res.wood = 0;
+  G.buildMode = 'fence';
+  placeBuild(bbx, bby);
+  const bb = G.buildings.find(b => b.type === 'fence' && b.tx === bbx && b.ty === bby && b.blueprint);
+  const placedPlanOk = !!bb && G.res.wood === 0 && bb.materialsPaid === false && (bb.waitingMissing || '').includes('wood');
+  const builder = G.pawns[0];
+  builder.workMul = 1; builder.workLevel = 0; builder.sick = null;
+  builder.x = bbx*TILE + TILE/2; builder.y = bby*TILE + TILE/2; builder.tx = bbx; builder.ty = bby;
+  G._claims = {};
+  const noWoodResult = tryBuild(builder);
+  const noWoodOk = noWoodResult === false && bb.progress === 0 && bb.materialsPaid === false && (bb.waitingMissing || '').includes('0/5');
+  G.res.wood = 5;
+  G._claims = {};
+  const withWoodResult = tryBuild(builder);
+  const paidOk = withWoodResult === true && bb.materialsPaid === true && G.res.wood === 0 && (bb.progress || 0) > 0 && !bb.waitingMissing;
+  const bbInfo = blueprintMaterialInfoHtml(bb);
+  const infoOk = bbInfo.includes('готовы');
+  const bbOk = placedPlanOk && noWoodOk && paidOk && infoOk;
+  console.log('SCENARIO BB (blueprint material feedback):');
+  console.log('   plan:', placedPlanOk?'OK':'FAIL', '| no wood waits:', noWoodOk?'OK':'FAIL', '| paid on work:', paidOk?'OK':'FAIL', '| info:', infoOk?'OK':'FAIL', '|', bbOk?'OK':'FAIL');
+  if (!bbOk) throw new Error('Scenario BB failed');
 })();
 `;
 try {

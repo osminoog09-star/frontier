@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.67';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.68';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -1234,18 +1234,25 @@ function tryRepair(p) {
 
 function tryBuild(p) {
   // nearest pending blueprint that isn't already full (cap 2 builders)
-  const bp = G.buildings.filter(b=>b.blueprint && !b.done)
-    .filter(b=>claimCount('bp_'+b.tx+'_'+b.ty) < 2)
-    .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty))[0];
+  const pending = G.buildings.filter(b=>b.blueprint && !b.done)
+    .filter(b=>claimCount('bp_'+b.tx+'_'+b.ty) < 2);
+  const ready = pending.filter(b=>blueprintMaterialsReady(b));
+  if (!ready.length) {
+    pending.forEach(updateBlueprintWaiting);
+    return tryBuildFloor(p);
+  }
+  const bp = ready.sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty))[0];
   if (!bp) return tryBuildFloor(p);
   claimSpot('bp_'+bp.tx+'_'+bp.ty);
   p._wt = 'bp_'+bp.tx+'_'+bp.ty;
   setTarget(p, bp.tx, bp.ty);
   if (distTiles(p, bp.tx, bp.ty) <= 2) {
+    if (!ensureBlueprintMaterials(bp)) return false;
     bp.progress = (bp.progress||0) + 0.008 * wmul(p);
     if (bp.progress >= 1) {
       bp.blueprint = false;
       bp.done = true;
+      bp.waitingMissing = '';
       bp.hp = getBuildingMaxHp(bp.type);
       bp.maxHp = bp.hp;
       addLog(`🔨 ${p.name} построил ${BUILDS[bp.type].name}`, 'good');
@@ -1256,6 +1263,42 @@ function tryBuild(p) {
     }
   }
   p.state = 'working';
+  return true;
+}
+
+function missingResources(cost) {
+  return Object.entries(cost || {})
+    .filter(([, amt]) => amt > 0)
+    .map(([res, amt]) => ({ res, need: amt, have: Math.floor(G.res[res] || 0) }))
+    .filter(x => x.have < x.need);
+}
+
+function missingResourcesText(cost) {
+  const miss = missingResources(cost);
+  return miss.map(x => `${x.res}: ${x.have}/${x.need}`).join(', ');
+}
+
+function updateBlueprintWaiting(bp) {
+  if (!bp || !bp.blueprint || bp.materialsPaid) return '';
+  bp.waitingMissing = missingResourcesText(BUILDS[bp.type]?.cost || {});
+  return bp.waitingMissing;
+}
+
+function blueprintMaterialsReady(bp) {
+  if (!bp || !bp.blueprint) return false;
+  if (bp.materialsPaid) { bp.waitingMissing = ''; return true; }
+  const missing = updateBlueprintWaiting(bp);
+  return !missing;
+}
+
+function ensureBlueprintMaterials(bp) {
+  if (!bp || !bp.blueprint) return false;
+  if (bp.materialsPaid) return true;
+  const cost = BUILDS[bp.type]?.cost || {};
+  if (updateBlueprintWaiting(bp)) return false;
+  consumeResources(cost);
+  bp.materialsPaid = true;
+  bp.waitingMissing = '';
   return true;
 }
 
@@ -3700,6 +3743,7 @@ function sanitizeBuildings(buildings) {
     b.ty = spot.ty;
     b.blueprint = !!b.blueprint;
     b.done = !!b.done || !b.blueprint;
+    if (b.blueprint && b.materialsPaid === undefined) b.materialsPaid = true;
     if (b.done && (!b.hp || !b.maxHp)) {
       b.hp = getBuildingMaxHp(b.type);
       b.maxHp = b.hp;
@@ -3732,10 +3776,6 @@ function placeBuild(tx, ty) {
   if (!def) return;
   if (def.floor) { placeFloor(tx, ty, def); return; }
   const quiet = paintMode === 'build'; // во время рисования не спамим лог
-  // Check cost
-  for (const [res, amt] of Object.entries(def.cost)) {
-    if (G.res[res] < amt) { if(!quiet) addLog(`❌ Недостаточно ресурсов! Нужно ${amt} ${res}`, 'warn'); return; }
-  }
   // Check overlap / terrain
   if (!canPlaceBuilding(G.buildMode, tx, ty)) {
     if (!quiet && tx>=0 && ty>=0 && tx<MAP_W && ty<MAP_H && G.map[ty][tx].type===TERRAIN.WATER) {
@@ -3743,14 +3783,13 @@ function placeBuild(tx, ty) {
     }
     return;
   }
-  // Deduct cost
-  for (const [res, amt] of Object.entries(def.cost)) G.res[res] -= amt;
   G.buildings.push({
     type: G.buildMode, tx, ty,
     blueprint: true, done: false, progress: 0,
     hp: 0, maxHp: 0, selected: false,
+    materialsPaid: false, waitingMissing: missingResourcesText(def.cost),
   });
-  if (!quiet) addLog(`📐 Заложена ${def.name}`, '');
+  if (!quiet) addLog(`📐 Заложена ${def.name}; материалы принесут строители`, '');
   Diag.action(`Заложил ${def.name} @${tx},${ty}`);
 }
 
@@ -3768,6 +3807,7 @@ function showBuildingInfo(b, cx, cy) {
   overlay.innerHTML = `
     <div class="inf-title">${def.icon} ${def.name}</div>
     ${b.blueprint ? `<div class="inf-line">🔨 Строится: ${Math.round((b.progress||0)*100)}%</div>` : ''}
+    ${blueprintMaterialInfoHtml(b)}
     ${b.done ? `<div class="inf-line">HP: <b>${Math.floor(b.hp||0)}/${b.maxHp||0}</b></div>` : ''}
     ${def.prod ? `<div class="inf-line">Производит: <b>${def.prod}</b></div>` : ''}
     ${recipeLines}
@@ -3780,6 +3820,16 @@ function showBuildingInfo(b, cx, cy) {
   bindStockpileFilterButtons(b);
   bindCaravanTradeButtons(b);
   setTimeout(() => { overlay.style.display='none'; }, 3000);
+}
+
+function blueprintMaterialInfoHtml(b) {
+  if (!b || !b.blueprint) return '';
+  const def = BUILDS[b.type];
+  if (!def) return '';
+  if (b.materialsPaid) return `<div class="inf-line">📦 Материалы: <b style="color:#9cc06a">готовы</b></div>`;
+  const missing = updateBlueprintWaiting(b);
+  if (missing) return `<div class="inf-line">📦 Ждёт материалы: <b style="color:#e8c97e">${missing}</b></div>`;
+  return `<div class="inf-line">📦 Материалы: <b>строитель заберёт при начале работ</b></div>`;
 }
 
 function furnitureInfoHtml(b) {
@@ -4662,7 +4712,13 @@ const Diag = {
       const anyProg = bps.some(b => (b.progress||0) > (b._lastProg||0) + 0.0001);
       bps.forEach(b => b._lastProg = b.progress||0);
       this._bpStuck = anyProg ? 0 : this._bpStuck + 1;
-      if (this._bpStuck > 25) this.anomaly('bp_stuck', `${bps.length} чертёж(ей) не строятся — нет свободных строителей?`);
+      if (this._bpStuck > 25) {
+        const waiting = bps.filter(b => b.blueprint && !b.materialsPaid).map(updateBlueprintWaiting).filter(Boolean);
+        const reason = waiting.length
+          ? `не хватает материалов: ${Array.from(new Set(waiting)).slice(0,3).join('; ')}`
+          : 'нет свободных строителей?';
+        this.anomaly('bp_stuck', `${bps.length} чертёж(ей) не строятся — ${reason}`);
+      }
     } else this._bpStuck = 0;
 
     // 5) Watchdog добычи: помеченные объекты есть, а ресурс не растёт

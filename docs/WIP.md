@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.68 - Blueprint material feedback (Codex). Чертежи зданий ставятся как план без мгновенного списания; строитель списывает материалы при начале работы; info-overlay/diagnostics показывают нехватку. Scenario BB. Harness A-BB (54) green, local site/game smoke green.
+
 - v1.67 - Architect desktop polish (Codex). Desktop smoke подтвердил: Architect не перекрывает цель/миникарту/низ; help-popup и «Как играть» ведут к левой панели, старый текст про нижнее меню убран; info-overlay сдвинут. Gameplay не менялся. Harness A-BA (53) green, local site/game smoke green.
 
 - 2026-06-03 - Roadmap identity sync (Codex). `ROADMAP.md`, `index.html`, `docs/TECH_ROADMAP.md`, `docs/DESIGN.md`, `docs/HANDOFF.md`, `docs/CHANGELOG.md` синхронизированы с направлением: RimWorld-like фундамент + Frontier-идентичность. Gameplay не менялся. Harness A-BA (53) green, local site smoke green.
