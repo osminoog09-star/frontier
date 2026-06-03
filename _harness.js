@@ -1350,6 +1350,21 @@ const test = `
   console.log('SCENARIO BM (fire system):');
   console.log('   fuel wood/stone/bare:', fuelWoodOk&&fuelStoneOk&&fuelBareOk?'OK':'FAIL', '| ignite:', burningOk?'OK':'FAIL', '| burned out ('+gFire+'t):', consumedOk?'OK':'FAIL', '| extinguished ('+gFf+'t):', extinguishedOk?'OK':'FAIL', '|', bmOk?'OK':'FAIL');
   if (!bmOk) throw new Error('Scenario BM failed');
+
+  // Scenario BN: night effects — work slower at night, daytime unchanged (uses day phases)
+  const dwDay = dayWorkMul(12), dwDawn = dayWorkMul(6), dwNight = dayWorkMul(2);
+  const mulOk = dwDay === 1 && dwDawn === 1 && dwNight < 1 && dwNight >= 0.7;
+  newGame('settlers');
+  const pw = G.pawns[0]; pw.workMul = 1; pw.workLevel = 0; pw.sick = null;
+  G.hour = 12; const wDay = wmul(pw);
+  G.hour = 6;  const wDawn = wmul(pw);   // стартовый час игры — труд не штрафуется
+  G.hour = 2;  const wNight = wmul(pw);
+  const wmulOk = wDay === 1 && wDawn === 1 && wNight < wDay && Math.abs(wNight - 0.85) < 1e-9;
+  const nightFlagOk = (G.hour=2, isNight()===true) && (G.hour=12, isNight()===false);
+  const bnOk = mulOk && wmulOk && nightFlagOk;
+  console.log('SCENARIO BN (night effects):');
+  console.log('   dayWorkMul day/dawn/night:', dwDay+'/'+dwDawn+'/'+dwNight, mulOk?'OK':'FAIL', '| wmul night', wNight.toFixed(2), wmulOk?'OK':'FAIL', '| isNight:', nightFlagOk?'OK':'FAIL', '|', bnOk?'OK':'FAIL');
+  if (!bnOk) throw new Error('Scenario BN failed');
 })();
 `;
 try {

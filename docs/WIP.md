@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.82 - Night effects (Claude, Phase 1). Ночью труд -15% (dayWorkMul), животные отдыхают; день/рассвет не штрафуют (сим цел). Scenario BN. Harness A-BN (66) green. Ядро Phase 1 завершено.
+
+
 - v1.81 - Fire system (Claude, Phase 1). G.fires: горючесть тайлов, распространение, урон, молния-источник, дождь гасит, пешки тушат (tryFirefight). Scenario BM. Harness A-BM (65) green.
 
 

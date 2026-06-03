@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.81';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.82';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -514,7 +514,7 @@ function applyTraitEffects(p) {
 // Effective work speed (traits + illness)
 function wmul(p) {
   const skill = 1 + 0.04 * (p.workLevel || 0);   // навык: +4% за уровень (до +40% на 10 ур.)
-  return (p.workMul || 1) * skill * (p.sick ? (0.7 - p.sick.severity*0.12) : 1);
+  return (p.workMul || 1) * skill * (p.sick ? (0.7 - p.sick.severity*0.12) : 1) * dayWorkMul(G ? G.hour : 12);
 }
 
 // Опыт работы: копится, пока пешка работает; уровни до 10 ускоряют труд.
@@ -1909,7 +1909,8 @@ function updateAnimals() {
       const tx = a.targetX*TILE+TILE/2, ty = a.targetY*TILE+TILE/2;
       const dx = tx-a.x, dy = ty-a.y;
       const d = Math.hypot(dx,dy);
-      if (d > 2) { a.x += dx/d*a.speed; a.y += dy/d*a.speed; }
+      const rest = isNight() ? 0.4 : 1;   // ночью животные отдыхают, бродят меньше
+      if (d > 2) { a.x += dx/d*a.speed*rest; a.y += dy/d*a.speed*rest; }
     }
     a.x = clamp(a.x, 0, MAP_W*TILE);
     a.y = clamp(a.y, 0, MAP_H*TILE);
@@ -2709,6 +2710,9 @@ function dayPhase(h) {
 function daylight(h) {
   return clamp(0.5 - 0.5 * Math.cos((h / 24) * Math.PI * 2), 0, 1);
 }
+function isNight() { return dayPhase(G ? G.hour : 12) === 'night'; }
+// Множитель скорости работы от времени суток: ночью труд медленнее (темно).
+function dayWorkMul(h) { return dayPhase(h) === 'night' ? 0.85 : 1; }
 
 function drawDayNightOverlay() {
   const h = G.hour + G.minute/60;
