@@ -112,10 +112,10 @@
         <a class="btn" href="#roadmap">Посмотреть roadmap</a>
       </div>
       <div class="badges">
-        <div class="badge"><b>v1.77</b><span>Строитель сначала несёт 📦 материалы к чертежу, и только потом начинает строить.</span></div>
-        <div class="badge"><b>A-BD</b><span>56 harness-сценариев, guard синхронизации и кодировки.</span></div>
+        <div class="badge"><b>v1.78</b><span>Полный аудит проекта; roadmap пересмотрен на 7 фаз. Детерминизм партии из seed готов.</span></div>
+        <div class="badge"><b>A-BJ</b><span>62 harness-сценария, guard синхронизации и кодировки.</span></div>
         <div class="badge"><b>Frontier</b><span>Лошади, ранчо, салуны, караваны, золото, форты и бандиты вместо sci-fi колонии.</span></div>
-        <div class="badge"><b>Сейчас</b><span>Фокус на ПК: стройка, комнаты, логистика, визуальная читаемость и контент Недели 2.</span></div>
+        <div class="badge"><b>Phase 1</b><span>Фокус на ПК: Playable Core — время/выживание, огонь, движение по местности.</span></div>
       </div>
     </div>
 
@@ -156,27 +156,29 @@
     </div>
 
     <div class="card section" id="roadmap">
-      <h2>Что будет дальше</h2>
+      <h2>Что будет дальше — план по фазам</h2>
+      <p style="color:#999;font-size:13px;margin:-4px 0 10px">После аудита план пересмотрен: сначала глубина колонии и идентичность Дикого Запада, мультиплеер перенесён в Phase 5 (не удалён). Детерминизм (seed) уже готов.</p>
       <div class="rows">
-        <div class="row now"><b>Стройка глубже — сейчас</b><span>✅ полы · ✅ стены · ✅ Architect-панель · ✅ уют от пола · ✅ материалы для чертежей · ✅ крыша · ✅ доставка пакета к стройке. ⏳ дальше: брать материалы со складов/ground stacks.</span></div>
-        <div class="row now"><b>Frontier-контент — сейчас</b><span>✅ лошади · ✅ ранчо · ✅ караваны · ✅ форт/налёты. ⏳ дальше: загоны, скот, салун глубже, риски торговых маршрутов.</span></div>
-        <div class="row now"><b>Читаемость — постоянно</b><span>✅ анимация работ · ✅ подсветка помеченных · ✅ счётчик задач. ⏳ дальше: автотайлинг биомов, понятные панели, причины простоя.</span></div>
-        <div class="row done"><b>Комнаты глубже</b><span>✅ базовые комнаты · ✅ типы комнат · ✅ качество стен · ✅ пол · ✅ крыша/укрытие · ✅ наглядная room-панель.</span></div>
-        <div class="row next"><b>Мобильный UX</b><span>⏸ Отложено примерно на 4 недели: текущий фокус — ПК-версия и контент.</span></div>
-        <div class="row next"><b>Неделя 3 — онлайн-фундамент</b><span>⏳ Детерминизм + команды, save v2, бэкенд-скелет, облачные сохранения.</span></div>
-        <div class="row next"><b>Неделя 4 — ALPHA</b><span>⏳ Кооп на двоих по интернету на общей карте + дизайн глобального мира.</span></div>
+        <div class="row done"><b>Фундамент + стройка — ГОТОВО</b><span>✅ работы/нужды/расписание · ✅ логистика/производство · ✅ бой/сценарии/караваны · ✅ полы/стены/Architect/подвоз материалов/крыша · ✅ детерминизм (seed).</span></div>
+        <div class="row now"><b>PHASE 1 — Playable Core (сейчас)</b><span>⏳ замедление времени + фазы суток · давление выживания · базовый огонь (распространение/тушение) · местность влияет на движение.</span></div>
+        <div class="row next"><b>PHASE 2 — Colony Management</b><span>⏳ навыки (per-skill), глубокая личность, реальный вес/переноска, здоровье по частям тела.</span></div>
+        <div class="row next"><b>PHASE 3 — World Simulation</b><span>⏳ биомы, реки/озёра/холмы/каньоны/леса, дороги, плавание, точки интереса.</span></div>
+        <div class="row next"><b>PHASE 4 — Wild West</b><span>⏳ шериф, бандиты, охотники за головами, прииски, салун-события, железная дорога, фракции.</span></div>
+        <div class="row next"><b>PHASE 5 — Multiplayer & Online</b><span>⏳ кооп и облако поверх детерминизма (перенесено сюда из ранних недель).</span></div>
+        <div class="row next"><b>PHASE 6–7 — Steam EA / Mobile</b><span>⏳ туториал, локализация, Steam-обёртка; мобайл — последней фазой, без ущерба PC.</span></div>
       </div>
     </div>
   </section>
 
   <section class="grid">
     <div class="card section">
-      <h2>План по неделям</h2>
+      <h2>Фазы разработки</h2>
       <div class="week">
-        <div class="week-card done"><b>Неделя 1</b><span>Core loop: строительство, логистика, рецепты, склады, события, сценарии, публичный web.</span></div>
-        <div class="week-card now"><b>Неделя 2</b><span>RimWorld-фундамент + Frontier-идентичность: комнаты, стройка, лошади, караваны, читаемый UI.</span></div>
-        <div class="week-card"><b>Неделя 3</b><span>Онлайн-фундамент: детерминизм, save v2, backend skeleton, cloud saves.</span></div>
-        <div class="week-card"><b>Неделя 4</b><span>Alpha-track: кооп на двоих, общая карта/соседние колонии, публичные smoke-проверки.</span></div>
+        <div class="week-card done"><b>Готово</b><span>Фундамент colony sim + стройка RimWorld-уровня + детерминизм.</span></div>
+        <div class="week-card now"><b>Phase 1</b><span>Playable Core: время/выживание, огонь, движение по местности.</span></div>
+        <div class="week-card"><b>Phase 2</b><span>Colony Management: навыки, личность, вес, здоровье.</span></div>
+        <div class="week-card"><b>Phase 3–4</b><span>World Simulation + Wild West: биомы, мир, шериф/бандиты/прииски/ж-д.</span></div>
+        <div class="week-card"><b>Phase 5–7</b><span>Multiplayer → Steam EA → Mobile (мобайл последним, без ущерба PC).</span></div>
       </div>
     </div>
 

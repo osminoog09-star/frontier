@@ -8,7 +8,7 @@
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
 - Последний локальный срез: `v1.70 - Construction material delivery`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.77`. Детерминизм готов: партия воспроизводима из G.seed (newGame сидирует PRNG). СЛЕД (Неделя 3): командная очередь событий, save v2 (сохранять позицию rng-потока), скелет бэкенда.
+- Текущий `GAME_VERSION`: `1.78`. Проведён аудит, roadmap переписан на 7 фаз (см. ROADMAP.md). СЕЙЧАС: Phase 1 — Playable Core (время/выживание/огонь/движение). Мультиплеер перенесён в Phase 5.
 - Harness: Scenarios A-BJ (62) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
 - Дизайн-курс: **RimWorld-like фундамент + Frontier-идентичность**. Не копировать RimWorld как тему; брать понятные жанровые паттерны и наполнять их Диким Западом.

@@ -1,5 +1,11 @@
 # FRONTIER changelog
 
+## v1.78 - Roadmap revision (full audit)
+
+- Проведён полный аудит проекта; roadmap переписан под 7 фаз (Playable Core → Colony Mgmt → World Sim → Wild West → Multiplayer → Steam EA → Mobile).
+- Мультиплеер/бэкенд/cloud/кооп НЕ удалены — перенесены в Phase 5 (сначала глубина колонии и идентичность). Детерминизм (v1.75-77) оставлен как готовый фундамент.
+- Обновлены ROADMAP.md, in-game roadmap-панель (showRoadmapPanel) и публичный сайт index.html. Геймплей не менялся, harness зелёный.
+
 ## v1.77 - Deterministic games from seed
 
 - newGame теперь сидирует PRNG в самом начале (случайный seed на партию, сохраняется в G.seed).
