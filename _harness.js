@@ -1240,6 +1240,17 @@ const test = `
   console.log('SCENARIO BG (sandbag cover):');
   console.log('   def:', sbDefOk?'OK':'FAIL', '| cover plain/sand:', coverPlain.toFixed(2)+'/'+coverSand.toFixed(2), coverOk?'OK':'FAIL', '| hit lower:', hitOk?'OK':'FAIL', '|', bgOk?'OK':'FAIL');
   if (!bgOk) throw new Error('Scenario BG failed');
+
+  // Scenario BH: fortification research lowers enemy hit chance against sheltered pawns
+  newGame('settlers');
+  const fortExists = !!G.researches.find(r => r.id === 'fortification');
+  const fortBefore = enemyHitChance(4, 0.2);
+  const fr = G.researches.find(r => r.id === 'fortification'); if (fr) fr.done = true;
+  const fortAfter = enemyHitChance(4, 0.2);
+  const bhOk = fortExists && fortAfter < fortBefore && Math.abs((fortBefore - fortAfter) - 0.1) < 1e-9;
+  console.log('SCENARIO BH (fortification research):');
+  console.log('   exists:', fortExists?'OK':'FAIL', '| enemy hit', fortBefore.toFixed(2)+'->'+fortAfter.toFixed(2), '|', bhOk?'OK':'FAIL');
+  if (!bhOk) throw new Error('Scenario BH failed');
 })();
 `;
 try {

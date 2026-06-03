@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.73';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.74';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -78,6 +78,7 @@ const RESEARCHES = [
   { id:'hunting', name:'Следопытство',       desc:'Охотники убивают быстрее, +30% мяса', cost:80, done:false, effect:'hunting' },
   { id:'trading', name:'Торговля',           desc:'Торговцы приносят больше', cost:70,   done:false, effect:'trading' },
   { id:'marksman',name:'Меткость',           desc:'Ковбои метче и больнее стреляют', cost:90, done:false, effect:'marksman' },
+  { id:'fortification',name:'Фортификация',  desc:'Ковбои за укрытием получают доп. защиту от выстрелов', cost:100, done:false, effect:'fortification' },
 ];
 
 // ==================== STATE ====================
@@ -1656,6 +1657,12 @@ function pawnHitChance(d, cover) {
 function pawnShotDamage() {
   return (14 + randInt(0,8)) + (hasResearch('marksman') ? 6 : 0);
 }
+// Шанс врага попасть по пешке: падает с дистанцией, укрытием и исследованием «Фортификация».
+function enemyHitChance(d, cover) {
+  let hc = 0.8 - d*0.06 - cover;
+  if (hasResearch('fortification')) hc -= 0.1;
+  return clamp(hc, 0.12, 0.8);
+}
 
 function fightEnemy(p, e) {
   p.state = 'fighting';
@@ -1843,7 +1850,7 @@ function updateEnemies() {
       if (d <= range && e.attackCooldown <= 0) {
         e.attackCooldown = e.reload;
         const cover = getCover(target.x, target.y);
-        const hit = Math.random() < clamp(0.8 - d*0.06 - cover, 0.15, 0.8);
+        const hit = Math.random() < enemyHitChance(d, cover);
         fireProjectile(e.x, e.y-4, target, false, hit ? e.atk+randInt(0,4) : 0);
       }
     } else {

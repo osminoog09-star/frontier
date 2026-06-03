@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.74 - Fortification research (Claude). Исследование «Фортификация»: -0.1 к шансу врага попасть по укрытой пешке; чистый хелпер enemyHitChance. Scenario BH. Harness A-BH (60) green.
+
+
 - v1.73 - Sandbag cover (Claude). Мешки с песком: проходимое укрытие с усиленным cover (0.3); getCover учитывает поле cover. Scenario BG. Harness A-BG (59) green.
 
 
