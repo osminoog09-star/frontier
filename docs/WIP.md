@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.86 - Mentorship + shooting skill (Claude, Phase 2). Наставник рядом ускоряет рост (x1.6); навык стрельбы растёт в бою и влияет на точность/урон. Scenario BR. Harness A-BR (70) green.
+
+
 - v1.85 - Skill degradation (Claude, Phase 2). Навыки без практики угасают раз в день (decaySkills); используемые сохраняются. Scenario BQ. Harness A-BQ (69) green.
 
 

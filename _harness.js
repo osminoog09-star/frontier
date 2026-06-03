@@ -1416,6 +1416,23 @@ const test = `
   console.log('SCENARIO BQ (skill degradation):');
   console.log('   used keeps:', usedKeepOk?'OK':'FAIL', '| unused decays 2->'+skillLvl(dqp,'mining'), decayedOk?'OK':'FAIL', '| practiced keeps:', farmKeepOk?'OK':'FAIL', '|', bqOk?'OK':'FAIL');
   if (!bqOk) throw new Error('Scenario BQ failed');
+
+  // Scenario BR: mentorship speeds skill growth; shooting skill improves accuracy (Phase 2)
+  newGame('settlers');
+  const mentorP = G.pawns[0], learnerP = G.pawns[1];
+  mentorP.skills = { building:{lvl:6,xp:0} };
+  learnerP.skills = {};
+  mentorP.x = 40*TILE; mentorP.y = 40*TILE; learnerP.x = 40*TILE+TILE; learnerP.y = 40*TILE;
+  const withMentor = mentorBonus(learnerP, 'building');
+  mentorP.x = 5*TILE; mentorP.y = 5*TILE;          // увели наставника далеко
+  const noMentor = mentorBonus(learnerP, 'building');
+  const mentorOk = withMentor > 1 && noMentor === 1;
+  const hitLow = pawnHitChance(5, 0.2, 0), hitHigh = pawnHitChance(5, 0.2, 15);
+  const shootHitOk = hitHigh > hitLow;
+  const brOk = mentorOk && shootHitOk;
+  console.log('SCENARIO BR (mentorship + shooting skill):');
+  console.log('   mentor bonus', withMentor+'->'+noMentor, mentorOk?'OK':'FAIL', '| shoot hit', hitLow.toFixed(2)+'->'+hitHigh.toFixed(2), shootHitOk?'OK':'FAIL', '|', brOk?'OK':'FAIL');
+  if (!brOk) throw new Error('Scenario BR failed');
 })();
 `;
 try {

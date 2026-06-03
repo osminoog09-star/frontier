@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.85';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.86';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -1255,7 +1255,7 @@ function doSpecificWork(p, workIdx) {
     case 6: did = tryGuard(p); break;
     case 7: did = tryHaul(p); break;
   }
-  if (did && WORK_SKILL[workIdx]) gainSkill(p, WORK_SKILL[workIdx], 0.05); // практика растит навык
+  if (did && WORK_SKILL[workIdx]) gainSkill(p, WORK_SKILL[workIdx], 0.05 * mentorBonus(p, WORK_SKILL[workIdx])); // практика (+наставник) растит навык
   return did;
 }
 
@@ -1729,13 +1729,24 @@ function dropItem(res, amount, tx, ty) {
 
 // Pawns are gunslingers: shoot from range, keep distance
 // Шанс попадания и урон ковбоя (чистые функции — тестируемо; «Меткость» усиливает обе).
-function pawnHitChance(d, cover) {
+function pawnHitChance(d, cover, shootLvl=0) {
   let hc = 0.95 - d*0.07 - cover;
   if (hasResearch('marksman')) hc += 0.1;
+  hc += (shootLvl || 0) * 0.005;   // навык стрельбы: до +10% точности на 20 ур.
   return clamp(hc, 0.2, 0.98);
 }
-function pawnShotDamage() {
-  return (14 + randInt(0,8)) + (hasResearch('marksman') ? 6 : 0);
+function pawnShotDamage(shootLvl=0) {
+  return (14 + randInt(0,8)) + (hasResearch('marksman') ? 6 : 0) + Math.round((shootLvl || 0) * 0.3);
+}
+// Наставничество: рост навыка ускоряется, если рядом есть более умелый союзник.
+function mentorBonus(p, skillId) {
+  if (!p || !skillId || !G.pawns) return 1;
+  const myLvl = skillLvl(p, skillId);
+  for (const q of G.pawns) {
+    if (q === p || !q.alive) continue;
+    if (Math.hypot(q.x - p.x, q.y - p.y) <= TILE * 5 && skillLvl(q, skillId) >= myLvl + 2) return 1.6;
+  }
+  return 1;
 }
 // Шанс врага попасть по пешке: падает с дистанцией, укрытием и исследованием «Фортификация».
 function enemyHitChance(d, cover) {
@@ -1766,8 +1777,10 @@ function fightEnemy(p, e) {
     p.attackCooldown = hasResearch('tools') ? 45 : 60; // fire rate
     // accuracy falls with distance and target cover
     const cover = getCover(e.x, e.y);
-    const hitChance = pawnHitChance(d, cover);
-    const dmg = pawnShotDamage();
+    const sl = skillLvl(p, 'shooting');
+    const hitChance = pawnHitChance(d, cover, sl);
+    const dmg = pawnShotDamage(sl);
+    gainSkill(p, 'shooting', 0.06);   // опыт стрельбы в бою
     fireProjectile(p.x, p.y-4, e, true, rng()<hitChance ? dmg : 0);
   }
 }
