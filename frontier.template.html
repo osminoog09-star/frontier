@@ -136,6 +136,23 @@
     background: rgba(18,16,12,0.96); box-shadow: 0 10px 26px rgba(0,0,0,0.55);
   }
   .build-group-panel .action-btn { width: 100%; text-align: left; }
+
+  /* Architect side panel (RimWorld-style) */
+  #architect {
+    position: absolute; top: 8px; left: 8px; z-index: 55;
+    width: 162px; max-height: calc(100% - 92px);
+    display: flex; flex-direction: column; gap: 3px;
+    padding: 6px; overflow-y: auto;
+    background: rgba(16,14,10,0.93); border: 1px solid #3a3320; border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  #architect::-webkit-scrollbar { width: 5px; }
+  #architect::-webkit-scrollbar-thumb { background: #3a3320; border-radius: 3px; }
+  #architect .arch-title { color: #e8c97e; font-size: 11px; font-weight: bold; text-align: center; letter-spacing: 2px; padding-bottom: 4px; border-bottom: 1px solid #2a2620; margin-bottom: 2px; }
+  #architect .build-group { width: 100%; }
+  #architect .build-group summary { width: 100%; text-align: left; box-sizing: border-box; }
+  #architect .build-group-panel { position: static; min-width: 0; width: 100%; box-shadow: none; background: rgba(0,0,0,0.22); border-color: #2a2620; margin-top: 3px; }
+  #architect .action-btn { width: 100%; text-align: left; box-sizing: border-box; }
   .action-btn {
     background: #1e1e1e; border: 1px solid #333; color: #aaa;
     padding: 4px 10px; cursor: pointer; font-size: 11px; font-family: inherit;
@@ -437,7 +454,7 @@
         <button class="menu-btn-big" id="mm-diag">🐞 Скачать лог диагностики</button>
         <button class="menu-btn-big" id="mm-resume" style="display:none">✖ Закрыть меню</button>
       </div>
-      <p class="menu-ver">PRE-ALPHA • build 1.65 • план: docs/ROADMAP_MONTH.md</p>
+      <p class="menu-ver">PRE-ALPHA • build 1.66 • план: docs/ROADMAP_MONTH.md</p>
     </div>
     <div class="menu-right" id="menu-panel">
       <div id="menu-panel-content"></div>
@@ -474,8 +491,8 @@
 <div id="main">
   <div id="canvas-wrap">
     <canvas id="game-canvas"></canvas>
-    <div id="bottombar">
-      <button class="action-btn" id="cancel-btn">✖ Отмена [Esc]</button>
+    <div id="architect">
+      <div class="arch-title">🛠 АРХИТЕКТОР</div>
       <details class="build-group" data-group="food">
         <summary>🌾 Еда</summary>
         <div class="build-group-panel">
@@ -535,6 +552,9 @@
           <button class="action-btn" id="build-floorstone-btn">⬜ Каменный пол</button>
         </div>
       </details>
+    </div>
+    <div id="bottombar">
+      <button class="action-btn" id="cancel-btn">✖ Отмена [Esc]</button>
       <button class="action-btn" id="demolish-btn" style="border-color:#5a2222;">🔥 Снести</button>
     </div>
     <div id="info-overlay"></div>
