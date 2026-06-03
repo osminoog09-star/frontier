@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.82';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.83';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -17,6 +17,40 @@ const SEASON_COLORS = ['#6a7a3a','#4a8a2a','#8a6a2a','#4a6a9a'];
 const SEASON_BG = ['#6a5a3a','#5a7a2a','#7a5a2a','#3a4a6a'];
 
 const WORK_TYPES = ['Рубка','Фермерство','Добыча','Строительство','Охота','Уход','Охрана','Перевозка'];
+// Навыки per-skill (Phase 2). Растут практикой; влияние на скорость/бой подключается срезами далее.
+const SKILLS = [
+  {id:'woodcutting', name:'Рубка',         icon:'🪓'},
+  {id:'farming',     name:'Фермерство',    icon:'🌾'},
+  {id:'mining',      name:'Добыча',        icon:'⛏️'},
+  {id:'building',    name:'Строительство', icon:'🔨'},
+  {id:'hunting',     name:'Охота',         icon:'🏹'},
+  {id:'medicine',    name:'Медицина',      icon:'💊'},
+  {id:'shooting',    name:'Стрельба',      icon:'🎯'},
+  {id:'hauling',     name:'Перевозка',     icon:'📦'},
+  {id:'cooking',     name:'Кулинария',     icon:'🍳'},
+  {id:'animals',     name:'Животноводство',icon:'🐴'},
+];
+// Соответствие WORK_TYPES -> навык (по индексу). 5:Уход->медицина, 6:Охрана->стрельба.
+const WORK_SKILL = ['woodcutting','farming','mining','building','hunting','medicine','shooting','hauling'];
+const SKILL_MAX = 20;
+function ensureSkills(p) { if (!p.skills) p.skills = {}; return p.skills; }
+function skillLvl(p, id) { const s = p.skills && p.skills[id]; return s ? s.lvl : 0; }
+function skillNextReq(lvl) { return (lvl + 1) * 80; }
+function gainSkill(p, id, amt) {
+  if (!p || !id || amt <= 0) return;
+  const sk = ensureSkills(p);
+  if (!sk[id]) sk[id] = { lvl:0, xp:0 };
+  const s = sk[id];
+  if (s.lvl >= SKILL_MAX) return;
+  s.xp += amt;
+  while (s.lvl < SKILL_MAX && s.xp >= skillNextReq(s.lvl)) { s.xp -= skillNextReq(s.lvl); s.lvl++; }
+}
+function skillSpeedMul(p, id) { return 1 + 0.05 * skillLvl(p, id); }   // +5% за уровень (до +100%)
+function topSkills(p, n=3) {
+  const sk = p.skills || {};
+  return Object.keys(sk).map(id => ({ id, lvl: sk[id].lvl }))
+    .filter(x => x.lvl > 0).sort((a,b) => b.lvl - a.lvl).slice(0, n);
+}
 const WORK_ICONS = ['🪓','🌾','⛏️','🔨','🦌','💊','🛡️','📦'];
 
 const BUILDS = {
@@ -473,7 +507,8 @@ function spawnPawn(tx, ty, name, priorities) {
     opinions: {},      // {pawnId: -100..100}
     sick: null,        // {name, severity 1-3, timer}
     workMul: 1,
-    workXp: 0, workLevel: 0,   // навык работы (опыт/уровень)
+    workXp: 0, workLevel: 0,   // общий навык труда (легаси, влияет на wmul)
+    skills: {},                // per-skill навыки (Phase 2): {id:{lvl,xp}}
     socialTimer: randInt(100,400),
     schedule_default: (() => {
       const s = Array(24).fill('work');
@@ -1189,17 +1224,19 @@ function doWork(p) {
 
 function doSpecificWork(p, workIdx) {
   // 0:Рубка 1:Фермерство 2:Добыча 3:Строительство 4:Охота 5:Уход 6:Охрана 7:Перевозка
+  let did = false;
   switch(workIdx) {
-    case 0: return tryChopTree(p);
-    case 1: return tryFarm(p);
-    case 2: return tryMine(p);
-    case 3: return tryBuild(p) || tryRepair(p);
-    case 4: return tryHunt(p);
-    case 5: return tryHeal(p);
-    case 6: return tryGuard(p);
-    case 7: return tryHaul(p);
+    case 0: did = tryChopTree(p); break;
+    case 1: did = tryFarm(p); break;
+    case 2: did = tryMine(p); break;
+    case 3: did = tryBuild(p) || tryRepair(p); break;
+    case 4: did = tryHunt(p); break;
+    case 5: did = tryHeal(p); break;
+    case 6: did = tryGuard(p); break;
+    case 7: did = tryHaul(p); break;
   }
-  return false;
+  if (did && WORK_SKILL[workIdx]) gainSkill(p, WORK_SKILL[workIdx], 0.05); // практика растит навык
+  return did;
 }
 
 function tryChopTree(p) {
@@ -2233,6 +2270,7 @@ function normalizeGameState(source='') {
   if (!Array.isArray(G.items)) G.items = [];
   if (!Array.isArray(G.floorBlueprints)) G.floorBlueprints = [];
   if (!Array.isArray(G.fires)) G.fires = [];
+  for (const p of G.pawns || []) { if (!p.skills || typeof p.skills !== 'object') p.skills = {}; }
   for (const b of G.buildings || []) {
     normalizeStockpileFilters(b);
     normalizeRecipeStation(b);
@@ -3513,6 +3551,10 @@ function createPawnCard(p) {
     const tr = TRAITS[t]; if(!tr) return '';
     return `<span class="trait-chip ${tr.good?'tg':'tb'}" title="${tr.desc}">${tr.icon} ${tr.name}</span>`;
   }).join('');
+  const skillChips = topSkills(p,3).map(s=>{
+    const def = SKILLS.find(d=>d.id===s.id);
+    return def ? `<span title="${def.name}">${def.icon}${s.lvl}</span>` : '';
+  }).join(' ');
   card.innerHTML = `
     <div class="pawn-name">🤠 ${p.name} ${p.dead?'(погиб)':''}</div>
     <div class="pawn-status">${p.role}${(p.workLevel||0)>0?` ⭐${p.workLevel}`:''} • ${stateNames[p.state]||p.state} ${woundText} ${sickText}</div>
@@ -3521,6 +3563,7 @@ function createPawnCard(p) {
     ${bar('Еда',p.food,p.maxFood,'bar-food')}
     ${bar('Настр',p.mood,p.maxMood,'bar-mood')}
     ${bar('Сила',p.energy,p.maxEnergy,'bar-energy')}
+    ${skillChips?`<div class="pawn-thoughts" style="color:#9cc06a">Навыки: ${skillChips}</div>`:''}
     <div class="pawn-thoughts">${p.thoughts.slice(0,3).map(t=>`<span class="${t.neg?'thought-neg':'thought-pos'}">${t.text}</span>`).join(' ')}</div>
   `;
   return card;

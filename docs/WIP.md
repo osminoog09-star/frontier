@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.83 - Per-skill foundation (Claude, Phase 2). p.skills с уровнями/опытом, 10 навыков, рост практикой, кап 20, топ-навыки в карточке. wmul не тронут (0 регрессий). Scenario BO. Harness A-BO (67) green.
+
+
 - v1.82 - Night effects (Claude, Phase 1). Ночью труд -15% (dayWorkMul), животные отдыхают; день/рассвет не штрафуют (сим цел). Scenario BN. Harness A-BN (66) green. Ядро Phase 1 завершено.
 
 

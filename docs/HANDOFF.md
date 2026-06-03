@@ -8,8 +8,8 @@
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
 - Последний локальный срез: `v1.70 - Construction material delivery`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.82`. PHASE 1 (Playable Core) завершён: время x4 (1.79), местность-движение (1.80), огонь (1.81), эффекты ночи (1.82). ДАЛЬШЕ: Phase 2 — навыки per-skill, личность, вес.
-- Harness: Scenarios A-BN (66) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
+- Текущий `GAME_VERSION`: `1.83`. PHASE 2 начат: каркас навыков per-skill (p.skills, gainSkill, skillSpeedMul, рост в doSpecificWork). Дальше: подключить навык к скорости работ и бою (wmul через skill), затем личность и вес.
+- Harness: Scenarios A-BO (67) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
 - Дизайн-курс: **RimWorld-like фундамент + Frontier-идентичность**. Не копировать RimWorld как тему; брать понятные жанровые паттерны и наполнять их Диким Западом.
 

@@ -1365,6 +1365,23 @@ const test = `
   console.log('SCENARIO BN (night effects):');
   console.log('   dayWorkMul day/dawn/night:', dwDay+'/'+dwDawn+'/'+dwNight, mulOk?'OK':'FAIL', '| wmul night', wNight.toFixed(2), wmulOk?'OK':'FAIL', '| isNight:', nightFlagOk?'OK':'FAIL', '|', bnOk?'OK':'FAIL');
   if (!bnOk) throw new Error('Scenario BN failed');
+
+  // Scenario BO: per-skill system — practice raises a specific skill, caps at 20 (Phase 2)
+  newGame('settlers');
+  const sp = G.pawns[0]; sp.skills = {};
+  const beforeLvl = skillLvl(sp,'mining');
+  gainSkill(sp, 'mining', 250);              // 80+160 -> уровень 2
+  const minedLvl = skillLvl(sp,'mining');
+  const boMulOk = skillSpeedMul(sp,'mining') > 1 && Math.abs(skillSpeedMul(sp,'mining') - (1 + 0.05*minedLvl)) < 1e-9;
+  const otherOk = skillLvl(sp,'farming') === 0;
+  gainSkill(sp, 'mining', 1e7);
+  const capOk = skillLvl(sp,'mining') === 20;
+  const top = topSkills(sp,3);
+  const topOk = top.length >= 1 && top[0].id === 'mining';
+  const boOk = beforeLvl===0 && minedLvl===2 && boMulOk && otherOk && capOk && topOk;
+  console.log('SCENARIO BO (per-skill system):');
+  console.log('   mining lvl 0->'+minedLvl, '| mul:', skillSpeedMul(sp,'mining').toFixed(2), mulOk?'OK':'FAIL', '| other 0:', otherOk?'OK':'FAIL', '| cap20:', capOk?'OK':'FAIL', '| top:', topOk?'OK':'FAIL', '|', boOk?'OK':'FAIL');
+  if (!boOk) throw new Error('Scenario BO failed');
 })();
 `;
 try {
