@@ -8,8 +8,8 @@
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
 - Последний локальный срез: `v1.70 - Construction material delivery`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `1.71`. Стройка-RimWorld закрыта (полы/стены/уют/меню/доставка/крыша+визуал крыши). 
-- Harness: Scenarios A-BE (57) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
+- Текущий `GAME_VERSION`: `1.72`. Стройка-RimWorld закрыта; добавлен враг Громила (боевой контент).
+- Harness: Scenarios A-BF (58) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
 - Дизайн-курс: **RimWorld-like фундамент + Frontier-идентичность**. Не копировать RimWorld как тему; брать понятные жанровые паттерны и наполнять их Диким Западом.
 

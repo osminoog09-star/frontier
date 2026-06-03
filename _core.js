@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.71';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.72';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -547,6 +547,7 @@ const ENEMY_TYPES = {
   boss:   { name:'Главарь',   hp:160,speed:1.0, atk:16, range:6.0,  ranged:true,  color:'#6a1818', reload:90,  icon:'🤠' },
   sniper: { name:'Снайпер',   hp:45, speed:0.9, atk:22, range:11.0, ranged:true,  color:'#7a5a2a', reload:170, icon:'🎯' },
   arsonist:{ name:'Поджигатель',hp:50,speed:1.35,atk:6, range:1.5,  ranged:false, color:'#b8602a', reload:45,  icon:'🔥', burns:true },
+  brute:  { name:'Громила',   hp:140,speed:0.85,atk:18, range:1.6,  ranged:false, color:'#5a3520', reload:70,  icon:'💪' },
 };
 
 function spawnEnemy(count) {
@@ -562,6 +563,7 @@ function spawnEnemy(count) {
     if (i===0 && count>=4) type='boss';
     else if (i===1 && count>=5) type='sniper';
     else if (i===2 && count>=6) type='arsonist';
+    else if (i===3 && count>=7) type='brute';
     else type = Math.random()<0.5 ? 'gunner' : 'knifer';
     const def = ENEMY_TYPES[type];
     G.enemies.push({
@@ -1726,7 +1728,7 @@ function applyHit(target, dmg, friendly) {
     if (target.hp <= 0 && target.alive) {
       target.alive = false;
       G.stats.kills++;
-      const reward = target.type==='boss' ? 30 : target.type==='sniper' ? 14 : 6;
+      const reward = target.type==='boss' ? 30 : target.type==='brute' ? 16 : target.type==='sniper' ? 14 : 6;
       G.res.gold += reward;
       G.stats.goldEarned += reward;
       Sfx.coin();

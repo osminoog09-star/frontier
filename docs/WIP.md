@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.72 - Brute enemy (Claude). Враг «Громила»: танк ближнего боя в налётах 7+, награда 16. Scenario BF. Harness A-BF (58) green.
+
+
 - v1.71 - Roof shade overlay (Claude). Крытые тайлы замкнутой комнаты показаны тенью-оверлеем; кэш recomputeRoofedCells. Дополняет roof-логику Codex (v1.69). Scenario BE. Harness A-BE (57) green.
 
 

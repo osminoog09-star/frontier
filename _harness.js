@@ -1210,6 +1210,20 @@ const test = `
   console.log('SCENARIO BE (roof shade cache):');
   console.log('   inside roofed:', beInside?'OK':'FAIL', '| outside clear:', beOutside?'OK':'FAIL', '| roofed cells:', beCount, '|', beOk?'OK':'FAIL');
   if (!beOk) throw new Error('Scenario BE failed');
+
+  // Scenario BF: brute enemy — tanky melee that joins very big raids (7+), absent below
+  const bruteDef = ENEMY_TYPES.brute;
+  const bruteDefOk = bruteDef && bruteDef.hp >= 130 && bruteDef.ranged === false && bruteDef.atk >= 16 && bruteDef.speed < 1;
+  newGame('settlers'); G.enemies = [];
+  spawnEnemy(7);  // [0]boss [1]sniper [2]arsonist [3]brute
+  const bruteBigOk = G.enemies[3].type === 'brute' && G.enemies[3].ranged === false && G.enemies[3].hp >= 130;
+  newGame('settlers'); G.enemies = [];
+  spawnEnemy(6);  // big but <7 -> no brute
+  const bruteNoneOk = !G.enemies.some(e => e.type === 'brute');
+  const bfOk = bruteDefOk && bruteBigOk && bruteNoneOk;
+  console.log('SCENARIO BF (brute enemy type):');
+  console.log('   def:', bruteDefOk?'OK':'FAIL', '| 7+ raid has brute:', bruteBigOk?'OK':'FAIL', '| 6 raid none:', bruteNoneOk?'OK':'FAIL');
+  if (!bfOk) throw new Error('Scenario BF failed');
 })();
 `;
 try {
