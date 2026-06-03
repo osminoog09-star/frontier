@@ -1251,6 +1251,28 @@ const test = `
   console.log('SCENARIO BH (fortification research):');
   console.log('   exists:', fortExists?'OK':'FAIL', '| enemy hit', fortBefore.toFixed(2)+'->'+fortAfter.toFixed(2), '|', bhOk?'OK':'FAIL');
   if (!bhOk) throw new Error('Scenario BH failed');
+
+  // Scenario BI: seeded PRNG foundation — same seed reproduces the sequence (determinism base)
+  newGame('settlers');
+  seedRng(12345);
+  const seqA = [rng(), rng(), rng(), rng()];
+  seedRng(12345);
+  const seqB = [rng(), rng(), rng(), rng()];
+  const sameSeq = seqA.every((v,i) => v === seqB[i]);
+  seedRng(999);
+  const seqC = [rng(), rng(), rng(), rng()];
+  const diffSeq = seqA.some((v,i) => v !== seqC[i]);
+  seedRng(42);
+  const ints1 = [rngInt(0,9), rngInt(0,9), rngInt(0,9), randInt(0,9)];
+  seedRng(42);
+  const ints2 = [rngInt(0,9), rngInt(0,9), rngInt(0,9), randInt(0,9)];
+  const intsSame = ints1.every((v,i) => v === ints2[i]) && ints1.every(v => v >= 0 && v <= 9);
+  const rangeOk = seqA.every(v => v >= 0 && v < 1);
+  clearRng(); // вернуть Math.random для остального процесса
+  const biOk = sameSeq && diffSeq && intsSame && rangeOk && G.seed === 42;
+  console.log('SCENARIO BI (seeded PRNG determinism):');
+  console.log('   same-seed seq:', sameSeq?'OK':'FAIL', '| diff seed:', diffSeq?'OK':'FAIL', '| ints repeat:', intsSame?'OK':'FAIL', '| range:', rangeOk?'OK':'FAIL', '|', biOk?'OK':'FAIL');
+  if (!biOk) throw new Error('Scenario BI failed');
 })();
 `;
 try {

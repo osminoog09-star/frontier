@@ -1,5 +1,12 @@
 # FRONTIER changelog
 
+## v1.75 - Seeded PRNG foundation (Week 3 start)
+
+- Первый шаг к онлайну: фундамент детерминизма. Добавлен seeded-PRNG (mulberry32) + rng()/rngInt()/seedRng()/clearRng().
+- randInt теперь идёт через rng(); по умолчанию _rng не засеян => поведение = Math.random (нулевое изменение текущей игры).
+- G.seed сохраняется/загружается (зачаток save v2). При seedRng один и тот же seed воспроизводит последовательность.
+- Миграция остальных Math.random-вызовов на rng — последующими срезами. Scenario BI. Harness A-BI (61) green.
+
 ## v1.74 - Fortification research
 
 - Новое исследование «Фортификация» (100 науки): пешки за укрытием получают доп. -0.1 к шансу врага попасть.

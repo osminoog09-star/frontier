@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.75 - Seeded PRNG foundation (Claude). mulberry32 + rng/rngInt/seedRng; randInt через rng (по умолчанию = Math.random); G.seed в сейве. Старт Недели 3 (детерминизм). Scenario BI. Harness A-BI (61) green.
+
+
 - v1.74 - Fortification research (Claude). Исследование «Фортификация»: -0.1 к шансу врага попасть по укрытой пешке; чистый хелпер enemyHitChance. Scenario BH. Harness A-BH (60) green.
 
 

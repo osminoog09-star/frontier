@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.74';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.75';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -83,6 +83,7 @@ const RESEARCHES = [
 
 // ==================== STATE ====================
 let G = null; // game state
+let _rng = null; // seeded PRNG (null => используем Math.random; включается seedRng)
 const DEFAULT_RES = { food:120, wood:60, ore:20, meat:0, med:10, sci:0, gold:30 };
 const STORABLE_RES = ['food','wood','ore','meat','med','gold'];
 const DEFAULT_HERD = { wild:6, tamed:0, tameProgress:0 };
@@ -4499,6 +4500,7 @@ function saveGame() {
       res:G.res, day:G.day, hour:G.hour, minute:G.minute,
       season:G.season, dayOfYear:G.dayOfYear, weather:G.weather,
       nextId:G.nextId,
+      seed:G.seed,
       scenario:G.scenario || 'settlers',
       camera:{x:G.camera.x, y:G.camera.y, zoom:G.camera.zoom},
       // compact map: plain number for empty tile, [type, objCode, hp, marked] for tiles with tree/rock
@@ -4533,6 +4535,7 @@ function loadGame() {
     G.season=save.season||0; G.dayOfYear=save.dayOfYear||0;
     G.weather=save.weather||'clear';
     if (save.nextId) G.nextId = save.nextId;
+    if (save.seed != null) seedRng(save.seed);
     if (save.herd) G.herd = save.herd;
     if (save.camera) G.camera = { x:save.camera.x, y:save.camera.y, zoom:save.camera.zoom||1 };
 
@@ -4581,7 +4584,22 @@ function loadGame() {
 
 // ==================== UTILS ====================
 function noopFS(){}
-function randInt(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+// ── Seeded PRNG (фундамент детерминизма для онлайна) ──
+// mulberry32: компактный детерминированный генератор. Пока опционален: если
+// _rng не засеян, rng() ведёт себя как Math.random() — нулевое изменение поведения.
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function seedRng(seed) { _rng = mulberry32((seed >>> 0) || 1); if (typeof G !== 'undefined' && G) G.seed = (seed >>> 0); return _rng; }
+function clearRng() { _rng = null; }
+function rng() { return _rng ? _rng() : Math.random(); }
+function rngInt(min, max) { return Math.floor(rng() * (max - min + 1)) + min; }
+function randInt(min, max) { return Math.floor(rng()*(max-min+1))+min; }
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function blendColor(hex1, hex2, t) {
   const parse = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
