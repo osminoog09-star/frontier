@@ -1382,6 +1382,22 @@ const test = `
   console.log('SCENARIO BO (per-skill system):');
   console.log('   mining lvl 0->'+minedLvl, '| mul:', skillSpeedMul(sp,'mining').toFixed(2), mulOk?'OK':'FAIL', '| other 0:', otherOk?'OK':'FAIL', '| cap20:', capOk?'OK':'FAIL', '| top:', topOk?'OK':'FAIL', '|', boOk?'OK':'FAIL');
   if (!boOk) throw new Error('Scenario BO failed');
+
+  // Scenario BP: per-skill level drives work speed via the active skill (wmul)
+  newGame('settlers');
+  const hp = G.pawns[0]; hp.workMul=1; hp.workLevel=0; hp.sick=null; hp.skills={};
+  G.hour = 12;                        // день — без ночного штрафа
+  hp._activeSkill = 'mining';
+  const baseW = wmul(hp);             // навык 0 -> 1.0
+  gainSkill(hp,'mining',250);         // уровень 2
+  const skilledW = wmul(hp);          // 1 + 0.05*2 = 1.1
+  const bpSkillOk = baseW===1 && skilledW>baseW && Math.abs(skilledW-1.1)<1e-9;
+  hp._activeSkill = null;             // вне работы — легаси (workLevel 0 -> 1.0)
+  const bpLegacyOk = wmul(hp)===1;
+  const bpOk = bpSkillOk && bpLegacyOk;
+  console.log('SCENARIO BP (skill drives work speed):');
+  console.log('   wmul 1.0->'+skilledW.toFixed(2)+' (lvl2)', bpSkillOk?'OK':'FAIL', '| legacy off-work:', bpLegacyOk?'OK':'FAIL', '|', bpOk?'OK':'FAIL');
+  if (!bpOk) throw new Error('Scenario BP failed');
 })();
 `;
 try {

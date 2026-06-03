@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.84 - Skills drive work speed (Claude, Phase 2). wmul во время работы идёт через skillSpeedMul активного навыка; p._activeSkill в doSpecificWork. Пины не задеты. Scenario BP. Harness A-BP (68) green.
+
+
 - v1.83 - Per-skill foundation (Claude, Phase 2). p.skills с уровнями/опытом, 10 навыков, рост практикой, кап 20, топ-навыки в карточке. wmul не тронут (0 регрессий). Scenario BO. Harness A-BO (67) green.
 
 

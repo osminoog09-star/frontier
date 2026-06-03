@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.83';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.84';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -548,7 +548,9 @@ function applyTraitEffects(p) {
 
 // Effective work speed (traits + illness)
 function wmul(p) {
-  const skill = 1 + 0.04 * (p.workLevel || 0);   // навык: +4% за уровень (до +40% на 10 ур.)
+  // Во время конкретной работы скорость задаёт соответствующий per-skill навык;
+  // вне работы (или если навык не выставлен) — легаси-уровень труда.
+  const skill = p._activeSkill ? skillSpeedMul(p, p._activeSkill) : (1 + 0.04 * (p.workLevel || 0));
   return (p.workMul || 1) * skill * (p.sick ? (0.7 - p.sick.severity*0.12) : 1) * dayWorkMul(G ? G.hour : 12);
 }
 
@@ -726,6 +728,7 @@ function updatePawns() {
     if (!p.alive) continue;
     if (p.downed) { updateDowned(p); continue; } // лежит без сознания — обычный ИИ не работает
     p._wt = null; // reset current work tag before schedule/combat can branch away
+    p._activeSkill = null; // сбрасываем активный навык (выставляется в doSpecificWork)
     p.attackCooldown = Math.max(0, p.attackCooldown - 1);
 
     // Passive stats
@@ -1216,6 +1219,7 @@ function doWork(p) {
     if (doSpecificWork(p, i)) return;
   }
 
+  p._activeSkill = null; // крафт идёт по легаси-скорости (не наследует навык предыдущей попытки)
   if (tryCraft(p)) return;
 
   p.state = 'idle';
@@ -1225,6 +1229,7 @@ function doWork(p) {
 function doSpecificWork(p, workIdx) {
   // 0:Рубка 1:Фермерство 2:Добыча 3:Строительство 4:Охота 5:Уход 6:Охрана 7:Перевозка
   let did = false;
+  p._activeSkill = WORK_SKILL[workIdx] || null;   // навык, который сейчас задействован (для wmul)
   switch(workIdx) {
     case 0: did = tryChopTree(p); break;
     case 1: did = tryFarm(p); break;

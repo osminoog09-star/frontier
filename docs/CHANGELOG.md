@@ -1,5 +1,11 @@
 # FRONTIER changelog
 
+## v1.84 - Skills drive work speed (Phase 2)
+
+- Per-skill навык теперь влияет на скорость работы: во время конкретной работы wmul использует skillSpeedMul активного навыка (+5%/уровень), а не общий workLevel.
+- doSpecificWork выставляет p._activeSkill по типу работы; сбрасывается per-tick и перед крафтом, чтобы навык не протекал.
+- Пины с навыком 0 не задеты (skillSpeedMul=1); сим B чист (пешки лишь немного быстрее по мере роста). Scenario BP. Harness A-BP (68) green.
+
 ## v1.83 - Per-skill system foundation (Phase 2)
 
 - Начат Phase 2 (Colony Management). Каркас индивидуальных навыков: у пешки p.skills = {id:{lvl,xp}}.
