@@ -1321,6 +1321,35 @@ const test = `
   console.log('SCENARIO BL (terrain movement):');
   console.log('   grass/dirt/sand/floor:', tGrass+'/'+tDirt+'/'+tSand+'/'+tRoad, '|', blOk?'OK':'FAIL');
   if (!blOk) throw new Error('Scenario BL failed');
+
+  // Scenario BM: fire — flammability, ignition, burn-out consumes fuel, pawn extinguishes
+  newGame('settlers'); G.fires=[]; G.weather='clear';
+  // изолированный деревянный пол (соседи не горят, чтобы не было разлёта)
+  G.map[30][30] = { type:TERRAIN.DIRT, v:0, obj:null, floor:'wood' };
+  G.map[30][31] = { type:TERRAIN.DIRT, v:0, obj:null, floor:'stone' };
+  G.map[30][29] = { type:TERRAIN.DIRT, v:0, obj:null };
+  G.map[31][30] = { type:TERRAIN.DIRT, v:0, obj:null };
+  G.map[29][30] = { type:TERRAIN.DIRT, v:0, obj:null };
+  const fuelWoodOk = tileFuel(30,30) > 0;
+  const fuelStoneOk = tileFuel(31,30) === 0;   // каменный пол не горит
+  const fuelBareOk = tileFuel(29,30) === 0;    // голая земля не горит
+  const ignited = igniteTile(30,30);
+  const burningOk = ignited && isBurningAt(30,30) && igniteTile(30,30) === false; // повторно не зажечь
+  let gFire=0; while(G.fires.length && gFire<800){ updateFires(); gFire++; }
+  const consumedOk = G.map[30][30].floor !== 'wood'; // деревянный пол выгорел
+  // тушение пешкой: травяной пожар потушить до выгорания, трава уцелела
+  newGame('settlers'); G.fires=[]; G.weather='clear';
+  G.map[28][28] = { type:TERRAIN.GRASS, v:0, obj:null };
+  igniteTile(28,28);
+  const ff = G.pawns[0]; ff.workMul=1; ff.workLevel=0; ff.sick=null;
+  ff.x=28*TILE+TILE/2; ff.y=28*TILE+TILE/2; ff.tx=28; ff.ty=28;
+  const hadFire = G.fires.length===1;
+  let gFf=0; while(G.fires.length && gFf<300){ G._claims={}; tryFirefight(ff); gFf++; }
+  const extinguishedOk = hadFire && G.fires.length===0 && G.map[28][28].type===TERRAIN.GRASS;
+  const bmOk = fuelWoodOk && fuelStoneOk && fuelBareOk && burningOk && consumedOk && extinguishedOk;
+  console.log('SCENARIO BM (fire system):');
+  console.log('   fuel wood/stone/bare:', fuelWoodOk&&fuelStoneOk&&fuelBareOk?'OK':'FAIL', '| ignite:', burningOk?'OK':'FAIL', '| burned out ('+gFire+'t):', consumedOk?'OK':'FAIL', '| extinguished ('+gFf+'t):', extinguishedOk?'OK':'FAIL', '|', bmOk?'OK':'FAIL');
+  if (!bmOk) throw new Error('Scenario BM failed');
 })();
 `;
 try {

@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.80';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.81';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -1161,6 +1161,8 @@ function doJoy(p) {
 }
 
 function doWork(p) {
+  // Пожар — важнее всего: если что-то горит рядом, ковбои бросаются тушить.
+  if (G.fires && G.fires.length && tryFirefight(p)) return;
   // Construction is urgent, BUT only a limited crew builds at once — otherwise
   // a big blueprint project (e.g. a long fence) starves mining/farming/chopping.
   const builderCap = clamp(Math.floor(G.pawns.filter(q=>q.alive).length/3), 1, 4);
@@ -2229,6 +2231,7 @@ function normalizeGameState(source='') {
   ensureHerd();
   if (!Array.isArray(G.items)) G.items = [];
   if (!Array.isArray(G.floorBlueprints)) G.floorBlueprints = [];
+  if (!Array.isArray(G.fires)) G.fires = [];
   for (const b of G.buildings || []) {
     normalizeStockpileFilters(b);
     normalizeRecipeStation(b);
@@ -2602,10 +2605,97 @@ function render() {
 
   ctx.restore();
 
+  drawFires();
+
   // Screen-space overlays
   drawWeather();
   drawDayNightOverlay();
   drawMinimap();
+}
+
+// ──────────────── СИСТЕМА ОГНЯ (Phase 1) ────────────────
+// Горючесть тайла: дерево/деревянный пол/трава/деревянные постройки горят; камень/вода/земля — нет.
+function tileFuel(tx, ty) {
+  if (!G || !G.map || !G.map[ty] || !G.map[ty][tx]) return 0;
+  const t = G.map[ty][tx];
+  if (t.type === TERRAIN.WATER || t.type === TERRAIN.ROCK) return 0;
+  let fuel = 0;
+  if (t.obj && t.obj.type === 'tree') fuel = Math.max(fuel, 60);
+  if (t.floor === 'wood') fuel = Math.max(fuel, 40);
+  if (t.type === TERRAIN.GRASS) fuel = Math.max(fuel, 20);
+  const b = G.buildings.find(b => b.tx===tx && b.ty===ty && b.done && !b.blueprint);
+  if (b && BUILDS[b.type] && BUILDS[b.type].cost && BUILDS[b.type].cost.wood && b.type!=='wall_stone') fuel = Math.max(fuel, 80);
+  return fuel;
+}
+function isBurningAt(tx, ty) { return !!(G.fires && G.fires.some(f => f.tx===tx && f.ty===ty)); }
+function igniteTile(tx, ty) {
+  if (!G.fires) G.fires = [];
+  if (tx<0||ty<0||tx>=MAP_W||ty>=MAP_H) return false;
+  if (isBurningAt(tx, ty)) return false;
+  const fuel = tileFuel(tx, ty);
+  if (fuel <= 0) return false;
+  G.fires.push({ tx, ty, hp: fuel });
+  return true;
+}
+function maybeLightning() {
+  if (G.weather === 'storm' && rng() < 0.0004) {
+    const tx = rngInt(0, MAP_W-1), ty = rngInt(0, MAP_H-1);
+    if (igniteTile(tx, ty)) addLog('⚡ Молния вызвала пожар!', 'warn');
+  }
+}
+function updateFires() {
+  if (!G.fires) G.fires = [];
+  const rainy = G.weather==='rain' || G.weather==='storm' || G.weather==='blizzard';
+  if (G.fires.length) {
+    const burn = rainy ? 2.4 : 0.7;   // дождь гасит быстрее
+    for (const f of G.fires) {
+      f.hp -= burn;
+      const t = G.map[f.ty] && G.map[f.ty][f.tx];
+      if (t) {
+        const b = G.buildings.find(b => b.tx===f.tx && b.ty===f.ty && b.done && !b.blueprint);
+        if (b) { b.hp -= 0.8; if (b.hp <= 0) { G.buildings = G.buildings.filter(x=>x!==b); addLog(`🔥 ${BUILDS[b.type].name} сгорела`, 'danger'); } }
+        if (t.obj && t.obj.type === 'tree') { t.obj.hp -= 1.2; if (t.obj.hp <= 0) t.obj = null; }
+      }
+      if (!rainy && rng() < 0.05) {  // распространение на соседний горючий тайл
+        const d = [[1,0],[-1,0],[0,1],[0,-1]][rngInt(0,3)];
+        igniteTile(f.tx+d[0], f.ty+d[1]);
+      }
+    }
+    G.fires = G.fires.filter(f => {
+      if (f.hp > 0) return true;
+      const t = G.map[f.ty] && G.map[f.ty][f.tx];   // топливо выгорело
+      if (t) { if (t.floor==='wood') t.floor = null; if (t.type===TERRAIN.GRASS && !t.obj) t.type = TERRAIN.DIRT; }
+      return false;
+    });
+  }
+  maybeLightning();
+}
+// Пешка тушит ближайший пожар (срочная работа — пожар важнее обычных дел).
+function tryFirefight(p) {
+  if (!G.fires || !G.fires.length) return false;
+  const fire = G.fires.filter(f => claimCount('fire_'+f.tx+'_'+f.ty) < 3)
+    .sort((a,b) => distTiles(p,a.tx,a.ty) - distTiles(p,b.tx,b.ty))[0];
+  if (!fire) return false;
+  claimSpot('fire_'+fire.tx+'_'+fire.ty);
+  p._wt = 'fire_'+fire.tx+'_'+fire.ty;
+  setTarget(p, fire.tx, fire.ty);
+  if (distTiles(p, fire.tx, fire.ty) <= 1.6) {
+    fire.hp -= 1.6 * wmul(p);
+    if (fire.hp <= 0) { G.fires = G.fires.filter(x=>x!==fire); addLog('🧯 Пожар потушен', 'good'); }
+  }
+  p.state = 'working';
+  return true;
+}
+function drawFires() {
+  if (!G.fires || !G.fires.length) return;
+  for (const f of G.fires) {
+    const px = f.tx*TILE, py = f.ty*TILE;
+    const flick = 0.6 + 0.4*Math.sin((G.tick||0)*0.4 + f.tx*3 + f.ty);
+    ctx.fillStyle = `rgba(255,${90+Math.floor(80*flick)},20,0.85)`;
+    ctx.beginPath(); ctx.moveTo(px+TILE*0.5, py+TILE*0.1); ctx.lineTo(px+TILE*0.2, py+TILE*0.9); ctx.lineTo(px+TILE*0.8, py+TILE*0.9); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = `rgba(255,220,80,${0.55*flick})`;
+    ctx.beginPath(); ctx.moveTo(px+TILE*0.5, py+TILE*0.4); ctx.lineTo(px+TILE*0.38, py+TILE*0.85); ctx.lineTo(px+TILE*0.62, py+TILE*0.85); ctx.closePath(); ctx.fill();
+  }
 }
 
 // Фаза суток по часу (чистая функция — тестируемо). Используется для тинта и будущих эффектов.
@@ -4536,6 +4626,7 @@ function saveGame() {
       season:G.season, dayOfYear:G.dayOfYear, weather:G.weather,
       nextId:G.nextId,
       seed:G.seed,
+      fires:G.fires || [],
       scenario:G.scenario || 'settlers',
       camera:{x:G.camera.x, y:G.camera.y, zoom:G.camera.zoom},
       // compact map: plain number for empty tile, [type, objCode, hp, marked] for tiles with tree/rock
@@ -4571,6 +4662,7 @@ function loadGame() {
     G.weather=save.weather||'clear';
     if (save.nextId) G.nextId = save.nextId;
     if (save.seed != null) seedRng(save.seed);
+    G.fires = Array.isArray(save.fires) ? save.fires : [];
     if (save.herd) G.herd = save.herd;
     if (save.camera) G.camera = { x:save.camera.x, y:save.camera.y, zoom:save.camera.zoom||1 };
 
@@ -4663,6 +4755,7 @@ function gameLoop(ts) {
       updateAnimals();
       updateEnemies();
       updateBarrels();
+      updateFires();
       updateProjectiles();
       updateParticles();
 
