@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.76';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.77';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -217,9 +217,12 @@ function triggerScenarioDayEvent() {
 }
 
 function newGame(scenarioId='settlers') {
+  const seed = (Math.random() * 0x100000000) >>> 0;  // случайный seed на партию, сохраняется в G.seed
+  seedRng(seed);                                      // дальше вся симуляция детерминирована от seed
   const map = generateMap();
   G = {
     map,
+    seed,
     pawns: [],
     buildings: [],
     items: [],

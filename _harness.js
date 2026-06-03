@@ -1273,6 +1273,25 @@ const test = `
   console.log('SCENARIO BI (seeded PRNG determinism):');
   console.log('   same-seed seq:', sameSeq?'OK':'FAIL', '| diff seed:', diffSeq?'OK':'FAIL', '| ints repeat:', intsSame?'OK':'FAIL', '| range:', rangeOk?'OK':'FAIL', '|', biOk?'OK':'FAIL');
   if (!biOk) throw new Error('Scenario BI failed');
+
+  // Scenario BJ: one seed reproduces map generation AND enemy spawns (real determinism)
+  seedRng(7777);
+  const mapA = generateMap();
+  seedRng(7777);
+  const mapB = generateMap();
+  let mapSame = true;
+  for (let i=0; i<30; i++) { const y=(i*7)%MAP_H, x=(i*11)%MAP_W; if (mapA[y][x].type !== mapB[y][x].type) mapSame=false; }
+  newGame('settlers');
+  seedRng(7777); G.enemies=[]; spawnEnemy(5);
+  const eA = G.enemies.map(e=>e.type+':'+e.tx+','+e.ty);
+  seedRng(7777); G.enemies=[]; spawnEnemy(5);
+  const eB = G.enemies.map(e=>e.type+':'+e.tx+','+e.ty);
+  const spawnSame = eA.length===5 && eA.length===eB.length && eA.every((v,i)=>v===eB[i]);
+  clearRng();
+  const bjOk = mapSame && spawnSame;
+  console.log('SCENARIO BJ (seed reproduces map + spawns):');
+  console.log('   map identical:', mapSame?'OK':'FAIL', '| spawns identical:', spawnSame?'OK':'FAIL', '|', bjOk?'OK':'FAIL');
+  if (!bjOk) throw new Error('Scenario BJ failed');
 })();
 `;
 try {

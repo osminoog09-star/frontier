@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.77 - Deterministic games from seed (Claude). newGame сидирует PRNG в начале; вся партия воспроизводима из G.seed. Harness 5/5 green (62 scn). Scenario BJ. Фундамент онлайн-синхронизации.
+
+
 - v1.76 - All randomness via rng() (Claude). 26 Math.random() -> rng() в логике; поведение идентично (fallback), но случайность централизована. Готово к сидированию-на-старте. Harness A-BI (61) green, 0 аномалий.
 
 
