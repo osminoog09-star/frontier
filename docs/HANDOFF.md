@@ -31,7 +31,7 @@
 ## Что изменилось в docs/site sync 2026-06-03
 
 - `ROADMAP.md` переписан как понятный план: RimWorld-фундамент, Frontier-идентичность, качество, сценарии, онлайн позже.
-- `index.html` обновлён до v1.66/A-BA и перестал показывать устаревший badge про v1.62/v1.61.
+- `index.html` обновлён до v1.68/A-BB и показывает актуальный badge про 54 harness-сценария.
 - `docs/TECH_ROADMAP.md` и `docs/DESIGN.md` синхронизированы с направлением v1.63-v1.66.
 - Gameplay не трогался; `_core.js`, `frontier.html`, `_harness.js` не менялись.
 

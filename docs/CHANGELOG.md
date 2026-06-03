@@ -1,5 +1,10 @@
 # FRONTIER changelog
 
+## 2026-06-03 - Public harness badge sync
+
+- `index.html`, `ROADMAP.md`, `docs/TECH_ROADMAP.md` и `docs/HANDOFF.md` синхронизированы с текущей проверкой v1.68: harness A-BB (54), включая Scenario BB про материалы чертежей.
+- Gameplay не менялся.
+
 ## v1.68 - Blueprint material feedback
 
 - Чертежи зданий больше не списывают ресурсы в момент клика: они ставятся как план, а стоимость списывается, когда строитель реально начинает работу.
