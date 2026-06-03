@@ -118,6 +118,13 @@
 - Stats now shows tamed/wild horses, taming progress/rate, stable/ranch counts, movement bonus, and daily ranch yield.
 - Scenario AX validates no-stable feedback and active stable/ranch/tamed-horse rows.
 
+## v1.69 room roof shelter
+
+- Closed rooms now count as roof shelter for the first weather/shelter slice.
+- Pawns inside an enclosed room do not receive the rain/storm `Мокнет` thought; pawns outside still do.
+- Room details expose a roof row, and furniture overlay room labels include `крыша есть`.
+- Scenario BC validates sheltered-vs-outside rain thoughts and room UI roof text.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -131,7 +138,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-BB (54) покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат, качество стен, room-панель, animal-панель, полы, стены, бонус уюта от пола и материалы чертежей.
+- Автотесты: `_harness.js`, сценарии A-BC (55) покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат, качество стен, room-панель, animal-панель, полы, стены, бонус уюта от пола, материалы чертежей и крышу/укрытие комнат.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза
@@ -163,8 +170,8 @@
 - [x] Architect-панель слева вместо длинной нижней простыни.
 - [x] Визуальная проверка Architect-панели на desktop: подсказки и overlay синхронизированы.
 - [x] Первый шаг материалов чертежей: blueprint ставится как план, строитель списывает стоимость при начале работы, нехватка видна в info-overlay/diagnostics.
+- [x] Крыша/укрытие: закрытая комната защищает от дождя/грозы и отображается в room-панели.
 - [ ] Следующий шаг: настоящая доставка пачек к стройке вместо глобального списания у строителя.
-- [ ] Следующий шаг: крыша/укрытие как отдельный слой качества комнаты.
 
 ### 3.2 Frontier-идентичность
 

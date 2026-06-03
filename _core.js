@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.68';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.69';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -839,7 +839,7 @@ function updateThoughts(p) {
   if (p.hp < 50) p.thoughts.push({text:'🤕 Ранен', neg:true});
   if (p.mood > 80) p.thoughts.push({text:'😊 Счастлив', neg:false});
   else if (p.mood < 30) p.thoughts.push({text:'😞 Подавлен', neg:true});
-  if (G.weather === 'rain') p.thoughts.push({text:'🌧️ Мокнет', neg:true});
+  if ((G.weather === 'rain' || G.weather === 'storm') && !pawnShelteredByRoom(p)) p.thoughts.push({text:'🌧️ Мокнет', neg:true});
   if (G.season===3) p.thoughts.push({text:'❄️ Зябко', neg:true});
   if (p.sick) p.thoughts.push({text:`🤒 ${p.sick.name}`, neg:true});
   if (sleepComfortAt(p) >= 2 && p.energy > 50) p.thoughts.push({text:'🛏️ Спал в кровати', neg:false});
@@ -972,6 +972,15 @@ function anyFlooredRoom() {
   return false;
 }
 function roomFloorBonus() { return anyFlooredRoom() ? 0.04 : 0; }
+function roomRoofInfo(room) {
+  if (!room || !room.cells) return { covered:0, total:0, ratio:0, label:'нет' };
+  return { covered:room.tiles, total:room.tiles, ratio:1, label:'крыша есть' };
+}
+function pawnShelteredByRoom(p) {
+  if (!p) return false;
+  const tx = Math.floor(p.x / TILE), ty = Math.floor(p.y / TILE);
+  return !!enclosedRoomAt(tx, ty);
+}
 function roomWallQuality(room) {
   if (!room) return { label:'нет', score:0, ratio:0 };
   const ratio = room.tiles > 0 ? room.walls / room.tiles : 0;
@@ -1015,7 +1024,8 @@ function roomTypeEntries() {
       wall: roomWallQuality(entry.room),
       tiles: entry.room.tiles,
       counts: entry.counts,
-      floor: roomFloorInfo(entry.room)
+      floor: roomFloorInfo(entry.room),
+      roof: roomRoofInfo(entry.room)
     };
   });
 }
@@ -1027,6 +1037,7 @@ function roomDetailRows() {
     if (r.counts.decor) furniture.push('декор: ' + r.counts.decor);
     const fl = r.floor || { ratio:0, mat:null };
     const floorText = fl.mat ? `${fl.mat} ${Math.round(fl.ratio*100)}%${fl.ratio>=0.6?' ✔':''}` : 'нет';
+    const roofText = r.roof && r.roof.ratio >= 1 ? 'есть · дождь не мочит' : 'нет';
     return {
       id: idx + 1,
       title: r.type,
@@ -1034,6 +1045,7 @@ function roomDetailRows() {
       walls: `${r.wall.label} · ${r.wall.ratio.toFixed(2)}`,
       size: `${r.tiles} клеток`,
       floor: floorText,
+      roof: roofText,
       furniture: furniture.length ? furniture.join(', ') : 'пусто'
     };
   });
@@ -1049,7 +1061,8 @@ function roomTypeLabelAt(tx, ty) {
   const counts = roomFurnitureCounts(room);
   const score = roomFurnitureScore(counts);
   const wall = roomWallQuality(room);
-  return `${classifyRoom(counts)} · ${roomComfortLabelForScore(score)} (${score}/3) · ${wall.label}`;
+  const roof = roomRoofInfo(room);
+  return `${classifyRoom(counts)} · ${roomComfortLabelForScore(score)} (${score}/3) · ${wall.label} · ${roof.label}`;
 }
 function roomComfortScore() {
   return (isFurnitureInRoom('bed') ? 1 : 0) + (isFurnitureInRoom('table') ? 1 : 0) + (isFurnitureInRoom('decor') ? 1 : 0);
@@ -3396,6 +3409,7 @@ function renderResearch() {
           <div>стены: <b style="color:#aaa">${r.walls}</b></div>
           <div>размер: <b style="color:#aaa">${r.size}</b></div>
           <div>пол: <b style="color:#aaa">${r.floor}</b></div>
+          <div>крыша: <b style="color:#aaa">${r.roof}</b></div>
           <div>мебель: <b style="color:#aaa">${r.furniture}</b></div>
         </div>
       `).join('')}

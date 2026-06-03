@@ -1137,6 +1137,28 @@ const test = `
   console.log('SCENARIO BB (blueprint material feedback):');
   console.log('   plan:', placedPlanOk?'OK':'FAIL', '| no wood waits:', noWoodOk?'OK':'FAIL', '| paid on work:', paidOk?'OK':'FAIL', '| info:', infoOk?'OK':'FAIL', '|', bbOk?'OK':'FAIL');
   if (!bbOk) throw new Error('Scenario BB failed');
+
+  // Scenario BC: enclosed rooms act as roof shelter during rain
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['bed','table','decor','fence','gate'].includes(b.type));
+  makeRoomBox(16, 16, 4, [{ type:'bed', dx:2, dy:2 }]);
+  G.weather = 'rain';
+  const shelteredPawn = G.pawns[0];
+  shelteredPawn.x = 18*TILE + TILE/2; shelteredPawn.y = 18*TILE + TILE/2;
+  const outsidePawn = G.pawns[1];
+  forceDry(6, 6, 1);
+  outsidePawn.x = 6*TILE + TILE/2; outsidePawn.y = 6*TILE + TILE/2;
+  updateThoughts(shelteredPawn);
+  updateThoughts(outsidePawn);
+  const shelteredOk = pawnShelteredByRoom(shelteredPawn) && !shelteredPawn.thoughts.some(t => t.text.includes('Мокнет'));
+  const outsideWetOk = !pawnShelteredByRoom(outsidePawn) && outsidePawn.thoughts.some(t => t.text.includes('Мокнет'));
+  const bcRows = roomDetailRows();
+  const rowRoofOk = bcRows.length === 1 && bcRows[0].roof.includes('дождь не мочит');
+  const labelRoofOk = roomTypeLabelAt(18, 18).includes('крыша есть');
+  const bcOk = shelteredOk && outsideWetOk && rowRoofOk && labelRoofOk;
+  console.log('SCENARIO BC (room roof shelter):');
+  console.log('   inside dry:', shelteredOk?'OK':'FAIL', '| outside wet:', outsideWetOk?'OK':'FAIL', '| row roof:', rowRoofOk?'OK':'FAIL', '| label:', labelRoofOk?'OK':'FAIL', '|', bcOk?'OK':'FAIL');
+  if (!bcOk) throw new Error('Scenario BC failed');
 })();
 `;
 try {

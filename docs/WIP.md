@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.69 - Room roof shelter (Codex). Закрытая комната считается крытой: пешка внутри не получает «Мокнет» под дождём/грозой, пешка снаружи продолжает мокнуть; room-панель и overlay мебели показывают крышу. Scenario BC. Harness A-BC (55) green.
+
 - v1.68 - Blueprint material feedback (Codex). Чертежи зданий ставятся как план без мгновенного списания; строитель списывает материалы при начале работы; info-overlay/diagnostics показывают нехватку. Scenario BB. Harness A-BB (54) green, local site/game smoke green.
 
 - v1.67 - Architect desktop polish (Codex). Desktop smoke подтвердил: Architect не перекрывает цель/миникарту/низ; help-popup и «Как играть» ведут к левой панели, старый текст про нижнее меню убран; info-overlay сдвинут. Gameplay не менялся. Harness A-BA (53) green, local site/game smoke green.
