@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.70';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.71';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -981,6 +981,29 @@ function pawnShelteredByRoom(p) {
   const tx = Math.floor(p.x / TILE), ty = Math.floor(p.y / TILE);
   return !!enclosedRoomAt(tx, ty);
 }
+// Set of "x,y" cells that are under a roof (inside any enclosed room). Cached;
+// cheap because each enclosed room is flooded only once via the `checked` memo.
+function recomputeRoofedCells() {
+  const roofed = new Set();
+  if (G && G.buildings) {
+    const checked = new Set();
+    for (const b of G.buildings) {
+      if (!b.done || b.blueprint) continue;
+      if (!(['fence','gate'].includes(b.type) || (BUILDS[b.type] && BUILDS[b.type].wall))) continue;
+      for (const d of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        const nx = b.tx + d[0], ny = b.ty + d[1];
+        const k = nx + ',' + ny;
+        if (checked.has(k)) continue;
+        checked.add(k);
+        const room = enclosedRoomAt(nx, ny);
+        if (room && room.cells) for (const c of room.cells) { roofed.add(c); checked.add(c); }
+      }
+    }
+  }
+  G._roofedCells = roofed;
+  return roofed;
+}
+function roofedCellCount() { return (G && G._roofedCells) ? G._roofedCells.size : 0; }
 function roomWallQuality(room) {
   if (!room) return { label:'нет', score:0, ratio:0 };
   const ratio = room.tiles > 0 ? room.walls / room.tiles : 0;
@@ -2401,6 +2424,8 @@ function render() {
 
   // Draw tiles
   const floorBpSet = new Set((G.floorBlueprints||[]).map(f=>f.tx+','+f.ty));
+  if (!G._roofedCells || (((G.tick||0) - (G._roofTick||-999)) >= 20)) { recomputeRoofedCells(); G._roofTick = G.tick||0; }
+  const roofedCells = G._roofedCells;
   for (let y=startY; y<endY; y++) {
     for (let x=startX; x<endX; x++) {
       const tile = G.map[y][x];
@@ -2440,6 +2465,12 @@ function render() {
         ctx.fillStyle = 'rgba(90,150,220,0.20)'; ctx.fillRect(px, py, TILE, TILE);
         ctx.strokeStyle = 'rgba(150,195,255,0.7)'; ctx.setLineDash([3,2]);
         ctx.strokeRect(px+1.5, py+1.5, TILE-3, TILE-3); ctx.setLineDash([]);
+      }
+
+      // Roof shade: subtle darkening over sheltered (enclosed-room) tiles
+      if (roofedCells && roofedCells.has(x+','+y)) {
+        ctx.fillStyle = 'rgba(18,16,28,0.20)';
+        ctx.fillRect(x*TILE, y*TILE, TILE+1, TILE+1);
       }
 
       // Objects

@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.71 - Roof shade overlay (Claude). Крытые тайлы замкнутой комнаты показаны тенью-оверлеем; кэш recomputeRoofedCells. Дополняет roof-логику Codex (v1.69). Scenario BE. Harness A-BE (57) green.
+
+
 - v1.70 - Construction material delivery (Codex). Строитель резервирует ресурсы, несёт видимый 📦 пакет к чертежу, и только после доставки начинается progress; overlay показывает `Материалы: в пути`. Scenario BD. Harness A-BD (56) green.
 
 - v1.69 - Room roof shelter (Codex). Закрытая комната считается крытой: пешка внутри не получает «Мокнет» под дождём/грозой, пешка снаружи продолжает мокнуть; room-панель и overlay мебели показывают крышу. Scenario BC. Harness A-BC (55) green.

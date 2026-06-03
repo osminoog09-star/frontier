@@ -1189,6 +1189,27 @@ const test = `
   console.log('SCENARIO BD (construction material delivery):');
   console.log('   progress waits:', beforeDeliveryOk?'OK':'FAIL', '| delivery starts build:', afterDeliveryOk?'OK':'FAIL', '|', bdOk?'OK':'FAIL');
   if (!bdOk) throw new Error('Scenario BD failed');
+
+  // Scenario BE: roof shade cache marks enclosed-room tiles as roofed, outside clear
+  newGame('settlers');
+  G.buildings = G.buildings.filter(b => !['fence','gate'].includes(b.type));
+  for (let y=24; y<=32; y++) for (let x=24; x<=32; x++) forceDry(x, y, 1);
+  for (let x=26; x<=31; x++) {
+    G.buildings.push({ type:'fence', tx:x, ty:26, done:true, blueprint:false, hp:100, maxHp:100 });
+    G.buildings.push({ type:'fence', tx:x, ty:31, done:true, blueprint:false, hp:100, maxHp:100 });
+  }
+  for (let y=27; y<=30; y++) {
+    G.buildings.push({ type:'fence', tx:26, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+    G.buildings.push({ type:'fence', tx:31, ty:y, done:true, blueprint:false, hp:100, maxHp:100 });
+  }
+  recomputeRoofedCells();
+  const beInside = G._roofedCells.has('28,28') && G._roofedCells.has('29,29');
+  const beOutside = !G._roofedCells.has('10,10') && !G._roofedCells.has('40,40');
+  const beCount = roofedCellCount();
+  const beOk = beInside && beOutside && beCount >= 4;
+  console.log('SCENARIO BE (roof shade cache):');
+  console.log('   inside roofed:', beInside?'OK':'FAIL', '| outside clear:', beOutside?'OK':'FAIL', '| roofed cells:', beCount, '|', beOk?'OK':'FAIL');
+  if (!beOk) throw new Error('Scenario BE failed');
 })();
 `;
 try {
