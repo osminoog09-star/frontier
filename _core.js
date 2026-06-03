@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.79';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.80';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -615,6 +615,19 @@ function ambientProfile() {
 }
 
 // Лошади из конюшен ускоряют передвижение колонии: каждая готовая конюшня +15%, максимум +45%.
+// Множитель скорости от местности (фундамент под систему веса Phase 2).
+// Мощёный пол = «дорога» (быстрее); песок/земля медленнее травы. Биомы/снег/склоны — Phase 3.
+function terrainSpeedMul(tx, ty) {
+  if (!G || !G.map || !G.map[ty] || !G.map[ty][tx]) return 1;
+  const t = G.map[ty][tx];
+  if (t.floor) return 1.3;                 // мощёный пол ускоряет
+  switch (t.type) {
+    case TERRAIN.GRASS: return 1.0;
+    case TERRAIN.DIRT:  return 0.9;
+    case TERRAIN.SAND:  return 0.8;
+    default: return 1.0;
+  }
+}
 function mountSpeedMul() {
   if (!G || !G.buildings) return 1;
   const stables = G.buildings.filter(b => b.type === 'stable' && b.done && !b.blueprint).length;
@@ -745,7 +758,8 @@ function updatePawns() {
 
     // Movement (faster when charging into combat); конюшни дают лошадей → ускорение
     const base = p.state==='sleeping' ? 0.5 : inCombat ? 2.4 : 2.0;
-    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul());
+    const terrain = terrainSpeedMul(Math.floor(p.x/TILE), Math.floor(p.y/TILE));
+    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul()) * terrain;
     moveTowardsTarget(p, moveSpeed);
 
     if (p.state === 'working') gainWorkXp(p);   // опыт за труд

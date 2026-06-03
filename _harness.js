@@ -1306,6 +1306,21 @@ const test = `
   console.log('SCENARIO BK (day/night rework):');
   console.log('   ticks/day:', ticksPerDay, slowOk?'OK':'FAIL', '| phases:', phaseOk?'OK':'FAIL', '| light:', lightOk?'OK':'FAIL', '| clock advance:', advanceOk?'OK':'FAIL', '|', bkOk?'OK':'FAIL');
   if (!bkOk) throw new Error('Scenario BK failed');
+
+  // Scenario BL: terrain affects movement speed; floors act as roads
+  newGame('settlers');
+  G.map[30][30] = { type:TERRAIN.GRASS, v:0, obj:null };
+  G.map[30][31] = { type:TERRAIN.DIRT,  v:0, obj:null };
+  G.map[30][32] = { type:TERRAIN.SAND,  v:0, obj:null };
+  G.map[30][33] = { type:TERRAIN.GRASS, v:0, obj:null, floor:'wood' };
+  const tGrass = terrainSpeedMul(30,30);
+  const tDirt  = terrainSpeedMul(31,30);
+  const tSand  = terrainSpeedMul(32,30);
+  const tRoad  = terrainSpeedMul(33,30);
+  const blOk = tGrass===1 && tDirt<tGrass && tSand<tDirt && tRoad>tGrass && tSand>=0.7;
+  console.log('SCENARIO BL (terrain movement):');
+  console.log('   grass/dirt/sand/floor:', tGrass+'/'+tDirt+'/'+tSand+'/'+tRoad, '|', blOk?'OK':'FAIL');
+  if (!blOk) throw new Error('Scenario BL failed');
 })();
 `;
 try {
