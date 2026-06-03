@@ -165,7 +165,7 @@
 
   /* Info panel overlay */
   #info-overlay {
-    position: absolute; top: 8px; left: 8px;
+    position: absolute; top: 74px; left: 180px; z-index: 56;
     background: rgba(16,16,16,0.92); border: 1px solid #333; border-radius: 4px;
     padding: 8px 10px; min-width: 200px; max-width: 260px;
     font-size: 11px; display: none; pointer-events: auto;
@@ -412,7 +412,7 @@
     }
     #minimap { width: 96px; height: 72px; }
     #zoom-controls { display: none; }
-    #info-overlay { max-width: min(270px, calc(100vw - 20px)); left: 8px !important; }
+    #info-overlay { max-width: min(270px, calc(100vw - 20px)); top: 8px !important; left: 8px !important; }
     #priority-panel { right: 8px; left: 8px; min-width: 0; max-height: calc(100dvh - 90px); overflow: auto; }
     #help-popup {
       width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 82px);
@@ -454,7 +454,7 @@
         <button class="menu-btn-big" id="mm-diag">🐞 Скачать лог диагностики</button>
         <button class="menu-btn-big" id="mm-resume" style="display:none">✖ Закрыть меню</button>
       </div>
-      <p class="menu-ver">PRE-ALPHA • build 1.66 • план: docs/ROADMAP_MONTH.md</p>
+      <p class="menu-ver">PRE-ALPHA • build 1.67 • план: docs/ROADMAP_MONTH.md</p>
     </div>
     <div class="menu-right" id="menu-panel">
       <div id="menu-panel-content"></div>
@@ -596,7 +596,7 @@
       <p>Ты управляешь отрядом ковбоев <b>не напрямую</b> — как в RimWorld. Они сами работают по приоритетам.</p>
       <ul>
         <li>🌲 <b>Кликни по дереву/камню</b> → ковбой сам придёт и срубит/добудет.</li>
-        <li>🏗️ <b>Снизу выбери постройку</b> → кликни на карту (зелёная зона = можно). Ковбой построит.</li>
+        <li>🏗️ <b>Слева в «Архитекторе» выбери постройку</b> → кликни на карту (зелёная зона = можно). Ковбой построит.</li>
         <li>👥 <b>Клик по ковбою</b> → настрой приоритеты работ.</li>
         <li>📅 Вкладка «Расп.» → расписание сна/работы/отдыха по часам.</li>
         <li>⚔️ Кнопка «Авт.Бой» → ковбои сами отстреливают бандитов.</li>

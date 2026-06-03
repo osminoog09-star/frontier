@@ -1,5 +1,13 @@
 # FRONTIER changelog
 
+## v1.67 - Architect desktop polish
+
+- Проведён desktop smoke для боковой панели `Архитектор`: не перекрывает цель, миникарту и нижнюю панель.
+- Стартовый help-popup и меню «Как играть» больше не говорят выбирать постройку снизу; теперь ведут игрока к левой панели «Архитектор».
+- `info-overlay` на desktop сдвинут правее и ниже, чтобы не прятаться под Architect-панелью и верхней целью.
+- Gameplay не менялся; `_core.js` изменён только ради help-текста/версии. `frontier.html` собран через `node build.js`.
+- Проверки: local browser smoke site/game green, `node _harness.js` green (A-BA, 53), runtime errors = 0.
+
 ## 2026-06-03 - Roadmap identity sync
 
 - Roadmap/site/docs синхронизированы с текущим направлением: **RimWorld-like фундамент + Frontier-идентичность**.

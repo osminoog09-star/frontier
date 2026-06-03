@@ -39,6 +39,8 @@
 
 ## Последний завершённый срез
 
+- v1.67 - Architect desktop polish (Codex). Desktop smoke подтвердил: Architect не перекрывает цель/миникарту/низ; help-popup и «Как играть» ведут к левой панели, старый текст про нижнее меню убран; info-overlay сдвинут. Gameplay не менялся. Harness A-BA (53) green, local site/game smoke green.
+
 - 2026-06-03 - Roadmap identity sync (Codex). `ROADMAP.md`, `index.html`, `docs/TECH_ROADMAP.md`, `docs/DESIGN.md`, `docs/HANDOFF.md`, `docs/CHANGELOG.md` синхронизированы с направлением: RimWorld-like фундамент + Frontier-идентичность. Gameplay не менялся. Harness A-BA (53) green, local site smoke green.
 
 - v1.66 - RimWorld-стройка срез 2b: меню-архитектор (Claude). Категории построек -> боковая панель слева; внизу слим-тулбар отмена/снести. HTML/CSS-only, ID кнопок сохранены. Harness A-BA (53) green. НУЖНА визуальная проверка.
