@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.69';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.70';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 
@@ -1246,9 +1246,25 @@ function tryRepair(p) {
 }
 
 function tryBuild(p) {
+  if (p.carry && p.carry.res === 'buildpack') {
+    const bp = findBlueprintByDeliveryKey(p.carry.target);
+    if (!bp) { p.carry = null; return false; }
+    claimSpot('bp_'+bp.tx+'_'+bp.ty);
+    p._wt = 'bp_'+bp.tx+'_'+bp.ty;
+    setTarget(p, bp.tx, bp.ty);
+    if (distTiles(p, bp.tx, bp.ty) <= 2) {
+      deliverBlueprintMaterials(p, bp);
+      bp.progress = (bp.progress||0) + 0.008 * wmul(p);
+      finishBlueprintIfReady(p, bp);
+    }
+    p.state = 'working';
+    return true;
+  }
+
   // nearest pending blueprint that isn't already full (cap 2 builders)
   const pending = G.buildings.filter(b=>b.blueprint && !b.done)
-    .filter(b=>claimCount('bp_'+b.tx+'_'+b.ty) < 2);
+    .filter(b=>claimCount('bp_'+b.tx+'_'+b.ty) < 2)
+    .filter(b=>b.materialsPaid || !b.materialsDeliveryReserved);
   const ready = pending.filter(b=>blueprintMaterialsReady(b));
   if (!ready.length) {
     pending.forEach(updateBlueprintWaiting);
@@ -1259,23 +1275,69 @@ function tryBuild(p) {
   claimSpot('bp_'+bp.tx+'_'+bp.ty);
   p._wt = 'bp_'+bp.tx+'_'+bp.ty;
   setTarget(p, bp.tx, bp.ty);
+  if (!bp.materialsPaid) {
+    if (!reserveBlueprintDelivery(p, bp)) return false;
+    p.state = 'working';
+    return true;
+  }
   if (distTiles(p, bp.tx, bp.ty) <= 2) {
-    if (!ensureBlueprintMaterials(bp)) return false;
     bp.progress = (bp.progress||0) + 0.008 * wmul(p);
-    if (bp.progress >= 1) {
-      bp.blueprint = false;
-      bp.done = true;
-      bp.waitingMissing = '';
-      bp.hp = getBuildingMaxHp(bp.type);
-      bp.maxHp = bp.hp;
-      addLog(`🔨 ${p.name} построил ${BUILDS[bp.type].name}`, 'good');
-      Diag.action(`Построено: ${BUILDS[bp.type].name} @${bp.tx},${bp.ty}`);
-      Sfx.build();
-      FX.build(bp.tx*TILE+TILE*BUILDS[bp.type].size/2, bp.ty*TILE+TILE*BUILDS[bp.type].size/2);
-      unlock('first_build');
-    }
+    finishBlueprintIfReady(p, bp);
   }
   p.state = 'working';
+  return true;
+}
+
+function blueprintDeliveryKey(bp) {
+  return bp ? `${bp.type}_${bp.tx}_${bp.ty}` : '';
+}
+
+function findBlueprintByDeliveryKey(key) {
+  return (G.buildings || []).find(b => b.blueprint && !b.done && blueprintDeliveryKey(b) === key) || null;
+}
+
+function reserveBlueprintDelivery(p, bp) {
+  if (!p || !bp || !bp.blueprint) return false;
+  if (bp.materialsPaid) return true;
+  if (bp.materialsDeliveryReserved) return false;
+  const cost = BUILDS[bp.type]?.cost || {};
+  if (updateBlueprintWaiting(bp)) return false;
+  consumeResources(cost);
+  const total = Object.values(cost).reduce((sum, amount) => sum + (amount || 0), 0);
+  bp.materialsDeliveryReserved = true;
+  bp.waitingMissing = '';
+  bp.deliveryStatus = 'materials_in_transit';
+  p.carry = { res:'buildpack', amount:total, target:blueprintDeliveryKey(bp), label:'материалы' };
+  addLog(`📦 ${p.name} несёт материалы к «${BUILDS[bp.type].name}»`, '');
+  return true;
+}
+
+function deliverBlueprintMaterials(p, bp) {
+  if (!p || !bp || !p.carry || p.carry.res !== 'buildpack') return false;
+  if (p.carry.target !== blueprintDeliveryKey(bp)) return false;
+  bp.materialsPaid = true;
+  bp.materialsDeliveryReserved = false;
+  bp.deliveryStatus = '';
+  bp.waitingMissing = '';
+  p.carry = null;
+  FX.build(bp.tx*TILE+TILE/2, bp.ty*TILE+TILE/2);
+  return true;
+}
+
+function finishBlueprintIfReady(p, bp) {
+  if (!bp || bp.progress < 1) return false;
+  bp.blueprint = false;
+  bp.done = true;
+  bp.waitingMissing = '';
+  bp.deliveryStatus = '';
+  bp.materialsDeliveryReserved = false;
+  bp.hp = getBuildingMaxHp(bp.type);
+  bp.maxHp = bp.hp;
+  addLog(`🔨 ${p.name} построил ${BUILDS[bp.type].name}`, 'good');
+  Diag.action(`Построено: ${BUILDS[bp.type].name} @${bp.tx},${bp.ty}`);
+  Sfx.build();
+  FX.build(bp.tx*TILE+TILE*BUILDS[bp.type].size/2, bp.ty*TILE+TILE*BUILDS[bp.type].size/2);
+  unlock('first_build');
   return true;
 }
 
@@ -1293,6 +1355,7 @@ function missingResourcesText(cost) {
 
 function updateBlueprintWaiting(bp) {
   if (!bp || !bp.blueprint || bp.materialsPaid) return '';
+  if (bp.materialsDeliveryReserved) { bp.waitingMissing = ''; return ''; }
   bp.waitingMissing = missingResourcesText(BUILDS[bp.type]?.cost || {});
   return bp.waitingMissing;
 }
@@ -1300,6 +1363,7 @@ function updateBlueprintWaiting(bp) {
 function blueprintMaterialsReady(bp) {
   if (!bp || !bp.blueprint) return false;
   if (bp.materialsPaid) { bp.waitingMissing = ''; return true; }
+  if (bp.materialsDeliveryReserved) { bp.waitingMissing = ''; return false; }
   const missing = updateBlueprintWaiting(bp);
   return !missing;
 }
@@ -1307,6 +1371,7 @@ function blueprintMaterialsReady(bp) {
 function ensureBlueprintMaterials(bp) {
   if (!bp || !bp.blueprint) return false;
   if (bp.materialsPaid) return true;
+  if (bp.materialsDeliveryReserved) return false;
   const cost = BUILDS[bp.type]?.cost || {};
   if (updateBlueprintWaiting(bp)) return false;
   consumeResources(cost);
@@ -1467,6 +1532,7 @@ function tryGuard(p) {
 }
 
 function tryHaul(p) {
+  if (p.carry && p.carry.res === 'buildpack') return tryBuild(p);
   if (p.carry) {
     const stock = nearestStockpileForRes(p, p.carry.res);
     if (!stock) {
@@ -1501,6 +1567,7 @@ function tryHaul(p) {
 
 function depositCarry(p, stock=null) {
   if (!p.carry) return;
+  if (p.carry.res === 'buildpack') { p.carry = null; p.state = 'idle'; return; }
   const carried = p.carry;
   G.res[p.carry.res] = (G.res[p.carry.res] || 0) + p.carry.amount;
   if (stock) p.lastDepositStock = {tx:stock.tx, ty:stock.ty, res:carried.res, amount:carried.amount};
@@ -3012,7 +3079,7 @@ function drawPawn(p) {
   if (p.carry) {
     ctx.fillStyle = '#e8c97e';
     ctx.font = '9px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('['+Math.floor(p.carry.amount)+']', x, y-18);
+    ctx.fillText(p.carry.res === 'buildpack' ? '📦' : '['+Math.floor(p.carry.amount)+']', x, y-18);
   }
 
   // Name tag
@@ -3758,6 +3825,10 @@ function sanitizeBuildings(buildings) {
     b.blueprint = !!b.blueprint;
     b.done = !!b.done || !b.blueprint;
     if (b.blueprint && b.materialsPaid === undefined) b.materialsPaid = true;
+    if (!b.blueprint || b.materialsPaid) {
+      b.materialsDeliveryReserved = false;
+      b.deliveryStatus = '';
+    }
     if (b.done && (!b.hp || !b.maxHp)) {
       b.hp = getBuildingMaxHp(b.type);
       b.maxHp = b.hp;
@@ -3841,9 +3912,10 @@ function blueprintMaterialInfoHtml(b) {
   const def = BUILDS[b.type];
   if (!def) return '';
   if (b.materialsPaid) return `<div class="inf-line">📦 Материалы: <b style="color:#9cc06a">готовы</b></div>`;
+  if (b.materialsDeliveryReserved) return `<div class="inf-line">📦 Материалы: <b style="color:#75aee8">в пути</b></div>`;
   const missing = updateBlueprintWaiting(b);
   if (missing) return `<div class="inf-line">📦 Ждёт материалы: <b style="color:#e8c97e">${missing}</b></div>`;
-  return `<div class="inf-line">📦 Материалы: <b>строитель заберёт при начале работ</b></div>`;
+  return `<div class="inf-line">📦 Материалы: <b>строитель принесёт перед работой</b></div>`;
 }
 
 function furnitureInfoHtml(b) {

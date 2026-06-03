@@ -125,6 +125,13 @@
 - Room details expose a roof row, and furniture overlay room labels include `крыша есть`.
 - Scenario BC validates sheltered-vs-outside rain thoughts and room UI roof text.
 
+## v1.70 construction material delivery
+
+- Building blueprints no longer start progress immediately after global resource reservation.
+- A builder reserves the required resources, carries a visible `buildpack` package to the blueprint, and only then marks materials paid and starts progress.
+- Blueprint info shows `Материалы: в пути` while the package is being delivered.
+- Scenario BD validates that progress waits for delivery and starts only after the carried package reaches the blueprint.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -138,7 +145,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-BC (55) покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат, качество стен, room-панель, animal-панель, полы, стены, бонус уюта от пола, материалы чертежей и крышу/укрытие комнат.
+- Автотесты: `_harness.js`, сценарии A-BD (56) покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат, качество стен, room-панель, animal-панель, полы, стены, бонус уюта от пола, материалы чертежей, крышу/укрытие комнат и доставку пакета материалов к стройке.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза
@@ -171,7 +178,8 @@
 - [x] Визуальная проверка Architect-панели на desktop: подсказки и overlay синхронизированы.
 - [x] Первый шаг материалов чертежей: blueprint ставится как план, строитель списывает стоимость при начале работы, нехватка видна в info-overlay/diagnostics.
 - [x] Крыша/укрытие: закрытая комната защищает от дождя/грозы и отображается в room-панели.
-- [ ] Следующий шаг: настоящая доставка пачек к стройке вместо глобального списания у строителя.
+- [x] Доставка пакета к стройке: progress не растёт, пока строитель не принесёт 📦 к чертежу.
+- [ ] Следующий шаг: брать материалы для стройки из stockpile/ground stacks вместо глобального резерва.
 
 ### 3.2 Frontier-идентичность
 

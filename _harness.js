@@ -1130,12 +1130,17 @@ const test = `
   G.res.wood = 5;
   G._claims = {};
   const withWoodResult = tryBuild(builder);
-  const paidOk = withWoodResult === true && bb.materialsPaid === true && G.res.wood === 0 && (bb.progress || 0) > 0 && !bb.waitingMissing;
+  const reservedOk = withWoodResult === true && bb.materialsPaid === false && bb.materialsDeliveryReserved === true &&
+    G.res.wood === 0 && (bb.progress || 0) === 0 && builder.carry && builder.carry.res === 'buildpack';
+  G._claims = {};
+  const deliveredResult = tryBuild(builder);
+  const paidOk = deliveredResult === true && bb.materialsPaid === true && !bb.materialsDeliveryReserved &&
+    !builder.carry && (bb.progress || 0) > 0 && !bb.waitingMissing;
   const bbInfo = blueprintMaterialInfoHtml(bb);
   const infoOk = bbInfo.includes('готовы');
-  const bbOk = placedPlanOk && noWoodOk && paidOk && infoOk;
+  const bbOk = placedPlanOk && noWoodOk && reservedOk && paidOk && infoOk;
   console.log('SCENARIO BB (blueprint material feedback):');
-  console.log('   plan:', placedPlanOk?'OK':'FAIL', '| no wood waits:', noWoodOk?'OK':'FAIL', '| paid on work:', paidOk?'OK':'FAIL', '| info:', infoOk?'OK':'FAIL', '|', bbOk?'OK':'FAIL');
+  console.log('   plan:', placedPlanOk?'OK':'FAIL', '| no wood waits:', noWoodOk?'OK':'FAIL', '| reserved carry:', reservedOk?'OK':'FAIL', '| paid after delivery:', paidOk?'OK':'FAIL', '| info:', infoOk?'OK':'FAIL', '|', bbOk?'OK':'FAIL');
   if (!bbOk) throw new Error('Scenario BB failed');
 
   // Scenario BC: enclosed rooms act as roof shelter during rain
@@ -1159,6 +1164,31 @@ const test = `
   console.log('SCENARIO BC (room roof shelter):');
   console.log('   inside dry:', shelteredOk?'OK':'FAIL', '| outside wet:', outsideWetOk?'OK':'FAIL', '| row roof:', rowRoofOk?'OK':'FAIL', '| label:', labelRoofOk?'OK':'FAIL', '|', bcOk?'OK':'FAIL');
   if (!bcOk) throw new Error('Scenario BC failed');
+
+  // Scenario BD: building progress waits until a carried material package reaches the blueprint
+  newGame('settlers');
+  const bdx = 30, bdy = 30;
+  forceDry(bdx, bdy, TERRAIN.GRASS);
+  G.res.wood = 5;
+  G.buildMode = 'fence';
+  placeBuild(bdx, bdy);
+  const bd = G.buildings.find(b => b.type === 'fence' && b.tx === bdx && b.ty === bdy && b.blueprint);
+  const bdBuilder = G.pawns[0];
+  bdBuilder.workMul = 1; bdBuilder.workLevel = 0; bdBuilder.sick = null;
+  bdBuilder.x = 4*TILE + TILE/2; bdBuilder.y = 4*TILE + TILE/2;
+  G._claims = {};
+  const reserveResult = tryBuild(bdBuilder);
+  const beforeDeliveryOk = reserveResult === true && bd.materialsDeliveryReserved === true && bd.materialsPaid === false &&
+    bd.progress === 0 && G.res.wood === 0 && bdBuilder.carry && bdBuilder.carry.res === 'buildpack';
+  bdBuilder.x = bdx*TILE + TILE/2; bdBuilder.y = bdy*TILE + TILE/2;
+  G._claims = {};
+  const deliverResult = tryBuild(bdBuilder);
+  const afterDeliveryOk = deliverResult === true && bd.materialsPaid === true && bd.materialsDeliveryReserved === false &&
+    !bdBuilder.carry && bd.progress > 0;
+  const bdOk = beforeDeliveryOk && afterDeliveryOk;
+  console.log('SCENARIO BD (construction material delivery):');
+  console.log('   progress waits:', beforeDeliveryOk?'OK':'FAIL', '| delivery starts build:', afterDeliveryOk?'OK':'FAIL', '|', bdOk?'OK':'FAIL');
+  if (!bdOk) throw new Error('Scenario BD failed');
 })();
 `;
 try {
