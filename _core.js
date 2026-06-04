@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.99';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.00';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -789,6 +789,16 @@ function loadSpeedMul(p) {
   if (ratio <= 1.0) return 0.65;
   return 0.45;
 }
+// Погода замедляет передвижение: дождь/гроза/метель (Phase 3).
+function weatherSpeedMul() {
+  if (!G) return 1;
+  switch (G.weather) {
+    case 'rain':     return 0.92;
+    case 'storm':    return 0.85;
+    case 'blizzard': return 0.80;
+    default:         return 1;
+  }
+}
 function mountSpeedMul() {
   if (!G || !G.buildings) return 1;
   const stables = G.buildings.filter(b => b.type === 'stable' && b.done && !b.blueprint).length;
@@ -921,7 +931,7 @@ function updatePawns() {
     // Movement (faster when charging into combat); конюшни дают лошадей → ускорение
     const base = p.state==='sleeping' ? 0.5 : inCombat ? 2.4 : 2.0;
     const terrain = terrainSpeedMul(Math.floor(p.x/TILE), Math.floor(p.y/TILE));
-    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul()) * terrain * loadSpeedMul(p);
+    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul()) * terrain * loadSpeedMul(p) * weatherSpeedMul();
     moveTowardsTarget(p, moveSpeed);
 
     if (p.state === 'working') gainWorkXp(p);   // опыт за труд

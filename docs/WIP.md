@@ -23,8 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - Phase 3: погода влияет на движение
-  - Мои файлы: _core.js -> weatherSpeedMul + movement; _harness.js -> сценарий. Codex: точки интереса/бой/UI свободно.
+Пусто (Claude-local: погода->движение v2.00 завершена).
 
 ---
 
@@ -39,6 +38,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.00 - Weather affects movement (Claude-local, Phase 3). Дождь/гроза/метель замедляют движение (weatherSpeedMul). Scenario CD. Harness A-CD (82) green.
 
 - v1.99 - Roads (Claude-local, Phase 3). Дорога на карте (floor=road) ускоряет движение x1.3; через систему полов (рендер/скорость/save). Scenario CC. Harness A-CC (81) green.
 

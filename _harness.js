@@ -1597,6 +1597,17 @@ const test = `
   console.log('SCENARIO CC (roads):');
   console.log('   road tiles='+roads, roadsOk?'OK':'FAIL', '| faster than grass:', speedOk?'OK':'FAIL', '|', ccOk?'OK':'FAIL');
   if (!ccOk) throw new Error('Scenario CC failed');
+
+  // Scenario CD: weather slows movement (Phase 3)
+  newGame('settlers');
+  G.weather='clear';    const wClear = weatherSpeedMul();
+  G.weather='rain';     const wRain = weatherSpeedMul();
+  G.weather='storm';    const wStorm = weatherSpeedMul();
+  G.weather='blizzard'; const wBliz = weatherSpeedMul();
+  const cdOk = wClear===1 && wRain<wClear && wStorm<wRain && wBliz<wStorm && wBliz>=0.7;
+  console.log('SCENARIO CD (weather movement):');
+  console.log('   clear/rain/storm/blizzard', wClear+'/'+wRain+'/'+wStorm+'/'+wBliz, '|', cdOk?'OK':'FAIL');
+  if (!cdOk) throw new Error('Scenario CD failed');
 })();
 `;
 try {
