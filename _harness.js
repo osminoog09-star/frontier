@@ -1584,6 +1584,19 @@ const test = `
   console.log('SCENARIO CB (rivers + lakes):');
   console.log('   water frac', frac.toFixed(3), fracOk?'OK':'FAIL', '| quadrants', quad.filter(c=>c>0).length, spreadOk?'OK':'FAIL', '|', cbOk?'OK':'FAIL');
   if (!cbOk) throw new Error('Scenario CB failed');
+
+  // Scenario CC: roads — generated road tiles speed up movement (Phase 3)
+  newGame('settlers');
+  let roads=0;
+  for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) if (G.map[y][x].floor==='road') roads++;
+  const roadsOk = roads>0;
+  G.map[5][5] = { type:TERRAIN.GRASS, v:0, obj:null };
+  G.map[5][6] = { type:TERRAIN.GRASS, v:0, obj:null, floor:'road' };
+  const speedOk = terrainSpeedMul(6,5) > terrainSpeedMul(5,5);
+  const ccOk = roadsOk && speedOk;
+  console.log('SCENARIO CC (roads):');
+  console.log('   road tiles='+roads, roadsOk?'OK':'FAIL', '| faster than grass:', speedOk?'OK':'FAIL', '|', ccOk?'OK':'FAIL');
+  if (!ccOk) throw new Error('Scenario CC failed');
 })();
 `;
 try {

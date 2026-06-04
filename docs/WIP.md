@@ -23,9 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - Phase 3: дороги (ускорение движения)
-  - Мои файлы: _core.js -> generateMap()/слой дороги + terrainSpeedMul; _harness.js -> сценарий.
-  - Codex: точки интереса (руины/лагеря/прииски), бой, UI — свободно. Не трогай generateMap пока IN PROGRESS.
+Пусто (Claude-local: дороги v1.99 завершены).
 
 ---
 
@@ -40,6 +38,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v1.99 - Roads (Claude-local, Phase 3). Дорога на карте (floor=road) ускоряет движение x1.3; через систему полов (рендер/скорость/save). Scenario CC. Harness A-CC (81) green.
 
 - v1.98 - Rivers + lakes (Claude-local, Phase 3). Озёра-кляксы вразброс помимо реки; постройки не на воде. Scenario CB. Harness A-CB (80) green.
 

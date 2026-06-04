@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.98';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.99';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -530,6 +530,16 @@ function generateMap() {
           if (map[y+dy][x+dx].type===TERRAIN.WATER) waterN++;
         if (waterN===0) map[y][x].type = TERRAIN.SAND;
       }
+    }
+  }
+
+  // Дорога: извилистая тропа через карту (floor='road') — ускоряет движение, читаемый ориентир.
+  let ry = Math.floor(MAP_H*0.5);
+  for (let x=0; x<MAP_W; x++) {
+    ry += rngInt(-1,1); ry = clamp(ry, 3, MAP_H-4);
+    for (let dy=0; dy<=1; dy++) {
+      const tt = map[ry+dy] && map[ry+dy][x];
+      if (tt && tt.type!==TERRAIN.WATER && tt.type!==TERRAIN.ROCK) tt.floor = 'road';
     }
   }
 
@@ -3003,6 +3013,12 @@ function drawDayNightOverlay() {
 
 function drawFloorTile(x, y, mat) {
   const px = x*TILE, py = y*TILE;
+  if (mat==='road') {
+    ctx.fillStyle = '#b09464'; ctx.fillRect(px, py, TILE+1, TILE+1);            // утоптанная тропа
+    ctx.fillStyle = 'rgba(120,95,55,0.45)';
+    ctx.fillRect(px+2, py+TILE*0.35, TILE-4, 2); ctx.fillRect(px+2, py+TILE*0.6, TILE-4, 2); // колеи
+    return;
+  }
   if (mat==='stone') {
     ctx.fillStyle = '#8d8a82'; ctx.fillRect(px, py, TILE+1, TILE+1);
     ctx.fillStyle = '#9a978f'; ctx.fillRect(px, py, TILE/2, TILE/2); ctx.fillRect(px+TILE/2, py+TILE/2, TILE/2, TILE/2);
@@ -4945,7 +4961,7 @@ function saveGame() {
       map: G.map.map(row=>row.map(t=>
         t.obj ? [t.type, t.obj.type==='tree'?1:2, Math.round(t.obj.hp), t.obj.marked?1:0] : t.type
       )),
-      floors: G.map.map(row=>row.map(t=> t.floor==='wood'?1:(t.floor==='stone'?2:0) )),
+      floors: G.map.map(row=>row.map(t=> t.floor==='wood'?1:(t.floor==='stone'?2:(t.floor==='road'?3:0)) )),
       floorBlueprints: G.floorBlueprints || [],
       animals: G.animals.filter(a=>a.alive).map(a=>({type:a.type,x:a.x,y:a.y,hp:a.hp,maxHp:a.maxHp,speed:a.speed,meat:a.meat})),
       herd: G.herd,
@@ -4992,7 +5008,7 @@ function loadGame() {
       if (save.floors) {
         for (let y=0; y<G.map.length; y++) for (let x=0; x<G.map[y].length; x++) {
           const f = save.floors[y] && save.floors[y][x];
-          if (f) G.map[y][x].floor = f===1 ? 'wood' : 'stone';
+          if (f) G.map[y][x].floor = f===1 ? 'wood' : f===2 ? 'stone' : 'road';
         }
       }
       _miniDirty = true;
