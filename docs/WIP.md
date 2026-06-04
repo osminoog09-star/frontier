@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.87 - FIX выбор пешки справа (Claude). pointerdown вместо click: список перерисовывался между mousedown/mouseup и click не возникал. Проверено в браузере. Harness A-BR (70) green.
+
+
 - v1.86 - Mentorship + shooting skill (Claude, Phase 2). Наставник рядом ускоряет рост (x1.6); навык стрельбы растёт в бою и влияет на точность/урон. Scenario BR. Harness A-BR (70) green.
 
 

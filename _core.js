@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.86';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.87';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -3560,9 +3560,12 @@ function focusPawn(id) {
 const _boundPawnLists = new WeakSet();
 function bindPawnList(list) {
   if (!list || _boundPawnLists.has(list)) return;
-  // Делегирование: один слушатель на контейнере. Переживает пересборку innerHTML,
-  // поэтому клик не теряется, даже если карточки перерисовались между mousedown/mouseup.
-  list.addEventListener('click', (e) => {
+  // Делегирование: один слушатель на контейнере. ВАЖНО: используем pointerdown, а НЕ click.
+  // Список пешек пересобирается ~10 раз/сек (updateUI), поэтому карточка под курсором
+  // уничтожается между mousedown и mouseup и событие click не возникает — выбор «терялся».
+  // pointerdown срабатывает сразу при нажатии, до перерисовки.
+  list.addEventListener('pointerdown', (e) => {
+    if (e.button && e.button !== 0) return;        // только основная кнопка
     const card = e.target.closest && e.target.closest('.pawn-card[data-pawn-id]');
     if (!card) return;
     focusPawn(parseInt(card.dataset.pawnId, 10));
