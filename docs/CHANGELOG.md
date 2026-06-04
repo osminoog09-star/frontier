@@ -1,10 +1,16 @@
 # FRONTIER changelog
 
+## v2.04 - POI events foundation (Phase 3)
+
+- Точки интереса теперь дают одноразовые события при клике: руины приносят еду/медикаменты/науку, золотая жила даёт золото/руду, лагерь бандитов даёт добычу и поднимает малый налёт.
+- Карточка POI показывает исход или статус «уже обследовано»; save/load сохраняет `searched` и `exploredDay`.
+- Scenario CG. Harness A-CG (84) green, guard sync/кодировки OK.
+
 ## v2.03 - Swimming foundation (Phase 3)
 
 - Каркас плавания: swimSpeedMul(p) (скорость в воде от навыка swimming: 0.35 на 0 ур. -> 1.0 на 20) и canSwim(p) (>=3 ур. — рискнуть глубокой водой).
 - Чистые функции, A* воду пока НЕ открывает (это отдельный срез — риск для путей). Scenario CF. Harness A-CF (84) green.
-- (v2.02 зарезервирована за Codex POI-events; взял v2.03, чтобы не пересечься по версии.)
+- Срез Claude-local; следующий Codex-срез поднял версию до v2.04 после POI-events.
 
 ## v2.01 - Frontier points of interest (Phase 3, Codex)
 
