@@ -1714,6 +1714,19 @@ const test = `
   console.log('SCENARIO CJ (body capacity affects work/move):');
   console.log('   wmul full->hurt', wFull+'->'+wHurt.toFixed(2), workOk?'OK':'FAIL', '| move '+mFull+'->'+mHurt, moveOk?'OK':'FAIL', '|', cjOk?'OK':'FAIL');
   if (!cjOk) throw new Error('Scenario CJ failed');
+
+  // Scenario CK: combat wounds damage body parts (Phase 2/3)
+  newGame('settlers'); seedRng(12345);
+  const ckP = G.pawns[0]; ensureBody(ckP);
+  const ckBefore = BODY_PARTS.reduce((s,k)=>s+ckP.body[k].hp,0);
+  for (let i=0;i<120;i++) { ckP.hp = ckP.maxHp; applyHit(ckP, 4, false); }  // несмертельные попадания
+  const ckAfter = BODY_PARTS.reduce((s,k)=>s+ckP.body[k].hp,0);
+  const woundedOk = ckAfter < ckBefore;            // хотя бы одна часть пострадала
+  const capDrop = bodyCapacity(ckP,'move') < 1 || bodyCapacity(ckP,'work') < 1 || bodyCapacity(ckP,'aim') < 1;
+  const ckOk = woundedOk && capDrop;
+  console.log('SCENARIO CK (combat wounds body parts):');
+  console.log('   body hp '+ckBefore+'->'+ckAfter, woundedOk?'OK':'FAIL', '| capacity dropped:', capDrop?'OK':'FAIL', '|', ckOk?'OK':'FAIL');
+  if (!ckOk) throw new Error('Scenario CK failed');
 })();
 `;
 try {

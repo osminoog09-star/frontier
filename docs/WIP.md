@@ -38,6 +38,8 @@
 
 ## Последний завершённый срез
 
+- v2.08 - Combat wounds hit body parts (Claude-local). Раны в бою бьют по случайной части тела (накопление травм -> capacity). Scenario CK. Harness A-CK (89) green.
+
 - v2.07 - Body capacity affects gameplay (Claude-local). Травмы ног/рук/головы -> скорость/работа/стрельба; целое тело = x1 (сим цел). Scenario CJ. Harness A-CJ (88) green.
 
 - v2.06 - Body injuries in pawn card (Claude-local). Карточка показывает травмы частей тела (bodyInjurySummary). Scenario CI. Harness A-CI (87) green.

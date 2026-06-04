@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.07';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.08';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -2133,6 +2133,11 @@ function applyHit(target, dmg, friendly) {
     else if (rng()<0.3) {
       target.woundSeverity = Math.min(3, (target.woundSeverity||0)+1);
       addThought(target, '🩸 Ранен пулей', 8, false);
+      if (target.body) {                        // рана задевает случайную часть тела (Phase 2/3)
+        const part = BODY_PARTS[rngInt(0, BODY_PARTS.length-1)];
+        const b = target.body[part];
+        if (b) b.hp = clamp(b.hp - dmg*0.4, 0, b.max);
+      }
     }
   }
 }
