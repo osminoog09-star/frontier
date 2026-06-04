@@ -1,5 +1,11 @@
 # FRONTIER changelog
 
+## 2026-06-04 - Docs status sync after v1.96 (Codex)
+
+- ROADMAP.md, docs/HANDOFF.md, docs/TECH_ROADMAP.md, docs/WIP.md и index.html синхронизированы с v1.96/A-BZ (78).
+- Публичный roadmap теперь честно показывает: Phase 1 завершена, Phase 3 начата, ближайшие задачи — ресурсы по биомам, вода/дороги и точки интереса.
+- Gameplay не менялся; `_core.js`, `_harness.js` и `frontier.html` не редактировались.
+
 ## v1.96 - Biome world generation (Phase 3)
 
 - Карта теперь делится на крупные биом-регионы: пустыня/равнина/прерия/лес/горы (низкочастотный шум region смещает влажность).

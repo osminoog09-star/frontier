@@ -1,6 +1,6 @@
 # FRONTIER - техническая дорожная карта
 
-Дата обновления: 2026-06-02
+Дата обновления: 2026-06-04
 
 ## v1.36 public/mobile quality gate
 
@@ -132,6 +132,13 @@
 - Blueprint info shows `Материалы: в пути` while the package is being delivered.
 - Scenario BD validates that progress waits for delivery and starts only after the carried package reaches the blueprint.
 
+## v1.71-v1.96 phase progress
+
+- Phase 1 completed: slower day/night rhythm, night effects, terrain movement, and fire spread/firefighting.
+- Phase 2 deepened pawns: per-skill system, work speed from skills, skill decay, mentorship, shooting skill, personality axes and behavior hooks, and weight/carry speed penalties.
+- Phase 2.5 zones landed: zone framework, grow-zone farming, stockpile zone hauling, and allowed zones for idle wandering.
+- Phase 3 started in v1.96: biome regions (desert/plains/prairie/forest/mountain), `tile.biome`, and Scenario BZ.
+
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
 Для совместной работы агентов:
@@ -145,7 +152,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-BD (56) покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты, ранчо, приручение лошадей, новые угрозы, навыки, меткость, ремонт, типы комнат, качество стен, room-панель, animal-панель, полы, стены, бонус уюта от пола, материалы чертежей, крышу/укрытие комнат и доставку пакета материалов к стройке.
+- Автотесты: `_harness.js`, сценарии A-BZ (78) покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады/склад-зоны, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты/крыши, ранчо/лошадей, угрозы/огонь, навыки, личность, вес/переноску, зоны, разрешённые зоны и биомы.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза
