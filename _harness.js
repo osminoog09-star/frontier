@@ -1608,6 +1608,27 @@ const test = `
   console.log('SCENARIO CD (weather movement):');
   console.log('   clear/rain/storm/blizzard', wClear+'/'+wRain+'/'+wStorm+'/'+wBliz, '|', cdOk?'OK':'FAIL');
   if (!cdOk) throw new Error('Scenario CD failed');
+
+  // Scenario CE: frontier points of interest — generated, visible layer data, save/load safe (Phase 3)
+  newGame('settlers');
+  const pois = G.pois || [];
+  const poiTypes = new Set(pois.map(p=>p.type));
+  const typeOk = pois.length >= 3 && ['ruin','banditCamp','goldClaim'].every(t=>poiTypes.has(t));
+  const validOk = pois.every(p => {
+    const t = G.map[p.ty] && G.map[p.ty][p.tx];
+    return t && t.type!==TERRAIN.WATER && t.type!==TERRAIN.ROCK && !t.obj && canPlacePoi(G.map, p.tx, p.ty, pois.filter(x=>x!==p), Math.floor(MAP_W/2), Math.floor(MAP_H/2));
+  });
+  const firstPoi = pois[0];
+  const atOk = !!firstPoi && poiAt(firstPoi.tx, firstPoi.ty) === firstPoi && !!poiDef(firstPoi.type).name;
+  saveGame();
+  const before = JSON.stringify((G.pois||[]).map(p=>({type:p.type,tx:p.tx,ty:p.ty})).sort((a,b)=>a.type.localeCompare(b.type)||a.tx-b.tx||a.ty-b.ty));
+  loadGame();
+  const after = JSON.stringify((G.pois||[]).map(p=>({type:p.type,tx:p.tx,ty:p.ty})).sort((a,b)=>a.type.localeCompare(b.type)||a.tx-b.tx||a.ty-b.ty));
+  const roundOk = before === after;
+  const ceOk = typeOk && validOk && atOk && roundOk;
+  console.log('SCENARIO CE (frontier POIs):');
+  console.log('   count/types:', pois.length+'/'+[...poiTypes].join(','), typeOk?'OK':'FAIL', '| valid:', validOk?'OK':'FAIL', '| lookup:', atOk?'OK':'FAIL', '| save/load:', roundOk?'OK':'FAIL', '|', ceOk?'OK':'FAIL');
+  if (!ceOk) throw new Error('Scenario CE failed');
 })();
 `;
 try {

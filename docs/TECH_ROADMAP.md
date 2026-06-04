@@ -132,12 +132,12 @@
 - Blueprint info shows `Материалы: в пути` while the package is being delivered.
 - Scenario BD validates that progress waits for delivery and starts only after the carried package reaches the blueprint.
 
-## v1.71-v1.96 phase progress
+## v1.71-v2.01 phase progress
 
 - Phase 1 completed: slower day/night rhythm, night effects, terrain movement, and fire spread/firefighting.
 - Phase 2 deepened pawns: per-skill system, work speed from skills, skill decay, mentorship, shooting skill, personality axes and behavior hooks, and weight/carry speed penalties.
 - Phase 2.5 zones landed: zone framework, grow-zone farming, stockpile zone hauling, and allowed zones for idle wandering.
-- Phase 3 started in v1.96: biome regions (desert/plains/prairie/forest/mountain), `tile.biome`, and Scenario BZ.
+- Phase 3 progressed through v2.01: biome regions, resource density by biome, rivers/lakes, generated roads, weather movement penalties, and first `G.pois` Frontier points of interest.
 
 Этот документ собирает технический план из `ARCHITECTURE.md`, `DESIGN.md`, `ROADMAP_MONTH.md`, `MULTIPLAYER.md`, текущего кода и автотестов `_harness.js`.
 
@@ -152,7 +152,7 @@
 - Статическая web-игра: `frontier.html`.
 - Публичный доступ: GitHub Pages.
 - Локальный/LAN запуск: `server.js`, `start-phone-server.ps1`.
-- Автотесты: `_harness.js`, сценарии A-BZ (78) покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады/склад-зоны, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты/крыши, ранчо/лошадей, угрозы/огонь, навыки, личность, вес/переноску, зоны, разрешённые зоны и биомы.
+- Автотесты: `_harness.js`, сценарии A-CE (83) покрывают бой, экономику, save/load, pathfinding, hauling, рецепты, склады/склад-зоны, диагностику, production controls, торговлю, сценарии, мебель/комфорт, комнаты/крыши, ранчо/лошадей, угрозы/огонь, навыки, личность, вес/переноску, зоны, разрешённые зоны, биомы, ресурсы по биомам, воду/дороги, погодное движение и точки интереса.
 - Версионные снапшоты: `versions/frontier-v*.html`.
 
 ## 2. Обязательное правило релиза

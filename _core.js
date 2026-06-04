@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.00';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.01';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -315,6 +315,7 @@ function newGame(scenarioId='settlers') {
   const map = generateMap();
   G = {
     map,
+    pois: generatePOIs(map),
     seed,
     pawns: [],
     buildings: [],
@@ -364,12 +365,14 @@ function newGame(scenarioId='settlers') {
   for (let i=0; i<360; i++) {
     const x=randInt(2,MAP_W-2), y=randInt(2,MAP_H-2);
     const t = G.map[y][x];
+    if (poiAt(x,y)) continue;
     if (t.obj || (t.type!==TERRAIN.GRASS && t.type!==TERRAIN.DIRT)) continue;
     if (rng() < treeChanceForBiome(t.biome)) t.obj = { type:'tree', hp:40, maxHp:40, marked:false };
   }
   for (let i=0; i<240; i++) {
     const x=randInt(2,MAP_W-2), y=randInt(2,MAP_H-2);
     const t = G.map[y][x];
+    if (poiAt(x,y)) continue;
     if (t.type===TERRAIN.ROCK && !t.obj && rng() < 0.72) {
       t.obj = { type:'rock', hp:60, maxHp:60, marked:false };
     }
@@ -544,6 +547,60 @@ function generateMap() {
   }
 
   return map;
+}
+
+const POI_DEFS = {
+  ruin:       { name:'Руины поселенцев', icon:'🏚️', color:'#b8a06a', note:'Старая усадьба. Позже станет источником находок и событий.' },
+  banditCamp: { name:'Лагерь бандитов',  icon:'🚩', color:'#b84a3a', note:'Опасная точка. Позже будет давать угрозы и рейды.' },
+  goldClaim:  { name:'Золотая жила',     icon:'💰', color:'#e8c95a', note:'Перспективный прииск. Позже даст разведку золота.' },
+};
+
+function poiDef(type) { return POI_DEFS[type] || POI_DEFS.ruin; }
+
+function canPlacePoi(map, tx, ty, existing, avoidCx=Math.floor(MAP_W/2), avoidCy=Math.floor(MAP_H/2)) {
+  if (!map || tx<3 || ty<3 || tx>=MAP_W-3 || ty>=MAP_H-3) return false;
+  const t = map[ty] && map[ty][tx];
+  if (!t || t.type===TERRAIN.WATER || t.type===TERRAIN.ROCK || t.obj) return false;
+  if (Math.hypot(tx-avoidCx, ty-avoidCy) < 10) return false;
+  for (const p of existing || []) if (Math.hypot(tx-p.tx, ty-p.ty) < 9) return false;
+  return true;
+}
+
+function findPoiSpot(map, type, existing) {
+  for (let tries=0; tries<700; tries++) {
+    const tx = rngInt(4, MAP_W-5), ty = rngInt(4, MAP_H-5);
+    const t = map[ty] && map[ty][tx];
+    if (!canPlacePoi(map, tx, ty, existing)) continue;
+    if (type==='goldClaim' && t.biome && t.biome!=='mountain' && t.biome!=='desert' && tries < 500) continue;
+    if (type==='banditCamp' && t.floor==='road' && tries < 500) continue;
+    if (type==='ruin' && t.type===TERRAIN.SAND && tries < 350) continue;
+    return { tx, ty };
+  }
+  for (let y=4; y<MAP_H-4; y++) for (let x=4; x<MAP_W-4; x++) {
+    if (canPlacePoi(map, x, y, existing)) return { tx:x, ty:y };
+  }
+  return null;
+}
+
+function generatePOIs(map) {
+  const pois = [];
+  const plan = ['ruin','ruin','banditCamp','banditCamp','goldClaim','goldClaim'];
+  for (const type of plan) {
+    const spot = findPoiSpot(map, type, pois);
+    if (!spot) continue;
+    pois.push({
+      id:`poi_${type}_${spot.tx}_${spot.ty}`,
+      type,
+      tx:spot.tx,
+      ty:spot.ty,
+      discovered:false,
+    });
+  }
+  return pois;
+}
+
+function poiAt(tx, ty) {
+  return (G.pois || []).find(p => p.tx===tx && p.ty===ty);
 }
 
 // Smooth value noise field 0..1 (bilinear-interpolated lattice + octaves)
@@ -2502,6 +2559,9 @@ function normalizeGameState(source='') {
     _miniDirty = true;
     safeDiagRuntime('map_reset_'+source, 'Map was invalid and got regenerated');
   }
+  if (!Array.isArray(G.pois) || G.pois.length === 0) G.pois = generatePOIs(G.map);
+  G.pois = (G.pois || []).filter(p => p && POI_DEFS[p.type] && p.tx>=0 && p.ty>=0 && p.tx<MAP_W && p.ty<MAP_H)
+    .map(p => ({ id:p.id || `poi_${p.type}_${p.tx}_${p.ty}`, type:p.type, tx:p.tx, ty:p.ty, discovered:!!p.discovered }));
 }
 
 function safeDiagRuntime(key, msg, stack='') {
@@ -2789,6 +2849,9 @@ function render() {
 
   // Ground item stacks
   for (const item of G.items || []) drawItemStack(item);
+
+  // Frontier points of interest
+  for (const poi of G.pois || []) drawPOI(poi);
 
   // Hover highlight / build preview
   if (hoverTile && !isDragging) {
@@ -3086,6 +3149,39 @@ function drawTileObj(x, y, obj) {
       ctx.fillText('⛏️', px, y*TILE+5); ctx.globalAlpha = 1;
     }
   }
+}
+
+function drawPOI(poi) {
+  const def = poiDef(poi.type);
+  const px = poi.tx*TILE + TILE/2, py = poi.ty*TILE + TILE/2;
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.beginPath(); ctx.ellipse(px+2, py+7, 9, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(20,16,10,0.72)';
+  ctx.strokeStyle = def.color;
+  ctx.lineWidth = 1.5;
+  ctx.fillRect(px-9, py-12, 18, 18);
+  ctx.strokeRect(px-9, py-12, 18, 18);
+  ctx.font = '14px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#f4deb0';
+  ctx.fillText(def.icon, px, py-3);
+  ctx.restore();
+}
+
+function showPoiInfo(poi, cx, cy) {
+  const overlay = document.getElementById('info-overlay');
+  const def = poiDef(poi.type);
+  overlay.style.display = 'block';
+  overlay.style.left = Math.min(cx, canvas.width-280) + 'px';
+  overlay.style.top = (cy + 10) + 'px';
+  overlay.innerHTML = `
+    <div class="inf-title">${def.icon} ${def.name}</div>
+    <div class="inf-line">Координаты: <b>${poi.tx},${poi.ty}</b></div>
+    <div class="inf-line">${def.note}</div>
+  `;
+  setTimeout(() => { overlay.style.display='none'; }, 3000);
 }
 
 function drawBuilding(b) {
@@ -4182,6 +4278,13 @@ function handleLeftClick(tx, ty, cx, cy) {
   const animal = G.animals.find(a=>a.alive && Math.abs(Math.floor(a.x/TILE)-tx)<2 && Math.abs(Math.floor(a.y/TILE)-ty)<2);
   if (animal) { animal.marked = !animal.marked; return; }
 
+  const poi = poiAt(tx, ty);
+  if (poi) {
+    poi.discovered = true;
+    showPoiInfo(poi, cx, cy);
+    return;
+  }
+
   // Click on pawn
   const pawn = G.pawns.find(p=>p.alive && Math.abs(Math.floor(p.x/TILE)-tx)<2 && Math.abs(Math.floor(p.y/TILE)-ty)<2);
   if (pawn) {
@@ -4254,6 +4357,7 @@ function canPlaceBuilding(type, tx, ty, buildings = G.buildings, ignore = null) 
   for (let dy=0; dy<size; dy++) {
     for (let dx=0; dx<size; dx++) {
       if (G.map[ty+dy][tx+dx].type === TERRAIN.WATER) return false;
+      if (poiAt(tx+dx, ty+dy)) return false;
     }
   }
   for (const b of buildings) {
@@ -4598,6 +4702,9 @@ function showTooltip(e, tx, ty) {
   let text = TNAMES[tile.type];
   if (tile.obj) text += ` • ${tile.obj.type==='tree'?'Дерево':tile.obj.type==='rock'?'Камень':'?'} (HP ${tile.obj.hp}/${tile.obj.maxHp})`;
 
+  const poi = poiAt(tx, ty);
+  if (poi) text += ` • ${poiDef(poi.type).name}`;
+
   const bld = G.buildings.find(b=>tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
   if (bld) text = `${BUILDS[bld.type].name} ${bld.blueprint?'(стройка)':''}`;
 
@@ -4819,9 +4926,9 @@ function showRoadmapPanel(panel) {
   const monthRows = [
     ['done','Фундамент — ГОТОВО','Работы/расписание/нужды, склады+носильщики, производство, A*, стены/ворота, сценарии, караваны, бой, детерминизм (seed).'],
     ['done','Стройка как colony sim — ГОТОВО','Полы/стены кистью, Architect-панель, подвоз материалов к чертежу, комнаты/крыша/уют.'],
-    ['now', 'PHASE 1 — Playable Core','Сейчас: замедление времени + фазы суток, давление выживания, базовый огонь (распространение/тушение), местность влияет на движение.'],
-    ['soon','PHASE 2 — Colony Management','Навыки (per-skill), глубокая личность, реальный вес/переноска, здоровье по частям тела.'],
-    ['soon','PHASE 3 — World Simulation','Биомы, реки/озёра/холмы/каньоны/леса, дороги, плавание, точки интереса, распространение огня.'],
+    ['done', 'PHASE 1 — Playable Core','Готово: замедленное время, фазы суток, ночные эффекты, базовый огонь и движение по местности.'],
+    ['done','PHASE 2 — Colony Management','Основа готова: навыки, личность, вес/переноска, зоны и логистика. Осталось здоровье по частям тела.'],
+    ['now','PHASE 3 — World Simulation','Сейчас: биомы, ресурсы по биому, реки/озёра, дороги, погода-движение и Frontier-точки интереса. Дальше: плавание и события POI.'],
     ['soon','PHASE 4 — Wild West','Шериф, бандиты, охотники за головами, прииски, салун-события, железная дорога, фракции — идентичность Frontier.'],
     ['soon','PHASE 5 — Multiplayer','Кооп и облако поверх детерминизма (перенесено сюда: сначала глубина колонии).'],
     ['soon','PHASE 6–7 — Steam EA / Mobile','Туториал, локализация, Steam-обёртка; мобайл — последней фазой, без ущерба PC.'],
@@ -4835,7 +4942,8 @@ function showRoadmapPanel(panel) {
     ['done','v1.21–1.27','Сценарии старта и UI: Поселенцы/Золотая лихорадка/Форт/Караван, цели, мобильный layout, полировка сделок.'],
     ['done','v1.28–1.31','Глубина сценариев: волны форта с наградой, налётчики Gold Rush, бонус Caravan Route, фикс выбора пешки.'],
     ['done','v1.32–1.35','Аудит + UX: фикс версии и прокрутки меню, понятный роадмап, координация с Codex, боевая глубина (без сознания/спасение), конюшня (лошади ускоряют ковбоев).'],
-    ['now', 'v1.36–1.54','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом, враг «Поджигатель», навыки работы, исследование «Меткость».'],
+    ['done', 'v1.36–1.54','Публичный сайт, мобильная карта, мебель/комфорт усадьбы, ранчо, табун, группы стройки, room-бонусы и эмбиент-звук, прогрессия жилья, музыка настроений, анимация работ, подсветка помеченных ресурсов, счётчик задач, новый враг «Снайпер», бочка с порохом, враг «Поджигатель», навыки работы, исследование «Меткость».'],
+    ['now', 'v1.55–2.01','Ремонт, комнаты/крыши, детерминизм, Phase 1–2, зоны, биомы, ресурсы по биомам, реки/озёра, дороги, погода влияет на движение, Frontier-точки интереса.'],
   ];
   panel.innerHTML = `
     <h2>🗺️ Роадмап разработки</h2>
@@ -4965,6 +5073,7 @@ function saveGame() {
       seed:G.seed,
       fires:G.fires || [],
       zones:G.zones || [],
+      pois:G.pois || [],
       scenario:G.scenario || 'settlers',
       camera:{x:G.camera.x, y:G.camera.y, zoom:G.camera.zoom},
       // compact map: plain number for empty tile, [type, objCode, hp, marked] for tiles with tree/rock
@@ -5002,6 +5111,7 @@ function loadGame() {
     if (save.seed != null) seedRng(save.seed);
     G.fires = Array.isArray(save.fires) ? save.fires : [];
     G.zones = Array.isArray(save.zones) ? save.zones : [];
+    G.pois = Array.isArray(save.pois) ? save.pois : [];
     if (save.herd) G.herd = save.herd;
     if (save.camera) G.camera = { x:save.camera.x, y:save.camera.y, zoom:save.camera.zoom||1 };
 
