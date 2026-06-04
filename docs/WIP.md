@@ -23,8 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - Frontier-материал: саманная стена (adobe)
-  - Мои файлы: _core.js (BUILDS/getBuildingMaxHp/drawStructure/buildMap), frontier.template.html (кнопка), _harness.js. Codex: карта-мир/вода — свободно.
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -38,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.14 - Adobe wall (Claude-local). Саманная стена (Дикий Запад): дёшево, слабее (HP x0.7); блокирует/стена комнаты. Scenario CP. Harness A-CP (94) green.
 
 - v2.13 - Лагерь->Спальный мешок (Claude-local). RimWorld-bedroll; кровать в комнате приоритетнее. Display-only. Harness A-CO (93) green.
 

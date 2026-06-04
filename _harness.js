@@ -1799,6 +1799,21 @@ const test = `
   console.log('SCENARIO CO (furniture quality -> comfort):');
   console.log('   none/normal/high', coNone+'/'+coNormal+'/'+coHigh.toFixed(3), coOk?'OK':'FAIL', '|', coOk?'OK':'FAIL');
   if (!coOk) throw new Error('Scenario CO failed');
+
+  // Scenario CP: adobe wall (Frontier material) — cheaper, weaker, still blocks & forms rooms
+  newGame('settlers');
+  const adobeHp = getBuildingMaxHp('wall_adobe'), woodHp = getBuildingMaxHp('wall'), stoneHp = getBuildingMaxHp('wall_stone');
+  const cpHpOk = adobeHp < woodHp && woodHp < stoneHp;
+  const adef = BUILDS.wall_adobe;
+  const cpDefOk = !!adef && adef.wall===true && adef.cost.wood===3;
+  G.map[22][22] = { type:TERRAIN.GRASS, v:0, obj:null };
+  const cpBefore = isWalkableTile(22,22);
+  G.buildings.push({type:'wall_adobe', tx:22, ty:22, done:true, blueprint:false, hp:adobeHp, maxHp:adobeHp});
+  const cpBlockOk = cpBefore===true && isWalkableTile(22,22)===false && isRoomWallAt(22,22)===true;
+  const cpOk = cpHpOk && cpDefOk && cpBlockOk;
+  console.log('SCENARIO CP (adobe wall):');
+  console.log('   hp adobe/wood/stone '+adobeHp+'/'+woodHp+'/'+stoneHp, cpHpOk?'OK':'FAIL', '| cheap def:', cpDefOk?'OK':'FAIL', '| blocks/room-wall:', cpBlockOk?'OK':'FAIL', '|', cpOk?'OK':'FAIL');
+  if (!cpOk) throw new Error('Scenario CP failed');
 })();
 `;
 try {

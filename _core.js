@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.13';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.14';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -148,6 +148,7 @@ const BUILDS = {
   gate:   { name:'Ворота',   icon:'▫', cost:{wood:8},            size:1, prod:null,   hp:120, passable:true },
   wall:      { name:'Стена',        icon:'🧱', cost:{wood:6},     size:1, prod:null, wall:true },
   wall_stone:{ name:'Каменная стена',icon:'🪨', cost:{ore:6},     size:1, prod:null, wall:true },
+  wall_adobe:{ name:'Саманная стена',icon:'🟫', cost:{wood:3},     size:1, prod:null, wall:true },
   tower:  { name:'Вышка',    icon:'🗼', cost:{wood:20,ore:10},   size:1, prod:null,   range:12 },
   saloon: { name:'Салун',    icon:'🍺', cost:{wood:30,gold:10},  size:2, prod:'mood',  rate:0.1 },
   tradepost:{ name:'Торг. пост',icon:'🧳', cost:{wood:35,gold:20}, size:2, prod:'trade', rate:0 },
@@ -2640,6 +2641,7 @@ function getBuildingMaxHp(type) {
   const base = hasResearch('walls') ? 300 : 200;
   if (type === 'wall') return base + 80;
   if (type === 'wall_stone') return base * 2;
+  if (type === 'wall_adobe') return Math.round(base * 0.7);   // саман дешёвый, но слабее
   return base;
 }
 
@@ -3435,6 +3437,17 @@ function drawStructure(type, x, y, S, def, b) {
       ctx.moveTo(cx, y+1); ctx.lineTo(cx, cy);
       ctx.moveTo(x+S*0.3, cy); ctx.lineTo(x+S*0.3, y+S-1);
       ctx.moveTo(x+S*0.7, cy); ctx.lineTo(x+S*0.7, y+S-1);
+      ctx.stroke();
+      break;
+    }
+    case 'wall_adobe': {
+      ctx.fillStyle = '#b89366'; ctx.fillRect(x+1, y+1, S-2, S-2);          // глина/саман
+      ctx.fillStyle = '#c8a578'; ctx.fillRect(x+1, y+1, S-2, 3);
+      ctx.fillStyle = 'rgba(70,45,20,0.28)'; ctx.fillRect(x+1, y+S-4, S-2, 3);
+      ctx.strokeStyle = 'rgba(90,60,30,0.4)'; ctx.lineWidth = 1;            // саманные блоки
+      ctx.beginPath();
+      ctx.moveTo(x+1, cy); ctx.lineTo(x+S-1, cy);
+      ctx.moveTo(x+S*0.5, y+1); ctx.lineTo(x+S*0.5, cy);
       ctx.stroke();
       break;
     }
@@ -4858,7 +4871,7 @@ function setupButtons() {
 
   // Build buttons
   const buildMap = {
-    'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-wall-btn':'wall','build-wallstone-btn':'wall_stone','build-gate-btn':'gate',
+    'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-wall-btn':'wall','build-wallstone-btn':'wall_stone','build-walladobe-btn':'wall_adobe','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-barrel-btn':'barrel','build-sandbag-btn':'sandbag','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
@@ -5131,7 +5144,7 @@ function showHowtoPanel(panel) {
 
 function updateBuildButtons() {
   const buildMap = {
-    'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-wall-btn':'wall','build-wallstone-btn':'wall_stone','build-gate-btn':'gate',
+    'build-farm-btn':'farm','build-kitchen-btn':'kitchen','build-mine-btn':'mine','build-stockpile-btn':'stockpile','build-fence-btn':'fence','build-wall-btn':'wall','build-wallstone-btn':'wall_stone','build-walladobe-btn':'wall_adobe','build-gate-btn':'gate',
     'build-tower-btn':'tower','build-barrel-btn':'barrel','build-sandbag-btn':'sandbag','build-saloon-btn':'saloon','build-tradepost-btn':'tradepost','build-stable-btn':'stable','build-ranch-btn':'ranch','build-lab-btn':'lab',
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
