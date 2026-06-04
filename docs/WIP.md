@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.88 - FIX категория Архитектора не закрывается при выборе здания (Claude). Убран removeAttribute(open). Проверено в браузере. Заведён docs/BUGS.md. Harness A-BR (70) green.
+
+
 - v1.87 - FIX выбор пешки справа (Claude). pointerdown вместо click: список перерисовывался между mousedown/mouseup и click не возникал. Проверено в браузере. Harness A-BR (70) green.
 
 

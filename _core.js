@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.87';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.88';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -4392,7 +4392,8 @@ function setupButtons() {
       G.buildMode = G.buildMode===type ? null : type;
       G.demolishMode = false;
       updateBuildButtons();
-      document.getElementById(id).closest('.build-group')?.removeAttribute('open');
+      // НЕ закрываем категорию после выбора: в боковом «Архитекторе» это мешало
+      // (папка схлопывалась при каждом выборе). updateBuildButtons держит активную открытой.
     });
   }
 
