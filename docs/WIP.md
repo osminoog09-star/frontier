@@ -23,9 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - стройка/комнаты в духе RimWorld + Frontier-твист
-  - Исследование RimWorld-стройки (DESIGN.md) + расширение авто-типов комнат (кухня/мастерская/лаборатория) и Frontier-типы (салун-зал, барак), признак «ДОМ».
-  - Мои файлы: _core.js (roomFurnitureCounts/classifyRoom/room*), _harness.js, docs/DESIGN.md. Codex: карта-мир/экосистема/вода — свободно.
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -39,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.10 - RimWorld room types + Frontier (Claude-local). Кухня/мастерская/лаборатория + салун-зал/барак; признак «ДОМ» (дверь). Research RimWorld-стройки в DESIGN.md. Scenario CM. Harness A-CM (91) green.
 
 - v2.09 - Research rework (Claude-local). Исследования: деньги+бумага при старте + пешка изучает за лабораторией (tryResearch); убрано пассивное накопление. Новый ресурс «бумага». Scenario CL. Harness A-CL (90) green.
 

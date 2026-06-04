@@ -1747,6 +1747,29 @@ const test = `
   console.log('SCENARIO CL (research: gold+paper+pawn time):');
   console.log('   cost g/p '+gCost+'/'+pCost, costOk?'OK':'FAIL', '| no-lab blocks:', noLabOk?'OK':'FAIL', '| paid:', startedOk?'OK':'FAIL', '| researched ('+rg+'t):', doneOk?'OK':'FAIL', '|', clOk?'OK':'FAIL');
   if (!clOk) throw new Error('Scenario CL failed');
+
+  // Scenario CM: richer room types (kitchen/workshop/lab + Frontier saloon-hall/barracks) + house door
+  const cKitchen = classifyRoom({bed:0,table:0,decor:0,kitchen:1,smithy:0,saloon:0,lab:0})==='кухня';
+  const cSmithy = classifyRoom({bed:0,table:0,decor:0,kitchen:0,smithy:1,saloon:0,lab:0})==='мастерская';
+  const cSaloon = classifyRoom({bed:1,table:1,decor:0,kitchen:0,smithy:0,saloon:1,lab:0})==='салун-зал';
+  const cBarracks = classifyRoom({bed:2,table:0,decor:0,kitchen:0,smithy:0,saloon:0,lab:0})==='барак';
+  const cBedroom = classifyRoom({bed:1,table:0,decor:0,kitchen:0,smithy:0,saloon:0,lab:0})==='спальня';
+  const classOk = cKitchen&&cSmithy&&cSaloon&&cBarracks&&cBedroom;
+  newGame('settlers'); G.buildings = G.buildings.filter(b=>!['fence','gate','bed','table','decor','kitchen','smithy','saloon','lab'].includes(b.type));
+  for (let y=24;y<=32;y++) for (let x=24;x<=32;x++) forceDry(x,y,1);
+  G.buildings.push({type:'bed',tx:28,ty:28,done:true,blueprint:false,hp:120,maxHp:120});
+  for (let x=26;x<=31;x++){ G.buildings.push({type:'fence',tx:x,ty:26,done:true,blueprint:false,hp:100,maxHp:100}); G.buildings.push({type:'fence',tx:x,ty:31,done:true,blueprint:false,hp:100,maxHp:100}); }
+  for (let y=27;y<=30;y++){ G.buildings.push({type:'fence',tx:26,ty:y,done:true,blueprint:false,hp:100,maxHp:100}); G.buildings.push({type:'fence',tx:31,ty:y,done:true,blueprint:false,hp:100,maxHp:100}); }
+  const noDoorOk = roomHasDoor(enclosedRoomAt(28,28))===false;
+  G.buildings = G.buildings.filter(b=>!(b.tx===28&&b.ty===26&&b.type==='fence'));
+  G.buildings.push({type:'gate',tx:28,ty:26,done:true,blueprint:false,hp:120,maxHp:120});
+  const doorOk = roomHasDoor(enclosedRoomAt(28,28))===true;
+  const lbl = roomTypeLabelAt(28,28);
+  const labelOk = lbl.includes('ДОМ') && lbl.includes('спальня');
+  const cmOk = classOk && noDoorOk && doorOk && labelOk;
+  console.log('SCENARIO CM (RimWorld-style room types + house):');
+  console.log('   classify:', classOk?'OK':'FAIL', '| door->house:', (noDoorOk&&doorOk)?'OK':'FAIL', '| label:', JSON.stringify(lbl), labelOk?'OK':'FAIL', '|', cmOk?'OK':'FAIL');
+  if (!cmOk) throw new Error('Scenario CM failed');
 })();
 `;
 try {

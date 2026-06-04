@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.09';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.10';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -1249,13 +1249,24 @@ function roomHasTile(room, tx, ty) {
   return !!(room && room.cells && room.cells.has(tx + ',' + ty));
 }
 function roomFurnitureCounts(room) {
-  const counts = { bed:0, table:0, decor:0 };
+  const counts = { bed:0, table:0, decor:0, kitchen:0, smithy:0, saloon:0, lab:0 };
   if (!room || !G || !G.buildings) return counts;
   for (const b of G.buildings) {
     if (!b.done || b.blueprint || !(b.type in counts)) continue;
     if (roomHasTile(room, b.tx, b.ty)) counts[b.type]++;
   }
   return counts;
+}
+// Дверь (ворота) на границе комнаты => жилое помещение («ДОМ»), как в RimWorld.
+function roomHasDoor(room) {
+  if (!room || !room.cells || !G.buildings) return false;
+  for (const key of room.cells) {
+    const c = key.split(','), x = +c[0], y = +c[1];
+    for (const d of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      if (G.buildings.find(b => b.tx===x+d[0] && b.ty===y+d[1] && b.type==='gate' && b.done && !b.blueprint)) return true;
+    }
+  }
+  return false;
 }
 function roomFurnitureScore(counts) {
   return (counts.bed ? 1 : 0) + (counts.table ? 1 : 0) + (counts.decor ? 1 : 0);
@@ -1333,6 +1344,11 @@ function roomComfortLabelForScore(score) {
   return 'нет';
 }
 function classifyRoom(counts) {
+  if (counts.saloon) return 'салун-зал';            // Frontier: место сбора
+  if (counts.kitchen) return 'кухня';               // плита в комнате
+  if (counts.smithy) return 'мастерская';           // верстак/кузня
+  if (counts.lab) return 'лаборатория';
+  if (counts.bed >= 2) return 'барак';              // Frontier: жильё ковбоев (2+ кровати)
   if (counts.bed && counts.table) return 'жилая комната';
   if (counts.bed) return 'спальня';
   if (counts.table) return 'столовая';
@@ -1400,7 +1416,8 @@ function roomTypeLabelAt(tx, ty) {
   const score = roomFurnitureScore(counts);
   const wall = roomWallQuality(room);
   const roof = roomRoofInfo(room);
-  return `${classifyRoom(counts)} · ${roomComfortLabelForScore(score)} (${score}/3) · ${wall.label} · ${roof.label}`;
+  const house = roomHasDoor(room) ? '🏠 ДОМ · ' : '';
+  return `${house}${classifyRoom(counts)} · ${roomComfortLabelForScore(score)} (${score}/3) · ${wall.label} · ${roof.label}`;
 }
 function roomComfortScore() {
   return (isFurnitureInRoom('bed') ? 1 : 0) + (isFurnitureInRoom('table') ? 1 : 0) + (isFurnitureInRoom('decor') ? 1 : 0);
