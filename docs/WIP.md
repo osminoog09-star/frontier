@@ -23,7 +23,8 @@
 
 ## Сейчас в работе
 
-Пусто.
+- [IN PROGRESS] Claude-local 2026-06-04 - качество мебели влияет на уют
+  - Мои файлы: _core.js (furnitureQualityBonus + roomComfortBonus), _harness.js. Codex: карта-мир/вода/экосистема — свободно.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
