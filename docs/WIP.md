@@ -23,7 +23,8 @@
 
 ## Сейчас в работе
 
-Пусто.
+- [IN PROGRESS] Claude-local 2026-06-04 - переосмыслить «Лагерь» -> «Спальный мешок» (RimWorld bedroll, display-only)
+  - Мои файлы: _core.js (BUILDS.camp name/icon), frontier.template.html (кнопка). Тип camp оставляю (сценарии целы). Codex: карта-мир/вода — свободно.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
