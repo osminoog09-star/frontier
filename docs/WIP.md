@@ -23,8 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - capacity частей тела влияет на скорость/работу/стрельбу
-  - Безопасно: целое тело = x1, симуляция не меняется. Мои файлы: _core.js (movement/wmul/fightEnemy), _harness.js. Codex: вода/A*, экосистема — свободно.
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -38,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.07 - Body capacity affects gameplay (Claude-local). Травмы ног/рук/головы -> скорость/работа/стрельба; целое тело = x1 (сим цел). Scenario CJ. Harness A-CJ (88) green.
 
 - v2.06 - Body injuries in pawn card (Claude-local). Карточка показывает травмы частей тела (bodyInjurySummary). Scenario CI. Harness A-CI (87) green.
 

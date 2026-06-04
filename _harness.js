@@ -1698,6 +1698,22 @@ const test = `
   console.log('SCENARIO CI (body-injury summary):');
   console.log('   healthy empty:', healthyOk?'OK':'FAIL', '| injuries: "'+s2+'"', (oneOk&&twoOk)?'OK':'FAIL', '|', ciOk?'OK':'FAIL');
   if (!ciOk) throw new Error('Scenario CI failed');
+
+  // Scenario CJ: body capacity affects work speed & movement; full body = no change (Phase 2/3)
+  newGame('settlers');
+  const cjP = G.pawns[0]; cjP.workMul=1; cjP.workLevel=0; cjP.sick=null; cjP.skills={}; cjP._activeSkill=null; G.hour=12; ensureBody(cjP);
+  const wFull = wmul(cjP);                 // целое тело -> x1 (нет изменения)
+  cjP.body.leftArm.hp = 0; cjP.body.rightArm.hp = 5;
+  const wHurt = wmul(cjP);
+  const workOk = wFull===1 && wHurt<wFull;
+  const mFull = bodyCapacity(cjP,'move');
+  cjP.body.leftLeg.hp = 0;
+  const mHurt = bodyCapacity(cjP,'move');
+  const moveOk = mFull===1 && mHurt<mFull;
+  const cjOk = workOk && moveOk;
+  console.log('SCENARIO CJ (body capacity affects work/move):');
+  console.log('   wmul full->hurt', wFull+'->'+wHurt.toFixed(2), workOk?'OK':'FAIL', '| move '+mFull+'->'+mHurt, moveOk?'OK':'FAIL', '|', cjOk?'OK':'FAIL');
+  if (!cjOk) throw new Error('Scenario CJ failed');
 })();
 `;
 try {

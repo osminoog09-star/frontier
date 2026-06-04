@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.06';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.07';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -764,7 +764,7 @@ function wmul(p) {
   // Во время конкретной работы скорость задаёт соответствующий per-skill навык;
   // вне работы (или если навык не выставлен) — легаси-уровень труда.
   const skill = p._activeSkill ? skillSpeedMul(p, p._activeSkill) : (1 + 0.04 * (p.workLevel || 0));
-  return (p.workMul || 1) * skill * (p.sick ? (0.7 - p.sick.severity*0.12) : 1) * dayWorkMul(G ? G.hour : 12);
+  return (p.workMul || 1) * skill * (p.sick ? (0.7 - p.sick.severity*0.12) : 1) * dayWorkMul(G ? G.hour : 12) * Math.max(0.2, bodyCapacity(p,'work'));
 }
 
 // Опыт работы: копится, пока пешка работает; уровни до 10 ускоряют труд.
@@ -1047,7 +1047,7 @@ function updatePawns() {
     // Movement (faster when charging into combat); конюшни дают лошадей → ускорение
     const base = p.state==='sleeping' ? 0.5 : inCombat ? 2.4 : 2.0;
     const terrain = terrainSpeedMul(Math.floor(p.x/TILE), Math.floor(p.y/TILE));
-    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul()) * terrain * loadSpeedMul(p) * weatherSpeedMul();
+    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul()) * terrain * loadSpeedMul(p) * weatherSpeedMul() * Math.max(0.2, bodyCapacity(p,'move'));
     moveTowardsTarget(p, moveSpeed);
 
     if (p.state === 'working') gainWorkXp(p);   // опыт за труд
@@ -2069,7 +2069,7 @@ function fightEnemy(p, e) {
     // accuracy falls with distance and target cover
     const cover = getCover(e.x, e.y);
     const sl = skillLvl(p, 'shooting');
-    const hitChance = pawnHitChance(d, cover, sl);
+    const hitChance = pawnHitChance(d, cover, sl) * bodyCapacity(p,'aim');
     const dmg = pawnShotDamage(sl);
     gainSkill(p, 'shooting', 0.06);   // опыт стрельбы в бою
     fireProjectile(p.x, p.y-4, e, true, rng()<hitChance ? dmg : 0);
