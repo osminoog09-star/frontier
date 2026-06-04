@@ -23,10 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - Phase 2/3: здоровье по частям тела (каркас)
-  - Срез 1: p.body (head/torso/руки/ноги) + bodyCapacity(p,'move'|'work'|'aim') чистые функции + сценарий. Без правки скорости/боя пока (отдельный срез).
-  - Мои файлы: `_core.js` (данные тела + хелперы, создание/normalize пешки), `_harness.js` (сценарий CH). Codex: вода/A* (п.1), экосистема (п.2) — свободно.
-
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -40,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.05 - Body-part health foundation (Claude-local, Phase 2/3). p.body (части тела) + bodyCapacity(move/work/aim). Scenario CH. Harness A-CH (86) green.
 
 - v2.04 - POI events foundation (Codex, Phase 3). Точки интереса стали одноразовыми событиями: руины дают еду/медикаменты/науку, золотая жила даёт золото/руду, лагерь бандитов даёт добычу и малый налёт. Состояние `searched/exploredDay` сохраняется. Scenario CG. Harness A-CG (84) green.
 

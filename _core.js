@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.04';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.05';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -67,6 +67,31 @@ function topSkills(p, n=3) {
     .filter(x => x.lvl > 0).sort((a,b) => b.lvl - a.lvl).slice(0, n);
 }
 const WORK_ICONS = ['🪓','🌾','⛏️','🔨','🦌','💊','🛡️','📦'];
+
+// ──────────── ЗДОРОВЬЕ ПО ЧАСТЯМ ТЕЛА (Phase 2/3, каркас) ────────────
+// Срез 1: данные + capacity-функции. Влияние на скорость/работу/бой — отдельным срезом.
+const BODY_PARTS = ['head','torso','leftArm','rightArm','leftLeg','rightLeg'];
+function ensureBody(p) {
+  if (!p.body || typeof p.body !== 'object') { p.body = {}; for (const k of BODY_PARTS) p.body[k] = { hp:10, max:10 }; }
+  return p.body;
+}
+function partCond(p, part) {
+  const b = p.body && p.body[part];
+  return b && b.max > 0 ? clamp(b.hp / b.max, 0, 1) : 1;
+}
+// Способность 0..1 по типу: move (ноги), work/manip (руки), aim (руки+голова), consciousness (голова+торс).
+function bodyCapacity(p, kind) {
+  if (!p || !p.body) return 1;
+  const legs = (partCond(p,'leftLeg') + partCond(p,'rightLeg')) / 2;
+  const arms = (partCond(p,'leftArm') + partCond(p,'rightArm')) / 2;
+  switch (kind) {
+    case 'move':                return legs;
+    case 'work': case 'manip':  return arms;
+    case 'aim':                 return arms * 0.7 + partCond(p,'head') * 0.3;
+    case 'consciousness':       return (partCond(p,'head') + partCond(p,'torso')) / 2;
+    default:                    return 1;
+  }
+}
 
 // ──────────── ЛИЧНОСТЬ: оси характера 0–100 (Phase 2) ────────────
 // Поверх трейтов. Влияние на поведение/настроение подключается следующими срезами.
@@ -726,6 +751,7 @@ function applyTraitEffects(p) {
   if (p.traits.includes('lazy')) p.workMul *= 0.8;
   if (p.traits.includes('tough')) { p.maxHp = 130; if (p.hp===100) p.hp = 130; }
   p.personality = rollPersonality(p.traits);
+  ensureBody(p);
 }
 
 // Effective work speed (traits + illness)
@@ -2571,6 +2597,7 @@ function normalizeGameState(source='') {
   for (const p of G.pawns || []) {
     if (!p.skills || typeof p.skills !== 'object') p.skills = {};
     if (!p.personality || typeof p.personality !== 'object') p.personality = rollPersonality(p.traits);
+    ensureBody(p);
   }
   for (const b of G.buildings || []) {
     normalizeStockpileFilters(b);

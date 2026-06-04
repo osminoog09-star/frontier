@@ -1666,6 +1666,23 @@ const test = `
   console.log('SCENARIO CG (POI events):');
   console.log('   ruin reward:', ruinResOk?'OK':'FAIL', '| one-shot:', oneShotOk?'OK':'FAIL', '| claim:', claimOk?'OK':'FAIL', '| camp threat:', campOk?'OK':'FAIL', '| save/load:', saveOk?'OK':'FAIL', '|', cgOk?'OK':'FAIL');
   if (!cgOk) throw new Error('Scenario CG failed');
+
+  // Scenario CH: body-part health foundation — injuries lower the matching capacity (Phase 2/3)
+  newGame('settlers');
+  const bdP = G.pawns[0]; ensureBody(bdP);
+  const moveFull = bodyCapacity(bdP,'move'), workFull = bodyCapacity(bdP,'work'), aimFull = bodyCapacity(bdP,'aim');
+  const fullOk = moveFull===1 && workFull===1 && aimFull===1;
+  bdP.body.leftLeg.hp = 0;
+  const moveHurt = bodyCapacity(bdP,'move');
+  bdP.body.rightArm.hp = 0;
+  const workHurt = bodyCapacity(bdP,'work'), aimHurt = bodyCapacity(bdP,'aim');
+  const hurtOk = moveHurt<moveFull && workHurt<workFull && aimHurt<aimFull && moveHurt>=0;
+  bdP.body.head.hp = 0;
+  const consHurt = bodyCapacity(bdP,'consciousness') < 1;
+  const chOk = fullOk && hurtOk && consHurt;
+  console.log('SCENARIO CH (body-part health):');
+  console.log('   full caps:', fullOk?'OK':'FAIL', '| move '+moveFull+'->'+moveHurt+' work '+workFull+'->'+workHurt, hurtOk?'OK':'FAIL', '| head->consciousness:', consHurt?'OK':'FAIL', '|', chOk?'OK':'FAIL');
+  if (!chOk) throw new Error('Scenario CH failed');
 })();
 `;
 try {
