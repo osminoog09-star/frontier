@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.92';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.93';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -1314,7 +1314,7 @@ function doSpecificWork(p, workIdx) {
   p._activeSkill = WORK_SKILL[workIdx] || null;   // навык, который сейчас задействован (для wmul)
   switch(workIdx) {
     case 0: did = tryChopTree(p); break;
-    case 1: did = tryFarm(p); break;
+    case 1: did = tryFarm(p) || tryFarmZone(p); break;
     case 2: did = tryMine(p); break;
     case 3: did = tryBuild(p) || tryRepair(p); break;
     case 4: did = tryHunt(p); break;
@@ -1365,6 +1365,47 @@ function tryFarm(p) {
     p.state = 'working';
   }
   return true;
+}
+
+// Грядка-зона (Phase 2.5): пешка сеет на пустой клетке зоны, жнёт созревшую → еда.
+function tryFarmZone(p) {
+  const gz = G.zones && G.zones.find(z => z.type === 'grow');
+  if (!gz || !gz.cells.length) return false;
+  if (!gz.crops) gz.crops = {};
+  let ripeT=null, ripeD=Infinity, emptyT=null, emptyD=Infinity;
+  for (const key of gz.cells) {
+    if (claimCount('crop_'+key) >= 1) continue;
+    const c = key.split(','), tx=+c[0], ty=+c[1], d=distTiles(p,tx,ty), g=gz.crops[key];
+    if (g >= 1) { if (d < ripeD) { ripeD=d; ripeT={tx,ty,key}; } }
+    else if (g === undefined) { if (d < emptyD) { emptyD=d; emptyT={tx,ty,key}; } }
+  }
+  const target = ripeT || emptyT;
+  if (!target) return false;
+  claimSpot('crop_'+target.key);
+  p._wt = 'crop_'+target.key;
+  setTarget(p, target.tx, target.ty);
+  if (distTiles(p, target.tx, target.ty) <= 1.2) {
+    if (gz.crops[target.key] >= 1) {                       // жатва
+      const mul = hasResearch('tools') ? 1.5 : 1;
+      const got = Math.floor((5 + randInt(0,4)) * mul);
+      G.res.food += got; if (G.stats) G.stats.foodHarvested += got;
+      delete gz.crops[target.key];
+      if (Sfx && Sfx.coin) Sfx.coin();
+    } else if (gz.crops[target.key] === undefined) {      // посев
+      gz.crops[target.key] = 0.001;
+    }
+  }
+  p.state = 'working';
+  return true;
+}
+// Рост культур в грядках (зима медленнее, лето быстрее).
+function updateCrops() {
+  if (!G.zones) return;
+  const seasonMul = G.season===3 ? 0.2 : G.season===1 ? 1.4 : 1;
+  for (const z of G.zones) {
+    if (z.type !== 'grow' || !z.crops) continue;
+    for (const key in z.crops) if (z.crops[key] < 1) z.crops[key] = Math.min(1, z.crops[key] + 0.0006 * seasonMul);
+  }
 }
 
 function tryMine(p) {
@@ -2606,7 +2647,8 @@ function render() {
   if (!G._roofedCells || (((G.tick||0) - (G._roofTick||-999)) >= 20)) { recomputeRoofedCells(); G._roofTick = G.tick||0; }
   const roofedCells = G._roofedCells;
   const zoneMap = new Map();
-  for (const z of (G.zones||[])) for (const k of z.cells) zoneMap.set(k, z.type);
+  const cropMap = new Map();
+  for (const z of (G.zones||[])) { for (const k of z.cells) zoneMap.set(k, z.type); if (z.crops) for (const k in z.crops) cropMap.set(k, z.crops[k]); }
   for (let y=startY; y<endY; y++) {
     for (let x=startX; x<endX; x++) {
       const tile = G.map[y][x];
@@ -2659,6 +2701,14 @@ function render() {
       if (_zt && ZONE_DEFS[_zt]) {
         ctx.fillStyle = ZONE_DEFS[_zt].fill; ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
         ctx.strokeStyle = ZONE_DEFS[_zt].border; ctx.strokeRect(x*TILE+0.5, y*TILE+0.5, TILE-1, TILE-1);
+        const _cg = cropMap.get(x+','+y);
+        if (_cg != null) {
+          const cx0 = x*TILE+TILE/2, ripe = _cg >= 1;
+          ctx.fillStyle = ripe ? '#e8c040' : '#5aa83a';
+          const h = 3 + Math.min(_cg,1) * (TILE*0.5);
+          ctx.fillRect(cx0-1, y*TILE+TILE-3-h, 2, h);
+          if (ripe) { ctx.beginPath(); ctx.arc(cx0, y*TILE+TILE-3-h, 2.5, 0, Math.PI*2); ctx.fill(); }
+        }
       }
 
       // Objects
@@ -4228,7 +4278,7 @@ function paintZone(type, tx, ty) {
 function eraseZoneAt(tx, ty) {
   if (!G.zones) return false;
   const key = tx + ',' + ty; let removed = false;
-  for (const z of G.zones) { const i = z.cells.indexOf(key); if (i>=0) { z.cells.splice(i,1); removed = true; } }
+  for (const z of G.zones) { const i = z.cells.indexOf(key); if (i>=0) { z.cells.splice(i,1); if (z.crops) delete z.crops[key]; removed = true; } }
   G.zones = G.zones.filter(z => z.cells.length > 0);
   return removed;
 }
@@ -4961,6 +5011,7 @@ function gameLoop(ts) {
       updateEnemies();
       updateBarrels();
       updateFires();
+      updateCrops();
       updateProjectiles();
       updateParticles();
 

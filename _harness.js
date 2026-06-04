@@ -1499,6 +1499,24 @@ const test = `
   console.log('SCENARIO BV (zone framework):');
   console.log('   paint:', paintedOk?'OK':'FAIL', '| water reject:', waterRejOk?'OK':'FAIL', '| one-cell-one-zone:', switchOk?'OK':'FAIL', '| erase:', eraseOk?'OK':'FAIL', '|', bvOk?'OK':'FAIL');
   if (!bvOk) throw new Error('Scenario BV failed');
+
+  // Scenario BW: grow-zone AI — sow, grow, harvest yields food (Phase 2.5)
+  newGame('settlers'); G.zones=[]; G.res.food=0;
+  for (let i=0;i<3;i++) G.map[20][20+i] = { type:TERRAIN.GRASS, v:0, obj:null };
+  paintZone('grow',20,20); paintZone('grow',21,20); paintZone('grow',22,20);
+  const gz = G.zones.find(z=>z.type==='grow');
+  const fp2 = G.pawns[0]; fp2.workMul=1; fp2.workLevel=0; fp2.sick=null; fp2.skills={};
+  fp2.x=20*TILE+TILE/2; fp2.y=20*TILE+TILE/2; fp2.tx=20; fp2.ty=20;
+  G._claims={}; tryFarmZone(fp2);                 // посев на (20,20)
+  const sownOk = gz.crops['20,20']!==undefined && gz.crops['20,20']<1;
+  for (let i=0;i<3000;i++) updateCrops();          // рост до созревания
+  const ripeOk = gz.crops['20,20']>=1;
+  G._claims={}; tryFarmZone(fp2);                 // жатва
+  const harvestOk = G.res.food>0 && gz.crops['20,20']===undefined;
+  const bwOk = sownOk && ripeOk && harvestOk;
+  console.log('SCENARIO BW (grow-zone AI):');
+  console.log('   sow:', sownOk?'OK':'FAIL', '| ripen:', ripeOk?'OK':'FAIL', '| harvest food='+G.res.food, harvestOk?'OK':'FAIL', '|', bwOk?'OK':'FAIL');
+  if (!bwOk) throw new Error('Scenario BW failed');
 })();
 `;
 try {

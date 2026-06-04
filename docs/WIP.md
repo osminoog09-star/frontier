@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.93 - Grow-zone farming (Claude, Phase 2.5). Грядки: посев->рост(z.crops)->жатва->еда; рендер всходов. Scenario BW. Harness A-BW (75) green.
+
+
 - v1.92 - Zone framework (Claude, Phase 2.5). G.zones рисуются кистью (грядка/склад-зона), рендер, save/load, снос. AI следующими срезами. Scenario BV. Harness A-BV (74) green.
 
 
