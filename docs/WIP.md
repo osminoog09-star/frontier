@@ -23,7 +23,8 @@
 
 ## Сейчас в работе
 
-Пусто (Claude-local: дороги v1.99 завершены).
+- [IN PROGRESS] Claude-local 2026-06-04 - Phase 3: погода влияет на движение
+  - Мои файлы: _core.js -> weatherSpeedMul + movement; _harness.js -> сценарий. Codex: точки интереса/бой/UI свободно.
 
 ---
 
