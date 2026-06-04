@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.95';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.96';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -452,26 +452,46 @@ function applyScenario(id, cx=Math.floor(MAP_W/2), cy=Math.floor(MAP_H/2)) {
   }
 }
 
+// Биом по высоте/влажности (чистая функция — тестируемо). Phase 3.
+function biomeAt(e, m) {
+  if (e < 0.30) return 'water';
+  if (e > 0.78) return 'mountain';
+  if (m > 0.62) return 'forest';
+  if (m > 0.45) return 'prairie';
+  if (m > 0.30) return 'plains';
+  return 'desert';
+}
+// Тип тайла для биома (существующие TERRAIN — без правки рендера/сейва).
+function biomeTerrain(biome) {
+  switch (biome) {
+    case 'water':    return TERRAIN.WATER;
+    case 'mountain': return TERRAIN.ROCK;
+    case 'forest':   return TERRAIN.GRASS;
+    case 'prairie':  return TERRAIN.GRASS;
+    case 'plains':   return TERRAIN.DIRT;
+    case 'desert':   return TERRAIN.SAND;
+    default:         return TERRAIN.DIRT;
+  }
+}
+
 function generateMap() {
   // Build smooth value-noise fields for large coherent biomes
-  const seedA = rng()*1000, seedB = rng()*1000;
+  const seedA = rng()*1000, seedB = rng()*1000, seedC = rng()*1000;
   const elev = buildNoiseField(seedA, 5.5);   // height -> water / land / mountains
   const moist = buildNoiseField(seedB, 4.0);  // moisture -> grass vs sand
+  const region = buildNoiseField(seedC, 2.2); // низкочастотный шум -> крупные биом-регионы
 
   const map = [];
   for (let y=0; y<MAP_H; y++) {
     map[y] = [];
     for (let x=0; x<MAP_W; x++) {
       const e = elev[y][x];
-      const m = moist[y][x];
-      let type;
-      if (e < 0.30) type = TERRAIN.WATER;
-      else if (e > 0.78) type = TERRAIN.ROCK;
-      else if (m > 0.55) type = TERRAIN.GRASS;
-      else if (m > 0.38) type = TERRAIN.DIRT;
-      else type = TERRAIN.SAND;
-      // store a per-tile variation value for subtle texture
-      map[y][x] = { type, obj:null, v: (Math.sin(x*12.9+y*78.2)*43758.5)%1 };
+      // регион делает большие области суше (пустыня) или влажнее (лес)
+      const m = clamp(moist[y][x] + (region[y][x] - 0.5) * 0.5, 0, 1);
+      const biome = biomeAt(e, m);
+      const type = biomeTerrain(biome);
+      // store a per-tile variation value for subtle texture + биом для будущих систем (деревья/фуражировка)
+      map[y][x] = { type, obj:null, biome, v: (Math.sin(x*12.9+y*78.2)*43758.5)%1 };
     }
   }
 

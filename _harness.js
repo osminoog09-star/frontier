@@ -1546,6 +1546,19 @@ const test = `
   console.log('SCENARIO BY (allowed zone):');
   console.log('   no-zone all:', anyOk?'OK':'FAIL', '| inside:', inOk?'OK':'FAIL', '| outside blocked:', outOk?'OK':'FAIL', '|', byZoneOk?'OK':'FAIL');
   if (!byZoneOk) throw new Error('Scenario BY failed');
+
+  // Scenario BZ: biome classifier drives map regions (Phase 3 world gen)
+  const bzWater = biomeAt(0.2,0.5)==='water', bzMount = biomeAt(0.9,0.5)==='mountain';
+  const bzForest = biomeAt(0.5,0.7)==='forest', bzPrairie = biomeAt(0.5,0.5)==='prairie', bzDesert = biomeAt(0.5,0.1)==='desert';
+  const bzTerr = biomeTerrain('desert')===TERRAIN.SAND && biomeTerrain('forest')===TERRAIN.GRASS && biomeTerrain('mountain')===TERRAIN.ROCK && biomeTerrain('water')===TERRAIN.WATER;
+  newGame('settlers');
+  const biomesSeen = new Set();
+  for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) if (G.map[y][x].biome) biomesSeen.add(G.map[y][x].biome);
+  const varietyOk = biomesSeen.size >= 3;
+  const bzOk = bzWater&&bzMount&&bzForest&&bzPrairie&&bzDesert&&bzTerr&&varietyOk;
+  console.log('SCENARIO BZ (biome world gen):');
+  console.log('   classify:', (bzWater&&bzMount&&bzForest&&bzPrairie&&bzDesert)?'OK':'FAIL', '| terrain map:', bzTerr?'OK':'FAIL', '| biomes on map:', biomesSeen.size, varietyOk?'OK':'FAIL', '|', bzOk?'OK':'FAIL');
+  if (!bzOk) throw new Error('Scenario BZ failed');
 })();
 `;
 try {

@@ -23,10 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - Phase 3 срез 1: биомы в генерации карты
-  - Мои файлы (другому агенту не трогать): `_core.js` -> функция `generateMap()` + TERRAIN/цвета тайлов; `_harness.js` -> сценарий биомов.
-  - Свободно для другого агента: hauling, бой, зоны (Phase 2.5 хвосты), навыки/личность/вес, UI/сайт.
-  - Коммичу маленькими срезами; перед push всегда `git pull --ff-only`.
+Пусто (Claude-local: биомы v1.96 завершены и запушены).
 
 ---
 
@@ -41,6 +38,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v1.96 - Biome world gen (Claude-local, Phase 3). Карта делится на биомы (пустыня/равнина/прерия/лес/горы) через biomeAt/biomeTerrain + региональный шум. Scenario BZ. Harness A-BZ (78) green.
 
 - v1.95 - Allowed zones (Claude, Phase 2.5). Разрешённая зона ограничивает блуждание пешек (isAllowedTile); кнопка в Архитекторе. Scenario BY. Harness A-BY (77) green.
 
