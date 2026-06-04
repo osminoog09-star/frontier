@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.97';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.98';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -507,6 +507,17 @@ function generateMap() {
     for (let dx=-w; dx<=w; dx++) {
       const xx = rx+dx;
       if (xx>=0 && xx<MAP_W) map[y][xx].type = TERRAIN.WATER;
+    }
+  }
+
+  // Озёра: несколько водных «клякс» вразброс (помимо реки) — мир разнообразнее.
+  const lakeCount = 3 + rngInt(0, 2);
+  for (let l=0; l<lakeCount; l++) {
+    const lx = rngInt(6, MAP_W-6), ly = rngInt(6, MAP_H-6), r = 2 + rngInt(0, 2);
+    for (let dy=-r; dy<=r; dy++) for (let dx=-r; dx<=r; dx++) {
+      const xx = lx+dx, yy = ly+dy;
+      if (xx<0||yy<0||xx>=MAP_W||yy>=MAP_H) continue;
+      if (dx*dx + dy*dy <= r*r) map[yy][xx].type = TERRAIN.WATER;
     }
   }
 

@@ -23,9 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - Phase 3 п.2: реки/озёра в генерации карты
-  - Мои файлы: `_core.js` -> `generateMap()` (вода/реки/озёра); `_harness.js` -> сценарий.
-  - Codex: бери п.3 (точки интереса: руины/лагеря/прииски) и бой/UI/hauling. НЕ трогай generateMap, пока IN PROGRESS.
+Пусто (Claude-local: реки/озёра v1.98 завершены).
 
 ---
 
@@ -40,6 +38,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v1.98 - Rivers + lakes (Claude-local, Phase 3). Озёра-кляксы вразброс помимо реки; постройки не на воде. Scenario CB. Harness A-CB (80) green.
 
 - v1.97 - Resource density by biome (Claude-local, Phase 3). Деревья/камни по биому (лес густой, пустыня пустая, руда в горах); treeChanceForBiome. Scenario CA. Harness A-CA (79) green.
 

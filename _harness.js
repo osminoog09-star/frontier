@@ -1572,6 +1572,18 @@ const test = `
   console.log('SCENARIO CA (resource density by biome):');
   console.log('   chance gradient:', caChainOk?'OK':'FAIL', '| trees='+treeTotal+' desert='+desertTrees, caMapOk?'OK':'FAIL', '|', caOk?'OK':'FAIL');
   if (!caOk) throw new Error('Scenario CA failed');
+
+  // Scenario CB: rivers + lakes — water present, reasonable fraction, spread across map (Phase 3)
+  newGame('settlers');
+  let water=0; const quad=[0,0,0,0];
+  for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) if (G.map[y][x].type===TERRAIN.WATER) { water++; quad[(y<MAP_H/2?0:2)+(x<MAP_W/2?0:1)]++; }
+  const frac = water/(MAP_W*MAP_H);
+  const fracOk = frac>0.03 && frac<0.35;
+  const spreadOk = quad.filter(c=>c>0).length >= 2;
+  const cbOk = fracOk && spreadOk;
+  console.log('SCENARIO CB (rivers + lakes):');
+  console.log('   water frac', frac.toFixed(3), fracOk?'OK':'FAIL', '| quadrants', quad.filter(c=>c>0).length, spreadOk?'OK':'FAIL', '|', cbOk?'OK':'FAIL');
+  if (!cbOk) throw new Error('Scenario CB failed');
 })();
 `;
 try {
