@@ -23,9 +23,10 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - Phase 3 п.1: плавание (каркас)
-  - Срез 1 (сейчас): swimSpeedMul(p)/canSwim(p) чистые функции + сценарий. A* воду пока НЕ открываю (это отдельный срез, риск для путей).
-  - Мои файлы: `_core.js` (хелперы плавания), `_harness.js` (сценарий). Codex: события POI/экосистема — свободно.
+- [IN PROGRESS] Codex 2026-06-04 - POI events foundation
+  - Сделано: взял свободный срез Phase 3, не пересекающийся с Claude-плаванием.
+  - Осталось: добавить одноразовый обыск POI, награды/опасность по типам, Scenario CF, сборку, документы, версию.
+  - Затронутые файлы: `_core.js`, `_harness.js`, `frontier.template.html`, `frontier.html`, `versions/frontier-v2.02.html`, `ROADMAP.md`, `docs/TECH_ROADMAP.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`, `docs/WIP.md`, `index.html`.
 
 ---
 

@@ -1629,6 +1629,43 @@ const test = `
   console.log('SCENARIO CE (frontier POIs):');
   console.log('   count/types:', pois.length+'/'+[...poiTypes].join(','), typeOk?'OK':'FAIL', '| valid:', validOk?'OK':'FAIL', '| lookup:', atOk?'OK':'FAIL', '| save/load:', roundOk?'OK':'FAIL', '|', ceOk?'OK':'FAIL');
   if (!ceOk) throw new Error('Scenario CE failed');
+
+  // Scenario CF: swimming foundation — skill sets water speed, competence gate (Phase 3)
+  newGame('settlers');
+  const swP = G.pawns[0]; swP.skills = {};
+  const sw0 = swimSpeedMul(swP);
+  swP.skills = { swimming:{lvl:20,xp:0} };
+  const sw20 = swimSpeedMul(swP);
+  const swMonoOk = sw20 > sw0 && Math.abs(sw0-0.35) < 0.01 && Math.abs(sw20-1) < 1e-9;
+  const swCanOk = canSwim({skills:{}}) === false && canSwim({skills:{swimming:{lvl:5,xp:0}}}) === true;
+  const cfOk = swMonoOk && swCanOk;
+  console.log('SCENARIO CF (swimming foundation):');
+  console.log('   swimSpeedMul 0->20:', sw0.toFixed(2)+'->'+sw20.toFixed(2), swMonoOk?'OK':'FAIL', '| canSwim gate:', swCanOk?'OK':'FAIL', '|', cfOk?'OK':'FAIL');
+  if (!cfOk) throw new Error('Scenario CF failed');
+
+  // Scenario CG: POI events — one-shot rewards/threat and save/load state (Phase 3)
+  newGame('settlers');
+  G.res.food=0; G.res.med=0; G.res.sci=0; G.res.gold=0; G.res.ore=0; G.enemies=[];
+  const ruinPoi = {id:'test_ruin', type:'ruin', tx:10, ty:10, discovered:false, searched:false};
+  const claimPoi = {id:'test_claim', type:'goldClaim', tx:12, ty:10, discovered:false, searched:false};
+  const campPoi = {id:'test_camp', type:'banditCamp', tx:14, ty:10, discovered:false, searched:false};
+  G.pois = [ruinPoi, claimPoi, campPoi];
+  const ruinFirst = explorePoi(ruinPoi, true);
+  const ruinResOk = G.res.food===18 && G.res.med===4 && G.res.sci===4 && ruinPoi.searched && ruinPoi.discovered;
+  const ruinSecond = explorePoi(ruinPoi, true);
+  const oneShotOk = ruinSecond===false && G.res.food===18 && G.res.med===4 && G.res.sci===4;
+  const claimFirst = explorePoi(claimPoi, true);
+  const claimOk = claimFirst && G.res.gold===45 && G.res.ore===10 && claimPoi.searched;
+  const enemiesBefore = G.enemies.length;
+  const campFirst = explorePoi(campPoi, true);
+  const campOk = campFirst && G.res.gold===65 && G.enemies.length===enemiesBefore+2 && campPoi.searched;
+  saveGame(); loadGame();
+  const savedPoi = (G.pois||[]).find(p=>p.id==='test_ruin');
+  const saveOk = !!savedPoi && savedPoi.searched===true && savedPoi.discovered===true;
+  const cgOk = ruinFirst && ruinResOk && oneShotOk && claimOk && campOk && saveOk;
+  console.log('SCENARIO CG (POI events):');
+  console.log('   ruin reward:', ruinResOk?'OK':'FAIL', '| one-shot:', oneShotOk?'OK':'FAIL', '| claim:', claimOk?'OK':'FAIL', '| camp threat:', campOk?'OK':'FAIL', '| save/load:', saveOk?'OK':'FAIL', '|', cgOk?'OK':'FAIL');
+  if (!cgOk) throw new Error('Scenario CG failed');
 })();
 `;
 try {

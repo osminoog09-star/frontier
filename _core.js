@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.01';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.03';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -550,9 +550,9 @@ function generateMap() {
 }
 
 const POI_DEFS = {
-  ruin:       { name:'Руины поселенцев', icon:'🏚️', color:'#b8a06a', note:'Старая усадьба. Позже станет источником находок и событий.' },
-  banditCamp: { name:'Лагерь бандитов',  icon:'🚩', color:'#b84a3a', note:'Опасная точка. Позже будет давать угрозы и рейды.' },
-  goldClaim:  { name:'Золотая жила',     icon:'💰', color:'#e8c95a', note:'Перспективный прииск. Позже даст разведку золота.' },
+  ruin:       { name:'Руины поселенцев', icon:'🏚️', color:'#b8a06a', note:'Старая усадьба: можно обследовать и найти припасы.', result:'еда +18, медикаменты +4, наука +4' },
+  banditCamp: { name:'Лагерь бандитов',  icon:'🚩', color:'#b84a3a', note:'Опасная точка: разведка даст добычу, но поднимет тревогу.', result:'золото +20, малый налёт' },
+  goldClaim:  { name:'Золотая жила',     icon:'💰', color:'#e8c95a', note:'Перспективный прииск: обследование вскрывает жилу.', result:'золото +45, руда +10' },
 };
 
 function poiDef(type) { return POI_DEFS[type] || POI_DEFS.ruin; }
@@ -601,6 +601,30 @@ function generatePOIs(map) {
 
 function poiAt(tx, ty) {
   return (G.pois || []).find(p => p.tx===tx && p.ty===ty);
+}
+
+function explorePoi(poi, quiet=false) {
+  if (!G || !poi || !POI_DEFS[poi.type]) return false;
+  poi.discovered = true;
+  if (poi.searched) {
+    if (!quiet) addLog(`🗺️ ${poiDef(poi.type).name} уже обследована.`, '');
+    return false;
+  }
+  poi.searched = true;
+  poi.exploredDay = G.day || 1;
+  if (poi.type === 'ruin') {
+    G.res.food += 18; G.res.med += 4; G.res.sci += 4;
+    if (!quiet) addLog('🏚️ Руины обследованы: нашли еду, медикаменты и старые записи.', 'good');
+  } else if (poi.type === 'goldClaim') {
+    G.res.gold += 45; G.res.ore += 10;
+    if (!quiet) addLog('💰 Прииск разведан: +45 золота и +10 руды.', 'good');
+  } else if (poi.type === 'banditCamp') {
+    G.res.gold += 20;
+    spawnEnemy(2);
+    Sfx.alarm();
+    if (!quiet) addLog('🚩 Лагерь бандитов обыскан: добыча найдена, но разведчики подняли тревогу!', 'danger');
+  }
+  return true;
 }
 
 // Smooth value noise field 0..1 (bilinear-interpolated lattice + octaves)
@@ -846,6 +870,10 @@ function loadSpeedMul(p) {
   if (ratio <= 1.0) return 0.65;
   return 0.45;
 }
+// Плавание (Phase 3, каркас): скорость в воде зависит от навыка swimming.
+// A* воду пока не открывает — это отдельный срез; здесь только чистые функции для него.
+function swimSpeedMul(p) { return clamp(0.35 + 0.0325 * skillLvl(p, 'swimming'), 0.35, 1); }
+function canSwim(p) { return skillLvl(p, 'swimming') >= 3; }   // достаточно умеет, чтобы рискнуть глубокой водой
 // Погода замедляет передвижение: дождь/гроза/метель (Phase 3).
 function weatherSpeedMul() {
   if (!G) return 1;
@@ -2561,7 +2589,13 @@ function normalizeGameState(source='') {
   }
   if (!Array.isArray(G.pois) || G.pois.length === 0) G.pois = generatePOIs(G.map);
   G.pois = (G.pois || []).filter(p => p && POI_DEFS[p.type] && p.tx>=0 && p.ty>=0 && p.tx<MAP_W && p.ty<MAP_H)
-    .map(p => ({ id:p.id || `poi_${p.type}_${p.tx}_${p.ty}`, type:p.type, tx:p.tx, ty:p.ty, discovered:!!p.discovered }));
+    .map(p => ({
+      id:p.id || `poi_${p.type}_${p.tx}_${p.ty}`,
+      type:p.type, tx:p.tx, ty:p.ty,
+      discovered:!!p.discovered,
+      searched:!!p.searched,
+      exploredDay:p.exploredDay || 0,
+    }));
 }
 
 function safeDiagRuntime(key, msg, stack='') {
@@ -3180,6 +3214,7 @@ function showPoiInfo(poi, cx, cy) {
     <div class="inf-title">${def.icon} ${def.name}</div>
     <div class="inf-line">Координаты: <b>${poi.tx},${poi.ty}</b></div>
     <div class="inf-line">${def.note}</div>
+    <div class="inf-line">Исход: <b>${poi.searched ? 'уже обследовано' : def.result}</b></div>
   `;
   setTimeout(() => { overlay.style.display='none'; }, 3000);
 }
@@ -4280,7 +4315,7 @@ function handleLeftClick(tx, ty, cx, cy) {
 
   const poi = poiAt(tx, ty);
   if (poi) {
-    poi.discovered = true;
+    explorePoi(poi);
     showPoiInfo(poi, cx, cy);
     return;
   }

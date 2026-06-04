@@ -1,5 +1,11 @@
 # FRONTIER changelog
 
+## v2.03 - Swimming foundation (Phase 3)
+
+- Каркас плавания: swimSpeedMul(p) (скорость в воде от навыка swimming: 0.35 на 0 ур. -> 1.0 на 20) и canSwim(p) (>=3 ур. — рискнуть глубокой водой).
+- Чистые функции, A* воду пока НЕ открывает (это отдельный срез — риск для путей). Scenario CF. Harness A-CF (84) green.
+- (v2.02 зарезервирована за Codex POI-events; взял v2.03, чтобы не пересечься по версии.)
+
 ## v2.01 - Frontier points of interest (Phase 3, Codex)
 
 - На карте генерируются первые Frontier-точки интереса: руины поселенцев, лагеря бандитов и золотые жилы.
