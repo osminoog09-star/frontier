@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.88';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.89';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -67,6 +67,47 @@ function topSkills(p, n=3) {
     .filter(x => x.lvl > 0).sort((a,b) => b.lvl - a.lvl).slice(0, n);
 }
 const WORK_ICONS = ['🪓','🌾','⛏️','🔨','🦌','💊','🛡️','📦'];
+
+// ──────────── ЛИЧНОСТЬ: оси характера 0–100 (Phase 2) ────────────
+// Поверх трейтов. Влияние на поведение/настроение подключается следующими срезами.
+const PERSONALITY_AXES = [
+  { id:'bravery',     hi:'Смелый',            lo:'Робкий' },
+  { id:'industry',    hi:'Трудолюбивый',      lo:'Ленивый' },
+  { id:'aggression',  hi:'Агрессивный',       lo:'Миролюбивый' },
+  { id:'kindness',    hi:'Добрый',            lo:'Чёрствый' },
+  { id:'sociability', hi:'Общительный',       lo:'Замкнутый' },
+  { id:'greed',       hi:'Жадный',            lo:'Щедрый' },
+  { id:'curiosity',   hi:'Любознательный',    lo:'Равнодушный' },
+  { id:'discipline',  hi:'Дисциплинированный',lo:'Разгильдяй' },
+];
+function rollPersonality(traits) {
+  const t = traits || [];
+  const p = {};
+  for (const ax of PERSONALITY_AXES) p[ax.id] = rngInt(20, 80);
+  const bump = (id, d) => { p[id] = clamp(p[id] + d, 0, 100); };
+  if (t.includes('brave'))       bump('bravery', 30);
+  if (t.includes('coward'))      bump('bravery', -30);
+  if (t.includes('hardworking')) bump('industry', 30);
+  if (t.includes('lazy'))        bump('industry', -30);
+  if (t.includes('kind'))      { bump('kindness', 25); bump('sociability', 10); }
+  if (t.includes('greedy'))      bump('greed', 35);
+  if (t.includes('optimist'))    bump('sociability', 10);
+  if (t.includes('pessimist'))   bump('sociability', -10);
+  if (t.includes('drunkard'))  { bump('sociability', 15); bump('discipline', -15); }
+  return p;
+}
+function axis(p, id) { return (p && p.personality && typeof p.personality[id] === 'number') ? p.personality[id] : 50; }
+// Краткий ярлык: самая выраженная ось (или «Уравновешенный»).
+function personalitySummary(p) {
+  if (!p || !p.personality) return 'Уравновешенный';
+  let best = null, bestDev = 0;
+  for (const ax of PERSONALITY_AXES) {
+    const v = axis(p, ax.id), dev = Math.abs(v - 50);
+    if (dev > bestDev) { bestDev = dev; best = ax; }
+  }
+  if (!best || bestDev < 16) return 'Уравновешенный';
+  return axis(p, best.id) >= 50 ? best.hi : best.lo;
+}
 
 const BUILDS = {
   farm:   { name:'Ферма',    icon:'🌾', cost:{wood:10},          size:1, prod:'food',  rate:0.3 },
@@ -559,6 +600,7 @@ function applyTraitEffects(p) {
   if (p.traits.includes('hardworking')) p.workMul *= 1.25;
   if (p.traits.includes('lazy')) p.workMul *= 0.8;
   if (p.traits.includes('tough')) { p.maxHp = 130; if (p.hp===100) p.hp = 130; }
+  p.personality = rollPersonality(p.traits);
 }
 
 // Effective work speed (traits + illness)
@@ -2303,7 +2345,10 @@ function normalizeGameState(source='') {
   if (!Array.isArray(G.items)) G.items = [];
   if (!Array.isArray(G.floorBlueprints)) G.floorBlueprints = [];
   if (!Array.isArray(G.fires)) G.fires = [];
-  for (const p of G.pawns || []) { if (!p.skills || typeof p.skills !== 'object') p.skills = {}; }
+  for (const p of G.pawns || []) {
+    if (!p.skills || typeof p.skills !== 'object') p.skills = {};
+    if (!p.personality || typeof p.personality !== 'object') p.personality = rollPersonality(p.traits);
+  }
   for (const b of G.buildings || []) {
     normalizeStockpileFilters(b);
     normalizeRecipeStation(b);
@@ -3595,6 +3640,7 @@ function createPawnCard(p) {
   card.innerHTML = `
     <div class="pawn-name">🤠 ${p.name} ${p.dead?'(погиб)':''}</div>
     <div class="pawn-status">${p.role}${(p.workLevel||0)>0?` ⭐${p.workLevel}`:''} • ${stateNames[p.state]||p.state} ${woundText} ${sickText}</div>
+    <div class="pawn-status" style="color:#9a8fc0">🧠 ${personalitySummary(p)}</div>
     <div class="trait-row">${traitChips}</div>
     ${bar('HP',p.hp,p.maxHp,'bar-hp')}
     ${bar('Еда',p.food,p.maxFood,'bar-food')}

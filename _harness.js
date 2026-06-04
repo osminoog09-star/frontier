@@ -1433,6 +1433,21 @@ const test = `
   console.log('SCENARIO BR (mentorship + shooting skill):');
   console.log('   mentor bonus', withMentor+'->'+noMentor, mentorOk?'OK':'FAIL', '| shoot hit', hitLow.toFixed(2)+'->'+hitHigh.toFixed(2), shootHitOk?'OK':'FAIL', '|', brOk?'OK':'FAIL');
   if (!brOk) throw new Error('Scenario BR failed');
+
+  // Scenario BS: personality axes — rolled 0..100, shifted by traits, summary label (Phase 2)
+  seedRng(123); const baseP = rollPersonality([]);
+  seedRng(123); const braveP = rollPersonality(['brave']);
+  seedRng(123); const cowardP = rollPersonality(['coward']);
+  const bsRangeOk = PERSONALITY_AXES.every(ax => baseP[ax.id] >= 0 && baseP[ax.id] <= 100 && typeof baseP[ax.id] === 'number');
+  const bsTraitOk = braveP.bravery > baseP.bravery && cowardP.bravery < baseP.bravery;
+  const bsDefaultOk = axis({}, 'bravery') === 50 && axis({personality:{bravery:77}}, 'bravery') === 77;
+  const bsSummaryOk = personalitySummary({personality:{bravery:90}}) === 'Смелый'
+    && personalitySummary({personality:{bravery:10}}) === 'Робкий'
+    && personalitySummary({personality:{}}) === 'Уравновешенный';
+  const bsOk = bsRangeOk && bsTraitOk && bsDefaultOk && bsSummaryOk;
+  console.log('SCENARIO BS (personality axes):');
+  console.log('   range:', bsRangeOk?'OK':'FAIL', '| traits shift:', bsTraitOk?'OK':'FAIL', '(brave '+baseP.bravery+'->'+braveP.bravery+')', '| default/summary:', (bsDefaultOk&&bsSummaryOk)?'OK':'FAIL', '|', bsOk?'OK':'FAIL');
+  if (!bsOk) throw new Error('Scenario BS failed');
 })();
 `;
 try {

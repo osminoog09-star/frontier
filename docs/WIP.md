@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.89 - Personality axes (Claude, Phase 2). 8 осей характера 0-100, вывод из трейтов, ярлык в карточке (axis/personalitySummary). Поведение не задето. Scenario BS. Harness A-BS (71) green.
+
+
 - v1.88 - FIX категория Архитектора не закрывается при выборе здания (Claude). Убран removeAttribute(open). Проверено в браузере. Заведён docs/BUGS.md. Harness A-BR (70) green.
 
 
