@@ -23,8 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - переосмыслить «Лагерь» -> «Спальный мешок» (RimWorld bedroll, display-only)
-  - Мои файлы: _core.js (BUILDS.camp name/icon), frontier.template.html (кнопка). Тип camp оставляю (сценарии целы). Codex: карта-мир/вода — свободно.
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -38,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.13 - Лагерь->Спальный мешок (Claude-local). RimWorld-bedroll; кровать в комнате приоритетнее. Display-only. Harness A-CO (93) green.
 
 - v2.12 - Furniture quality -> comfort (Claude-local). Среднее качество мебели даёт бонус уюта; обычное=+0 (сим цел). Scenario CO. Harness A-CO (93) green.
 

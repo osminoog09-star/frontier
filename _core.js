@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.12';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.13';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -154,7 +154,7 @@ const BUILDS = {
   lab:    { name:'Лаборатория',icon:'🔬',cost:{wood:25,ore:15},  size:2, prod:'sci',   rate:0.15 },
   clinic: { name:'Клиника',  icon:'💊', cost:{wood:20,med:0},    size:2, prod:'heal',  rate:0.3 },
   smithy: { name:'Кузня',    icon:'🔨', cost:{wood:20,ore:20},   size:2, prod:'gold',  rate:0.1 },
-  camp:   { name:'Лагерь',   icon:'🏕️', cost:{wood:15},          size:2, prod:'rest',  rate:0.2 },
+  camp:   { name:'Спальный мешок', icon:'🛌', cost:{wood:15},     size:2, prod:'rest',  rate:0.2 },
   bed:    { name:'Кровать',  icon:'🛏️', cost:{wood:12},          size:1, prod:'comfort',rate:0 },
   table:  { name:'Стол',     icon:'🍽️', cost:{wood:10},          size:1, prod:'comfort',rate:0 },
   decor:  { name:'Декор',    icon:'🪴', cost:{wood:8,gold:2},     size:1, prod:'beauty', rate:0 },
