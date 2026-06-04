@@ -23,7 +23,8 @@
 
 ## Сейчас в работе
 
-Пусто.
+- [IN PROGRESS] Claude-local 2026-06-04 - Frontier-материал: саманная стена (adobe)
+  - Мои файлы: _core.js (BUILDS/getBuildingMaxHp/drawStructure/buildMap), frontier.template.html (кнопка), _harness.js. Codex: карта-мир/вода — свободно.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
