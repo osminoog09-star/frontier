@@ -23,7 +23,8 @@
 
 ## Сейчас в работе
 
-Пусто.
+- [IN PROGRESS] Claude-local 2026-06-04 - травмы частей тела в карточке пешки
+  - Мои файлы: _core.js (createPawnCard — строка травм/capacity), _harness.js (сценарий). Codex: вода/A*, экосистема — свободно.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
