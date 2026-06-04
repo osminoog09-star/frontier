@@ -1462,6 +1462,25 @@ const test = `
   console.log('SCENARIO BT (personality affects mood):');
   console.log('   moodDelta brave', dBrave.toFixed(2), '> timid', dTimid.toFixed(2), '|', btOk?'OK':'FAIL');
   if (!btOk) throw new Error('Scenario BT failed');
+
+  // Scenario BU: weight & carry — load reduces move speed, tough carries more (Phase 2)
+  newGame('settlers');
+  const wp = G.pawns[0]; wp.traits=[]; wp.personality={industry:50};
+  const capWp = pawnCarryCapacity(wp);
+  const buCapOk = capWp >= 30 && capWp <= 45;
+  wp.carry = null;
+  const buEmptyOk = pawnLoad(wp)===0 && loadSpeedMul(wp)===1;
+  wp.carry = { res:'wood', amount:5 };                 // 12.5кг -> налегке
+  const buLightOk = Math.abs(pawnLoad(wp)-12.5)<1e-9 && loadSpeedMul(wp)===1;
+  wp.carry = { res:'wood', amount:11 };                // 27.5кг ~0.78 -> 0.85
+  const buMedOk = loadSpeedMul(wp)===0.85;
+  wp.carry = { res:'ore', amount:12 };                 // 48кг -> перегруз 0.45
+  const buOverOk = loadSpeedMul(wp)===0.45;
+  const buToughOk = pawnCarryCapacity({traits:['tough'],personality:{industry:50}}) > pawnCarryCapacity({traits:[],personality:{industry:50}});
+  const buOk = buCapOk && buEmptyOk && buLightOk && buMedOk && buOverOk && buToughOk;
+  console.log('SCENARIO BU (weight & carry):');
+  console.log('   cap', capWp, buCapOk?'OK':'FAIL', '| load tiers 1/0.85/0.45:', (buLightOk&&buMedOk&&buOverOk)?'OK':'FAIL', '| tough carries more:', buToughOk?'OK':'FAIL', '|', buOk?'OK':'FAIL');
+  if (!buOk) throw new Error('Scenario BU failed');
 })();
 `;
 try {

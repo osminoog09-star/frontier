@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.91 - Weight & carry (Claude, Phase 2). Вес ресурсов (кг), грузоподъёмность, гружёный медленнее (loadSpeedMul). Scenario BU. Harness A-BU (73) green.
+
+
 - v1.90 - Personality affects behavior (Claude, Phase 2). Смелость->настроение рядом с врагами; общительность->соц.отношения. Scenario BT. Harness A-BT (72) green.
 
 

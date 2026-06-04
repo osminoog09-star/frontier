@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.90';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.91';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -722,6 +722,29 @@ function terrainSpeedMul(tx, ty) {
     default: return 1.0;
   }
 }
+// ──────────── ВЕС И ПЕРЕНОСКА (Phase 2) ────────────
+// Вес единицы ресурса в кг (реалистичные ориентиры, затем подгонка под играбельность).
+const RES_WEIGHT = { food:0.5, wood:2.5, ore:4, meat:0.6, med:0.3, gold:0.1, sci:0, buildpack:2.5 };
+function pawnCarryCapacity(p) {
+  let cap = 35;                                   // базовая комфортная нагрузка, кг
+  if (p && p.traits && p.traits.includes('tough')) cap += 12;
+  if (p) cap += Math.round((axis(p,'industry') - 50) / 5);  // трудолюбивые тащат чуть больше
+  return Math.max(20, cap);
+}
+function pawnLoad(p) {
+  if (!p || !p.carry) return 0;
+  const w = RES_WEIGHT[p.carry.res];
+  return (typeof w === 'number' ? w : 1) * (p.carry.amount || 0);
+}
+// Множитель скорости от загрузки: налегке — полная, перегруз — почти стоп.
+function loadSpeedMul(p) {
+  const cap = pawnCarryCapacity(p);
+  const ratio = cap > 0 ? pawnLoad(p) / cap : 0;
+  if (ratio <= 0.5) return 1;
+  if (ratio <= 0.8) return 0.85;
+  if (ratio <= 1.0) return 0.65;
+  return 0.45;
+}
 function mountSpeedMul() {
   if (!G || !G.buildings) return 1;
   const stables = G.buildings.filter(b => b.type === 'stable' && b.done && !b.blueprint).length;
@@ -854,7 +877,7 @@ function updatePawns() {
     // Movement (faster when charging into combat); конюшни дают лошадей → ускорение
     const base = p.state==='sleeping' ? 0.5 : inCombat ? 2.4 : 2.0;
     const terrain = terrainSpeedMul(Math.floor(p.x/TILE), Math.floor(p.y/TILE));
-    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul()) * terrain;
+    const moveSpeed = base * (p.state==='sleeping' ? 1 : mountSpeedMul()) * terrain * loadSpeedMul(p);
     moveTowardsTarget(p, moveSpeed);
 
     if (p.state === 'working') gainWorkXp(p);   // опыт за труд

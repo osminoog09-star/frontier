@@ -1,5 +1,11 @@
 # FRONTIER changelog
 
+## v1.91 - Weight & carry foundation (Phase 2)
+
+- Реальный вес/переноска: у ресурсов вес в кг (RES_WEIGHT), у пешки грузоподъёмность (pawnCarryCapacity, база 35кг, +tough, +трудолюбие).
+- Гружёная пешка двигается медленнее: loadSpeedMul по порогам (<=50% полная, ~0.85, ~0.65, перегруз 0.45). Подключено к движению (вместе с местностью и лошадьми).
+- Фундамент для системы выживания/логистики; связка с terrainSpeedMul. Scenario BU. Harness A-BU (73) green; перенос (F) цел.
+
 ## v1.90 - Personality affects behavior (Phase 2)
 
 - Оси характера теперь влияют на поведение:
