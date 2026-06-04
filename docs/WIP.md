@@ -23,7 +23,9 @@
 
 ## Сейчас в работе
 
-Пусто (Claude-local: реки/озёра v1.98 завершены).
+- [IN PROGRESS] Claude-local 2026-06-04 - Phase 3: дороги (ускорение движения)
+  - Мои файлы: _core.js -> generateMap()/слой дороги + terrainSpeedMul; _harness.js -> сценарий.
+  - Codex: точки интереса (руины/лагеря/прииски), бой, UI — свободно. Не трогай generateMap пока IN PROGRESS.
 
 ---
 
