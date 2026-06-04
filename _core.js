@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.94';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.95';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -2300,8 +2300,12 @@ function workOnObj(p, target, type, duration, onDone) {
 
 function wander(p, range) {
   if (G.tick % 120 === p.id % 120) {
-    const tx = clamp(Math.floor(p.x/TILE)+randInt(-range,range), 0, MAP_W-1);
-    const ty = clamp(Math.floor(p.y/TILE)+randInt(-range,range), 0, MAP_H-1);
+    let tx = clamp(Math.floor(p.x/TILE)+randInt(-range,range), 0, MAP_W-1);
+    let ty = clamp(Math.floor(p.y/TILE)+randInt(-range,range), 0, MAP_H-1);
+    if (!isAllowedTile(tx, ty)) {                 // держимся в разрешённой зоне
+      const z = G.zones.find(z => z.type === 'allowed');
+      if (z && z.cells.length) { const c = z.cells[rngInt(0, z.cells.length-1)].split(','); tx=+c[0]; ty=+c[1]; }
+    }
     if (G.map[ty][tx].type !== TERRAIN.WATER) setTarget(p, tx, ty);
   }
 }
@@ -4267,7 +4271,14 @@ function placeFloor(tx, ty, def) {
 const ZONE_DEFS = {
   grow:      { name:'Грядка',     fill:'rgba(90,170,70,0.22)',  border:'rgba(124,192,90,0.6)' },
   stockpile: { name:'Склад-зона', fill:'rgba(200,165,80,0.20)', border:'rgba(202,164,90,0.6)' },
+  allowed:   { name:'Разрешённая',fill:'rgba(90,140,210,0.16)', border:'rgba(120,170,235,0.55)' },
 };
+// Разрешено ли пешке находиться на клетке: если задана зона «Разрешённая» — только в ней.
+function isAllowedTile(tx, ty) {
+  const z = G.zones && G.zones.find(z => z.type === 'allowed');
+  if (!z || !z.cells.length) return true;
+  return z.cells.includes(tx + ',' + ty);
+}
 function ensureZones() { if (!Array.isArray(G.zones)) G.zones = []; return G.zones; }
 function zoneAt(tx, ty) {
   if (!G.zones) return null;
@@ -4565,7 +4576,7 @@ function setupButtons() {
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
     'build-floorwood-btn':'floor_wood','build-floorstone-btn':'floor_stone',
-    'build-zonegrow-btn':'zone_grow','build-zonestock-btn':'zone_stockpile',
+    'build-zonegrow-btn':'zone_grow','build-zonestock-btn':'zone_stockpile','build-zoneallowed-btn':'zone_allowed',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     document.getElementById(id).addEventListener('click', () => {
@@ -4837,7 +4848,7 @@ function updateBuildButtons() {
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
     'build-floorwood-btn':'floor_wood','build-floorstone-btn':'floor_stone',
-    'build-zonegrow-btn':'zone_grow','build-zonestock-btn':'zone_stockpile',
+    'build-zonegrow-btn':'zone_grow','build-zonestock-btn':'zone_stockpile','build-zoneallowed-btn':'zone_allowed',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     const btn = document.getElementById(id);

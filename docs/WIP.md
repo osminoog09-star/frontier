@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.95 - Allowed zones (Claude, Phase 2.5). Разрешённая зона ограничивает блуждание пешек (isAllowedTile); кнопка в Архитекторе. Scenario BY. Harness A-BY (77) green.
+
+
 - v1.94 - Stockpile zone (Claude, Phase 2.5). Склад-зона = сток для переноски (nearestStockpileForRes/hasStockpileForRes учитывают зону). Здания-склады целы. Scenario BX. Harness A-BX (76) green.
 
 

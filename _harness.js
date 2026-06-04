@@ -1534,6 +1534,18 @@ const test = `
   console.log('SCENARIO BX (stockpile zone):');
   console.log('   no-pile false:', noneOk?'OK':'FAIL', '| zone accepts:', hasOk?'OK':'FAIL', '| target:', targetOk?'OK':'FAIL', '| deposit +7:', depositOk?'OK':'FAIL', '|', bxOk?'OK':'FAIL');
   if (!bxOk) throw new Error('Scenario BX failed');
+
+  // Scenario BY: allowed zone — restricts where pawns may be (Phase 2.5 territory designation)
+  newGame('settlers'); G.zones=[];
+  const anyOk = isAllowedTile(5,5) === true;                  // нет зоны — всё разрешено
+  G.map[10][10] = { type:TERRAIN.GRASS, v:0, obj:null };
+  paintZone('allowed',10,10);
+  const inOk = isAllowedTile(10,10) === true;
+  const outOk = isAllowedTile(40,40) === false;
+  const byZoneOk = anyOk && inOk && outOk;
+  console.log('SCENARIO BY (allowed zone):');
+  console.log('   no-zone all:', anyOk?'OK':'FAIL', '| inside:', inOk?'OK':'FAIL', '| outside blocked:', outOk?'OK':'FAIL', '|', byZoneOk?'OK':'FAIL');
+  if (!byZoneOk) throw new Error('Scenario BY failed');
 })();
 `;
 try {
