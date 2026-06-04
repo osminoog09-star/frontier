@@ -23,8 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - травмы частей тела в карточке пешки
-  - Мои файлы: _core.js (createPawnCard — строка травм/capacity), _harness.js (сценарий). Codex: вода/A*, экосистема — свободно.
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -38,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.06 - Body injuries in pawn card (Claude-local). Карточка показывает травмы частей тела (bodyInjurySummary). Scenario CI. Harness A-CI (87) green.
 
 - v2.05 - Body-part health foundation (Claude-local, Phase 2/3). p.body (части тела) + bodyCapacity(move/work/aim). Scenario CH. Harness A-CH (86) green.
 

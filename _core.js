@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.05';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.06';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -71,6 +71,11 @@ const WORK_ICONS = ['🪓','🌾','⛏️','🔨','🦌','💊','🛡️','📦'
 // ──────────── ЗДОРОВЬЕ ПО ЧАСТЯМ ТЕЛА (Phase 2/3, каркас) ────────────
 // Срез 1: данные + capacity-функции. Влияние на скорость/работу/бой — отдельным срезом.
 const BODY_PARTS = ['head','torso','leftArm','rightArm','leftLeg','rightLeg'];
+const BODY_PART_RU = { head:'голова', torso:'торс', leftArm:'лев.рука', rightArm:'прав.рука', leftLeg:'лев.нога', rightLeg:'прав.нога' };
+function bodyInjurySummary(p) {
+  if (!p || !p.body) return '';
+  return BODY_PARTS.filter(k => p.body[k] && p.body[k].hp < p.body[k].max).map(k => BODY_PART_RU[k]).join(', ');
+}
 function ensureBody(p) {
   if (!p.body || typeof p.body !== 'object') { p.body = {}; for (const k of BODY_PARTS) p.body[k] = { hp:10, max:10 }; }
   return p.body;
@@ -3961,6 +3966,7 @@ function createPawnCard(p) {
     <div class="pawn-name">🤠 ${p.name} ${p.dead?'(погиб)':''}</div>
     <div class="pawn-status">${p.role}${(p.workLevel||0)>0?` ⭐${p.workLevel}`:''} • ${stateNames[p.state]||p.state} ${woundText} ${sickText}</div>
     <div class="pawn-status" style="color:#9a8fc0">🧠 ${personalitySummary(p)}</div>
+    ${bodyInjurySummary(p)?`<div class="pawn-status" style="color:#d08a8a">🩹 травмы: ${bodyInjurySummary(p)}</div>`:''}
     <div class="trait-row">${traitChips}</div>
     ${bar('HP',p.hp,p.maxHp,'bar-hp')}
     ${bar('Еда',p.food,p.maxFood,'bar-food')}

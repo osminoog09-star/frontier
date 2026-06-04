@@ -1,5 +1,10 @@
 # FRONTIER changelog
 
+## v2.06 - Body injuries shown in pawn card (Phase 2/3)
+
+- Карточка пешки показывает травмированные части тела (🩹 травмы: лев.нога, голова...) — новая система здоровья стала видимой.
+- bodyInjurySummary(p) — чистый хелпер. Scenario CI. Harness A-CI (87) green.
+
 ## v2.05 - Body-part health foundation (Phase 2/3)
 
 - Каркас здоровья по частям тела: p.body (голова/торс/руки/ноги), каждая часть {hp,max}.

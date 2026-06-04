@@ -1683,6 +1683,21 @@ const test = `
   console.log('SCENARIO CH (body-part health):');
   console.log('   full caps:', fullOk?'OK':'FAIL', '| move '+moveFull+'->'+moveHurt+' work '+workFull+'->'+workHurt, hurtOk?'OK':'FAIL', '| head->consciousness:', consHurt?'OK':'FAIL', '|', chOk?'OK':'FAIL');
   if (!chOk) throw new Error('Scenario CH failed');
+
+  // Scenario CI: body-injury summary for the pawn card (Phase 2/3)
+  newGame('settlers');
+  const ijP = G.pawns[0]; ensureBody(ijP);
+  const healthyOk = bodyInjurySummary(ijP) === '';
+  ijP.body.leftLeg.hp = 3;
+  const s1 = bodyInjurySummary(ijP);
+  const oneOk = s1.length > 0 && s1.includes('нога');
+  ijP.body.head.hp = 2;
+  const s2 = bodyInjurySummary(ijP);
+  const twoOk = s2.includes('нога') && s2.includes('голова');
+  const ciOk = healthyOk && oneOk && twoOk;
+  console.log('SCENARIO CI (body-injury summary):');
+  console.log('   healthy empty:', healthyOk?'OK':'FAIL', '| injuries: "'+s2+'"', (oneOk&&twoOk)?'OK':'FAIL', '|', ciOk?'OK':'FAIL');
+  if (!ciOk) throw new Error('Scenario CI failed');
 })();
 `;
 try {
