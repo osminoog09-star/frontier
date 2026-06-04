@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.92 - Zone framework (Claude, Phase 2.5). G.zones рисуются кистью (грядка/склад-зона), рендер, save/load, снос. AI следующими срезами. Scenario BV. Harness A-BV (74) green.
+
+
 - v1.91 - Weight & carry (Claude, Phase 2). Вес ресурсов (кг), грузоподъёмность, гружёный медленнее (loadSpeedMul). Scenario BU. Harness A-BU (73) green.
 
 

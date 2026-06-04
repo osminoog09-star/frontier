@@ -1481,6 +1481,24 @@ const test = `
   console.log('SCENARIO BU (weight & carry):');
   console.log('   cap', capWp, buCapOk?'OK':'FAIL', '| load tiers 1/0.85/0.45:', (buLightOk&&buMedOk&&buOverOk)?'OK':'FAIL', '| tough carries more:', buToughOk?'OK':'FAIL', '|', buOk?'OK':'FAIL');
   if (!buOk) throw new Error('Scenario BU failed');
+
+  // Scenario BV: zone framework — paint, query, one-cell-one-zone, water-reject, erase (Phase 2.5)
+  newGame('settlers'); G.zones = [];
+  G.map[30][30] = { type:TERRAIN.GRASS, v:0, obj:null };
+  G.map[30][31] = { type:TERRAIN.GRASS, v:0, obj:null };
+  G.map[30][32] = { type:TERRAIN.WATER, v:0, obj:null };
+  paintZone('grow', 30, 30); paintZone('grow', 31, 30);
+  const paintedOk = zoneAt(30,30)==='grow' && zoneAt(31,30)==='grow' && zoneCellCount('grow')===2;
+  paintZone('grow', 32, 30);                    // вода — отклонить
+  const waterRejOk = zoneAt(32,30)===null && zoneCellCount('grow')===2;
+  paintZone('stockpile', 30, 30);               // клетка переходит в другую зону
+  const switchOk = zoneAt(30,30)==='stockpile' && zoneCellCount('grow')===1 && zoneCellCount('stockpile')===1;
+  eraseZoneAt(31, 30);
+  const eraseOk = zoneAt(31,30)===null && zoneCellCount('grow')===0;
+  const bvOk = paintedOk && waterRejOk && switchOk && eraseOk;
+  console.log('SCENARIO BV (zone framework):');
+  console.log('   paint:', paintedOk?'OK':'FAIL', '| water reject:', waterRejOk?'OK':'FAIL', '| one-cell-one-zone:', switchOk?'OK':'FAIL', '| erase:', eraseOk?'OK':'FAIL', '|', bvOk?'OK':'FAIL');
+  if (!bvOk) throw new Error('Scenario BV failed');
 })();
 `;
 try {

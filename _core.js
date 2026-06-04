@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.91';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.92';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -2370,6 +2370,7 @@ function normalizeGameState(source='') {
   if (!Array.isArray(G.items)) G.items = [];
   if (!Array.isArray(G.floorBlueprints)) G.floorBlueprints = [];
   if (!Array.isArray(G.fires)) G.fires = [];
+  if (!Array.isArray(G.zones)) G.zones = [];
   for (const p of G.pawns || []) {
     if (!p.skills || typeof p.skills !== 'object') p.skills = {};
     if (!p.personality || typeof p.personality !== 'object') p.personality = rollPersonality(p.traits);
@@ -2604,6 +2605,8 @@ function render() {
   const floorBpSet = new Set((G.floorBlueprints||[]).map(f=>f.tx+','+f.ty));
   if (!G._roofedCells || (((G.tick||0) - (G._roofTick||-999)) >= 20)) { recomputeRoofedCells(); G._roofTick = G.tick||0; }
   const roofedCells = G._roofedCells;
+  const zoneMap = new Map();
+  for (const z of (G.zones||[])) for (const k of z.cells) zoneMap.set(k, z.type);
   for (let y=startY; y<endY; y++) {
     for (let x=startX; x<endX; x++) {
       const tile = G.map[y][x];
@@ -2649,6 +2652,13 @@ function render() {
       if (roofedCells && roofedCells.has(x+','+y)) {
         ctx.fillStyle = 'rgba(18,16,28,0.20)';
         ctx.fillRect(x*TILE, y*TILE, TILE+1, TILE+1);
+      }
+
+      // Zone overlay (grow / stockpile / ...)
+      const _zt = zoneMap.get(x+','+y);
+      if (_zt && ZONE_DEFS[_zt]) {
+        ctx.fillStyle = ZONE_DEFS[_zt].fill; ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
+        ctx.strokeStyle = ZONE_DEFS[_zt].border; ctx.strokeRect(x*TILE+0.5, y*TILE+0.5, TILE-1, TILE-1);
       }
 
       // Objects
@@ -4093,6 +4103,7 @@ function demolishAt(tx, ty) {
     }
     const tile = G.map[ty] && G.map[ty][tx];
     if (tile && tile.floor) { tile.floor = null; return; }
+    if (eraseZoneAt(tx, ty)) return;   // снять клетку зоны
     return;
   }
   G.buildings = G.buildings.filter(x=>x!==b);
@@ -4189,7 +4200,41 @@ function placeFloor(tx, ty, def) {
   if (!quiet) addLog(`📐 Размечен ${def.name.toLowerCase()}`, '');
 }
 
+// ──────────── ЗОНЫ И ТЕРРИТОРИИ (Phase 2.5, RimWorld-style) ────────────
+const ZONE_DEFS = {
+  grow:      { name:'Грядка',     fill:'rgba(90,170,70,0.22)',  border:'rgba(124,192,90,0.6)' },
+  stockpile: { name:'Склад-зона', fill:'rgba(200,165,80,0.20)', border:'rgba(202,164,90,0.6)' },
+};
+function ensureZones() { if (!Array.isArray(G.zones)) G.zones = []; return G.zones; }
+function zoneAt(tx, ty) {
+  if (!G.zones) return null;
+  const key = tx + ',' + ty;
+  for (const z of G.zones) if (z.cells.includes(key)) return z.type;
+  return null;
+}
+function zoneCellCount(type) { const z = G.zones && G.zones.find(z => z.type === type); return z ? z.cells.length : 0; }
+function paintZone(type, tx, ty) {
+  if (!ZONE_DEFS[type] || tx<0 || ty<0 || tx>=MAP_W || ty>=MAP_H) return;
+  const tile = G.map[ty][tx];
+  if (tile.type === TERRAIN.WATER || tile.type === TERRAIN.ROCK) return; // не на воде/скале
+  if (G.buildings.find(b => b.tx===tx && b.ty===ty && !b.blueprint)) return; // не поверх здания
+  ensureZones();
+  const key = tx + ',' + ty;
+  for (const z of G.zones) { const i = z.cells.indexOf(key); if (i>=0) z.cells.splice(i,1); } // клетка — одна зона
+  let z = G.zones.find(z => z.type === type);
+  if (!z) { z = { id: G.nextId++, type, cells: [] }; G.zones.push(z); }
+  z.cells.push(key);
+}
+function eraseZoneAt(tx, ty) {
+  if (!G.zones) return false;
+  const key = tx + ',' + ty; let removed = false;
+  for (const z of G.zones) { const i = z.cells.indexOf(key); if (i>=0) { z.cells.splice(i,1); removed = true; } }
+  G.zones = G.zones.filter(z => z.cells.length > 0);
+  return removed;
+}
+
 function placeBuild(tx, ty) {
+  if (typeof G.buildMode === 'string' && G.buildMode.startsWith('zone_')) { paintZone(G.buildMode.slice(5), tx, ty); return; }
   const def = BUILDS[G.buildMode];
   if (!def) return;
   if (def.floor) { placeFloor(tx, ty, def); return; }
@@ -4457,6 +4502,7 @@ function setupButtons() {
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
     'build-floorwood-btn':'floor_wood','build-floorstone-btn':'floor_stone',
+    'build-zonegrow-btn':'zone_grow','build-zonestock-btn':'zone_stockpile',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     document.getElementById(id).addEventListener('click', () => {
@@ -4728,6 +4774,7 @@ function updateBuildButtons() {
     'build-clinic-btn':'clinic','build-smithy-btn':'smithy',
     'build-camp-btn':'camp','build-bed-btn':'bed','build-table-btn':'table','build-decor-btn':'decor','build-well-btn':'well',
     'build-floorwood-btn':'floor_wood','build-floorstone-btn':'floor_stone',
+    'build-zonegrow-btn':'zone_grow','build-zonestock-btn':'zone_stockpile',
   };
   for (const [id, type] of Object.entries(buildMap)) {
     const btn = document.getElementById(id);
@@ -4783,6 +4830,7 @@ function saveGame() {
       nextId:G.nextId,
       seed:G.seed,
       fires:G.fires || [],
+      zones:G.zones || [],
       scenario:G.scenario || 'settlers',
       camera:{x:G.camera.x, y:G.camera.y, zoom:G.camera.zoom},
       // compact map: plain number for empty tile, [type, objCode, hp, marked] for tiles with tree/rock
@@ -4819,6 +4867,7 @@ function loadGame() {
     if (save.nextId) G.nextId = save.nextId;
     if (save.seed != null) seedRng(save.seed);
     G.fires = Array.isArray(save.fires) ? save.fires : [];
+    G.zones = Array.isArray(save.zones) ? save.zones : [];
     if (save.herd) G.herd = save.herd;
     if (save.camera) G.camera = { x:save.camera.x, y:save.camera.y, zoom:save.camera.zoom||1 };
 
