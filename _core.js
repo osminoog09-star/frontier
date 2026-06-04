@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.89';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.90';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -880,6 +880,7 @@ function updateSocial(p) {
   if (p.opinions[other.id]===undefined) p.opinions[other.id]=0;
   // chemistry: kind boosts, pessimist/greedy can clash
   let change = randInt(-3, 5);
+  change += Math.round((axis(p,'sociability') - 50) / 20);   // общительный охотнее ладит
   if (p.traits.includes('kind') || other.traits.includes('kind')) change += 4;
   if (p.traits.includes('pessimist')) change -= 2;
   p.opinions[other.id] = clamp(p.opinions[other.id] + change, -100, 100);
@@ -940,9 +941,10 @@ function calcMoodDelta(p) {
   if (p.traits.includes('optimist')) delta += 0.15;
   if (p.traits.includes('pessimist')) delta -= 0.15;
   if (p.traits.includes('greedy')) delta += G.res.gold > 200 ? 0.2 : -0.1;
-  if (p.traits.includes('coward') && G.enemies.length>0) {
-    const near = G.enemies.some(e=>Math.hypot(e.x-p.x,e.y-p.y)<TILE*12);
-    if (near) delta -= 0.5;
+  // Смелость (ось характера): рядом с врагами робкие падают духом, смелые — собранны.
+  if (G.enemies.length>0) {
+    const near = G.enemies.some(e=>e.alive!==false && Math.hypot(e.x-p.x,e.y-p.y)<TILE*12);
+    if (near) delta += (axis(p,'bravery') - 50) / 100 * 0.8;   // bravery 0→-0.4, 100→+0.4
   }
   if (p.traits.includes('drunkard')) {
     const nearSaloon = nearestBuilding(p,'saloon') && p.state==='joy';

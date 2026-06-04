@@ -1448,6 +1448,20 @@ const test = `
   console.log('SCENARIO BS (personality axes):');
   console.log('   range:', bsRangeOk?'OK':'FAIL', '| traits shift:', bsTraitOk?'OK':'FAIL', '(brave '+baseP.bravery+'->'+braveP.bravery+')', '| default/summary:', (bsDefaultOk&&bsSummaryOk)?'OK':'FAIL', '|', bsOk?'OK':'FAIL');
   if (!bsOk) throw new Error('Scenario BS failed');
+
+  // Scenario BT: personality affects behavior — bravery shapes mood near enemies (Phase 2)
+  newGame('settlers');
+  G.enemies = [{ x:40*TILE, y:40*TILE, alive:true }];
+  const braveP2 = G.pawns[0], timidP = G.pawns[1];
+  for (const q of [braveP2, timidP]) { q.traits=[]; q.x=40*TILE+TILE*3; q.y=40*TILE; q.food=80; q.energy=80; q.hp=q.maxHp; q.mood=50; q.sick=null; }
+  braveP2.personality = { bravery:90 };
+  timidP.personality  = { bravery:10 };
+  const dBrave = calcMoodDelta(braveP2);
+  const dTimid = calcMoodDelta(timidP);
+  const btOk = dBrave > dTimid;
+  console.log('SCENARIO BT (personality affects mood):');
+  console.log('   moodDelta brave', dBrave.toFixed(2), '> timid', dTimid.toFixed(2), '|', btOk?'OK':'FAIL');
+  if (!btOk) throw new Error('Scenario BT failed');
 })();
 `;
 try {

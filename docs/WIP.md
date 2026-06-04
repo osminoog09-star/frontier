@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.90 - Personality affects behavior (Claude, Phase 2). Смелость->настроение рядом с врагами; общительность->соц.отношения. Scenario BT. Harness A-BT (72) green.
+
+
 - v1.89 - Personality axes (Claude, Phase 2). 8 осей характера 0-100, вывод из трейтов, ярлык в карточке (axis/personalitySummary). Поведение не задето. Scenario BS. Harness A-BS (71) green.
 
 
