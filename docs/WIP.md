@@ -23,7 +23,9 @@
 
 ## Сейчас в работе
 
-Пусто.
+- [IN PROGRESS] Claude-local 2026-06-04 - стройка/комнаты в духе RimWorld + Frontier-твист
+  - Исследование RimWorld-стройки (DESIGN.md) + расширение авто-типов комнат (кухня/мастерская/лаборатория) и Frontier-типы (салун-зал, барак), признак «ДОМ».
+  - Мои файлы: _core.js (roomFurnitureCounts/classifyRoom/room*), _harness.js, docs/DESIGN.md. Codex: карта-мир/экосистема/вода — свободно.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
