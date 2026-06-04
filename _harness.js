@@ -1727,6 +1727,26 @@ const test = `
   console.log('SCENARIO CK (combat wounds body parts):');
   console.log('   body hp '+ckBefore+'->'+ckAfter, woundedOk?'OK':'FAIL', '| capacity dropped:', capDrop?'OK':'FAIL', '|', ckOk?'OK':'FAIL');
   if (!ckOk) throw new Error('Scenario CK failed');
+
+  // Scenario CL: research rework — costs gold+paper at start, a pawn researches at a lab over time
+  newGame('settlers');
+  const proj = G.researches.find(r=>!r.done);
+  G.res.gold = 100; G.res.paper = 20; G.activeResearch = null; G.researchProgress = 0;
+  const gCost = researchGoldCost(proj), pCost = researchPaperCost(proj);
+  const costOk = gCost > 0 && pCost > 0 && researchWorkCost(proj) > 0;
+  const rlP = G.pawns[0]; rlP.workMul=1; rlP.workLevel=0; rlP.sick=null; rlP.skills={}; ensureBody(rlP); G.hour=12;
+  G.activeResearch = proj.id;
+  const noLabOk = tryResearch(rlP) === false;       // нет лаборатории -> нельзя
+  G.activeResearch = null; G.res.gold -= gCost; G.res.paper -= pCost; G.activeResearch = proj.id; G.researchProgress = 0;
+  const startedOk = G.res.gold === 100-gCost && G.res.paper === 20-pCost;
+  G.buildings.push({ type:'lab', tx:30, ty:30, done:true, blueprint:false, hp:200, maxHp:200 });
+  rlP.x=30*TILE+TILE/2; rlP.y=30*TILE+TILE/2; rlP.tx=30; rlP.ty=30;
+  let rg=0; while (G.activeResearch && rg<300000) { G._claims={}; tryResearch(rlP); rg++; }
+  const doneOk = proj.done === true && G.activeResearch === null;
+  const clOk = costOk && noLabOk && startedOk && doneOk;
+  console.log('SCENARIO CL (research: gold+paper+pawn time):');
+  console.log('   cost g/p '+gCost+'/'+pCost, costOk?'OK':'FAIL', '| no-lab blocks:', noLabOk?'OK':'FAIL', '| paid:', startedOk?'OK':'FAIL', '| researched ('+rg+'t):', doneOk?'OK':'FAIL', '|', clOk?'OK':'FAIL');
+  if (!clOk) throw new Error('Scenario CL failed');
 })();
 `;
 try {

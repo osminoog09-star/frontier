@@ -23,9 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - переделка исследований (RimWorld-bench: деньги+бумага+время пешки)
-  - Ресурс «бумага»; выбор проекта тратит деньги+бумагу; пешка изучает за лабораторией (tryResearch, время); убрать пассивное накопление sci.
-  - Мои файлы: _core.js (research/onNewDay/doWork/resources/renderResearch), _harness.js. Codex: вода/A*, экосистема, КАРТА-МИР — свободно.
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -39,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.09 - Research rework (Claude-local). Исследования: деньги+бумага при старте + пешка изучает за лабораторией (tryResearch); убрано пассивное накопление. Новый ресурс «бумага». Scenario CL. Harness A-CL (90) green.
 
 - v2.08 - Combat wounds hit body parts (Claude-local). Раны в бою бьют по случайной части тела (накопление травм -> capacity). Scenario CK. Harness A-CK (89) green.
 

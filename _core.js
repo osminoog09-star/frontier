@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.08';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.09';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -207,8 +207,8 @@ const RESEARCHES = [
 // ==================== STATE ====================
 let G = null; // game state
 let _rng = null; // seeded PRNG (null => используем Math.random; включается seedRng)
-const DEFAULT_RES = { food:120, wood:60, ore:20, meat:0, med:10, sci:0, gold:30 };
-const STORABLE_RES = ['food','wood','ore','meat','med','gold'];
+const DEFAULT_RES = { food:120, wood:60, ore:20, meat:0, med:10, sci:0, gold:30, paper:15 };
+const STORABLE_RES = ['food','wood','ore','meat','med','gold','paper'];
 const DEFAULT_HERD = { wild:6, tamed:0, tameProgress:0 };
 const SCENARIOS = {
   settlers: { name:'Поселенцы', desc:'Обычный старт: баланс еды, дерева и золота.' },
@@ -1473,6 +1473,7 @@ function doWork(p) {
 
   p._activeSkill = null; // крафт идёт по легаси-скорости (не наследует навык предыдущей попытки)
   if (tryCraft(p)) return;
+  if (G.activeResearch && tryResearch(p)) return;   // свободная пешка изучает за лабораторией
 
   p.state = 'idle';
   wander(p, 4);
@@ -1781,6 +1782,35 @@ function tryBuildFloor(p) {
       const i = fbs.indexOf(fb); if (i>=0) fbs.splice(i, 1);
       addLog(`🔨 ${p.name} настелил пол`, 'good');
       Sfx.build();
+    }
+  }
+  p.state = 'working';
+  return true;
+}
+
+// Исследования (RimWorld-bench): деньги+бумага платятся при выборе проекта,
+// а пешка тратит ВРЕМЯ за лабораторией. Пассивного накопления науки больше нет.
+function researchWorkCost(r) { return (r.cost || 80) * 8; }                 // время-прогресс
+function researchGoldCost(r) { return Math.round((r.cost || 80) / 2); }     // деньги при старте
+function researchPaperCost(r) { return Math.max(1, Math.round((r.cost || 80) / 15)); } // бумага при старте
+function tryResearch(p) {
+  if (!G.activeResearch) return false;
+  const r = G.researches.find(r => r.id === G.activeResearch);
+  if (!r || r.done) return false;
+  const lab = G.buildings.filter(b => b.type==='lab' && b.done && !b.blueprint)
+    .filter(b => claimCount('research_'+b.tx+'_'+b.ty) < 1)
+    .sort((a,b) => distTiles(p,a.tx,a.ty) - distTiles(p,b.tx,b.ty))[0];
+  if (!lab) return false;
+  claimSpot('research_'+lab.tx+'_'+lab.ty);
+  p._wt = 'research_'+lab.tx+'_'+lab.ty;
+  p._activeSkill = null;
+  setTarget(p, lab.tx, lab.ty);
+  if (distTiles(p, lab.tx, lab.ty) <= 1.8) {
+    G.researchProgress = (G.researchProgress || 0) + 0.6 * wmul(p);
+    if (G.researchProgress >= researchWorkCost(r)) {
+      r.done = true; G.activeResearch = null; G.researchProgress = 0;
+      addLog(`🔬 Исследование завершено: ${r.name}`, 'good');
+      if (typeof renderResearch === 'function') renderResearch();
     }
   }
   p.state = 'working';
@@ -2685,9 +2715,6 @@ function updateTime() {
 
 function onNewDay() {
   decaySkills();   // навыки без практики медленно угасают
-  // Science from labs
-  const labs = G.buildings.filter(b=>b.type==='lab'&&b.done).length;
-  G.res.sci += labs * 5;
 
   const ranchYield = ranchDailyYield();
   if (ranchYield.food || ranchYield.gold) {
@@ -2698,17 +2725,7 @@ function onNewDay() {
   }
   processHorseTaming();
 
-  // Research progress
-  if (G.activeResearch) {
-    const r = G.researches.find(r=>r.id===G.activeResearch);
-    if (r && !r.done && G.res.sci >= r.cost) {
-      G.res.sci -= r.cost;
-      r.done = true;
-      addLog(`🔬 Исследование завершено: ${r.name}`, 'good');
-      G.activeResearch = null;
-      renderResearch();
-    }
-  }
+  // Исследования теперь ведут пешки за лабораторией (tryResearch), не пассивно.
 
   // Season change
   if (G.dayOfYear % 91 === 0) {
@@ -4063,16 +4080,18 @@ function renderSchedule() {
 function renderResearch() {
   const list = document.getElementById('research-list');
   list.innerHTML = '';
-  const sci = Math.floor(G.res.sci);
   for (const r of G.researches) {
     const div = document.createElement('div');
     div.className = 'research-item' + (r.done?' done':'') + (G.activeResearch===r.id?' active':'');
-    const canAfford = sci >= r.cost;
+    const gCost = researchGoldCost(r), pCost = researchPaperCost(r);
+    const canAfford = G.res.gold >= gCost && (G.res.paper||0) >= pCost;
+    const active = G.activeResearch===r.id;
+    const pct = active ? Math.round(clamp((G.researchProgress||0)/researchWorkCost(r),0,1)*100) : 0;
     div.innerHTML = `
       <div class="research-name">${r.done?'✅':''} ${r.name}</div>
       <div class="research-desc">${r.desc}</div>
-      <div class="research-cost">🔬 ${r.cost} очков науки ${r.done?'(завершено)':canAfford?'(доступно)':'(недостаточно)'}</div>
-      ${!r.done ? `<button class="btn-small" ${G.activeResearch===r.id?'disabled':''} data-rid="${r.id}">${G.activeResearch===r.id?'⏳ Исследуется...':'▶ Исследовать'}</button>` : ''}
+      <div class="research-cost">💰 ${gCost} · 📄 ${pCost} бумаги ${r.done?'(завершено)':active?`(изучается ${pct}%)`:canAfford?'(доступно)':'(не хватает денег/бумаги)'}</div>
+      ${!r.done ? `<button class="btn-small" ${active?'disabled':(canAfford?'':'disabled')} data-rid="${r.id}">${active?`⏳ ${pct}%`:'▶ Изучать (нужна лаборатория)'}</button>` : ''}
     `;
     list.appendChild(div);
   }
@@ -4080,18 +4099,13 @@ function renderResearch() {
   list.querySelectorAll('.btn-small[data-rid]').forEach(btn => {
     btn.addEventListener('click', () => {
       const r = G.researches.find(r=>r.id===btn.dataset.rid);
-      if (!r || r.done) return;
-      if (G.res.sci >= r.cost) {
-        G.res.sci -= r.cost;
-        r.done = true;
-        G.activeResearch = null;
-        addLog(`🔬 Исследовано: ${r.name}`, 'good');
-        renderResearch();
-      } else {
-        G.activeResearch = r.id;
-        addLog(`🔬 Начато исследование: ${r.name}`, '');
-        renderResearch();
-      }
+      if (!r || r.done || G.activeResearch===r.id) return;
+      const gCost = researchGoldCost(r), pCost = researchPaperCost(r);
+      if (G.res.gold < gCost || (G.res.paper||0) < pCost) { addLog('❌ Не хватает денег или бумаги для исследования', 'warn'); return; }
+      G.res.gold -= gCost; G.res.paper -= pCost;
+      G.activeResearch = r.id; G.researchProgress = 0;
+      addLog(`🔬 Начато исследование: ${r.name} (учёный изучит за лабораторией)`, '');
+      renderResearch();
     });
   });
 
@@ -5161,6 +5175,8 @@ function saveGame() {
       pawns:G.pawns.map(p=>({...p, thoughts:[]})),
       buildings:G.buildings,
       researches:G.researches,
+      activeResearch:G.activeResearch || null,
+      researchProgress:G.researchProgress || 0,
       stats:G.stats,
       achievements:G.achievements,
     };
@@ -5223,6 +5239,8 @@ function loadGame() {
     }));
     G.buildings=sanitizeBuildings(save.buildings);
     G.researches=save.researches;
+    G.activeResearch = save.activeResearch || null;
+    G.researchProgress = save.researchProgress || 0;
     G.stats=save.stats||G.stats;
     G.achievements=save.achievements||{};
     normalizeGameState('load');
