@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.93';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.94';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -1815,14 +1815,27 @@ function stockpileAllows(b, res) {
   return !!filters && filters[res] !== false;
 }
 
+function zoneAllows(z, res) { return !!z && (!z.filters || z.filters[res] !== false); }
+
+// Ближайший сток для ресурса: здание-склад ИЛИ клетка склад-зоны (Phase 2.5). Возвращает {tx,ty}.
 function nearestStockpileForRes(p, res) {
-  return G.buildings
-    .filter(b=>b.done && !b.blueprint && b.type==='stockpile' && stockpileAllows(b, res))
-    .sort((a,b)=>distTiles(p,a.tx,a.ty)-distTiles(p,b.tx,b.ty))[0] || null;
+  let best = null, bestD = Infinity;
+  for (const b of G.buildings) {
+    if (b.done && !b.blueprint && b.type==='stockpile' && stockpileAllows(b, res)) {
+      const d = distTiles(p, b.tx, b.ty); if (d < bestD) { bestD = d; best = { tx:b.tx, ty:b.ty }; }
+    }
+  }
+  const z = G.zones && G.zones.find(z => z.type === 'stockpile');
+  if (z && zoneAllows(z, res)) {
+    for (const key of z.cells) { const c = key.split(','), tx=+c[0], ty=+c[1], d=distTiles(p,tx,ty); if (d < bestD) { bestD = d; best = { tx, ty }; } }
+  }
+  return best;
 }
 
 function hasStockpileForRes(res) {
-  return G.buildings.some(b=>b.done && !b.blueprint && b.type==='stockpile' && stockpileAllows(b, res));
+  if (G.buildings.some(b=>b.done && !b.blueprint && b.type==='stockpile' && stockpileAllows(b, res))) return true;
+  const z = G.zones && G.zones.find(z => z.type === 'stockpile');
+  return !!(z && zoneAllows(z, res));
 }
 
 function dropItem(res, amount, tx, ty) {

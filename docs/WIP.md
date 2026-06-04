@@ -39,6 +39,9 @@
 
 ## Последний завершённый срез
 
+- v1.94 - Stockpile zone (Claude, Phase 2.5). Склад-зона = сток для переноски (nearestStockpileForRes/hasStockpileForRes учитывают зону). Здания-склады целы. Scenario BX. Harness A-BX (76) green.
+
+
 - v1.93 - Grow-zone farming (Claude, Phase 2.5). Грядки: посев->рост(z.crops)->жатва->еда; рендер всходов. Scenario BW. Harness A-BW (75) green.
 
 

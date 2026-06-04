@@ -1517,6 +1517,23 @@ const test = `
   console.log('SCENARIO BW (grow-zone AI):');
   console.log('   sow:', sownOk?'OK':'FAIL', '| ripen:', ripeOk?'OK':'FAIL', '| harvest food='+G.res.food, harvestOk?'OK':'FAIL', '|', bwOk?'OK':'FAIL');
   if (!bwOk) throw new Error('Scenario BW failed');
+
+  // Scenario BX: stockpile zone acts as a haul target/sink like a stockpile building (Phase 2.5)
+  newGame('settlers'); G.zones=[]; G.buildings = G.buildings.filter(b=>b.type!=='stockpile');
+  const noneOk = hasStockpileForRes('wood') === false;
+  for (let i=0;i<2;i++) G.map[25][25+i] = { type:TERRAIN.GRASS, v:0, obj:null };
+  paintZone('stockpile',25,25); paintZone('stockpile',26,25);
+  const hasOk = hasStockpileForRes('wood') === true;
+  const hpx = G.pawns[0]; hpx.x=25*TILE+TILE/2; hpx.y=25*TILE+TILE/2; hpx.tx=25; hpx.ty=25;
+  const tgt = nearestStockpileForRes(hpx,'wood');
+  const targetOk = !!tgt && (tgt.tx===25||tgt.tx===26) && tgt.ty===25;
+  const bxWood = G.res.wood; hpx.carry = { res:'wood', amount:7 };
+  depositCarry(hpx, tgt);
+  const depositOk = G.res.wood === bxWood+7 && !hpx.carry;
+  const bxOk = noneOk && hasOk && targetOk && depositOk;
+  console.log('SCENARIO BX (stockpile zone):');
+  console.log('   no-pile false:', noneOk?'OK':'FAIL', '| zone accepts:', hasOk?'OK':'FAIL', '| target:', targetOk?'OK':'FAIL', '| deposit +7:', depositOk?'OK':'FAIL', '|', bxOk?'OK':'FAIL');
+  if (!bxOk) throw new Error('Scenario BX failed');
 })();
 `;
 try {
