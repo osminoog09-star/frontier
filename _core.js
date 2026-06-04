@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '1.96';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '1.97';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -360,18 +360,17 @@ function newGame(scenarioId='settlers') {
   const stockSpot = findBuildableSpot('stockpile', cx-1, cy+4, G.buildings) || {tx:cx-1, ty:cy+4};
   G.buildings.push({type:'stockpile', tx:stockSpot.tx, ty:stockSpot.ty, blueprint:false, done:true, progress:1, hp:200, maxHp:200, selected:false, filters:defaultStockpileFilters()});
 
-  // Spawn trees & rocks
-  for (let i=0; i<180; i++) {
+  // Spawn trees & rocks — плотность зависит от биома (лес густой, пустыня пустая)
+  for (let i=0; i<360; i++) {
     const x=randInt(2,MAP_W-2), y=randInt(2,MAP_H-2);
     const t = G.map[y][x];
-    if (t.type===TERRAIN.GRASS && !t.obj) {
-      t.obj = { type:'tree', hp:40, maxHp:40, marked:false };
-    }
+    if (t.obj || (t.type!==TERRAIN.GRASS && t.type!==TERRAIN.DIRT)) continue;
+    if (rng() < treeChanceForBiome(t.biome)) t.obj = { type:'tree', hp:40, maxHp:40, marked:false };
   }
-  for (let i=0; i<80; i++) {
+  for (let i=0; i<240; i++) {
     const x=randInt(2,MAP_W-2), y=randInt(2,MAP_H-2);
     const t = G.map[y][x];
-    if (t.type===TERRAIN.ROCK && !t.obj) {
+    if (t.type===TERRAIN.ROCK && !t.obj && rng() < 0.72) {
       t.obj = { type:'rock', hp:60, maxHp:60, marked:false };
     }
   }
@@ -472,6 +471,10 @@ function biomeTerrain(biome) {
     case 'desert':   return TERRAIN.SAND;
     default:         return TERRAIN.DIRT;
   }
+}
+// Шанс дерева на пригодной клетке по биому (Phase 3): лес густой, пустыня — ноль.
+function treeChanceForBiome(b) {
+  return b==='forest' ? 0.55 : b==='prairie' ? 0.10 : b==='plains' ? 0.05 : 0;
 }
 
 function generateMap() {

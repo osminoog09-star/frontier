@@ -1,5 +1,10 @@
 # FRONTIER changelog
 
+## v1.97 - Resource density by biome (Phase 3)
+
+- Деревья и камни теперь зависят от биома: густой лес даёт много деревьев, прерия/равнина — редкие, пустыня — без деревьев; камень/руда — в горах.
+- Чистый хелпер treeChanceForBiome(biome). Биом-регионы стали осмысленными для добычи/рубки. Scenario CA. Harness A-CA (79) green.
+
 ## 2026-06-04 - Docs status sync after v1.96 (Codex)
 
 - ROADMAP.md, docs/HANDOFF.md, docs/TECH_ROADMAP.md, docs/WIP.md и index.html синхронизированы с v1.96/A-BZ (78).

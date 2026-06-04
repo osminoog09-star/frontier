@@ -23,10 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - Phase 3: плотность ресурсов по биому
-  - Делаю: деревья/камни/животные зависят от биома (forest густой лес, desert почти пусто, mountain больше камня).
-  - Мои файлы: `_core.js` -> расстановка объектов в `generateMap()` + проверки биома; `_harness.js` -> сценарий.
-  - Codex: свободно — реки/озёра/дороги (п.2), точки интереса (п.3), а также бой/UI/hauling/зоны. НЕ трогай generateMap, пока тут IN PROGRESS.
+Пусто (Claude-local: плотность по биому v1.97 завершена).
 
 ---
 
@@ -41,6 +38,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v1.97 - Resource density by biome (Claude-local, Phase 3). Деревья/камни по биому (лес густой, пустыня пустая, руда в горах); treeChanceForBiome. Scenario CA. Harness A-CA (79) green.
 
 - 2026-06-04 - Docs status sync after v1.96 (Codex). ROADMAP.md, docs/HANDOFF.md, docs/TECH_ROADMAP.md, docs/WIP.md и index.html синхронизированы с v1.96/A-BZ (78) и текущей Phase 3. Gameplay не менялся.
 

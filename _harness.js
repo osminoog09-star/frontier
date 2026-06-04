@@ -1559,6 +1559,19 @@ const test = `
   console.log('SCENARIO BZ (biome world gen):');
   console.log('   classify:', (bzWater&&bzMount&&bzForest&&bzPrairie&&bzDesert)?'OK':'FAIL', '| terrain map:', bzTerr?'OK':'FAIL', '| biomes on map:', biomesSeen.size, varietyOk?'OK':'FAIL', '|', bzOk?'OK':'FAIL');
   if (!bzOk) throw new Error('Scenario BZ failed');
+
+  // Scenario CA: resource density by biome — forest dense, desert none (Phase 3)
+  const caChainOk = treeChanceForBiome('forest') > treeChanceForBiome('prairie')
+    && treeChanceForBiome('prairie') > treeChanceForBiome('plains')
+    && treeChanceForBiome('desert') === 0 && treeChanceForBiome('mountain') === 0;
+  newGame('settlers');
+  let treeTotal=0, desertTrees=0;
+  for (let y=0;y<MAP_H;y++) for (let x=0;x<MAP_W;x++) { const t=G.map[y][x]; if (t.obj && t.obj.type==='tree') { treeTotal++; if (t.biome==='desert') desertTrees++; } }
+  const caMapOk = treeTotal>0 && desertTrees===0;
+  const caOk = caChainOk && caMapOk;
+  console.log('SCENARIO CA (resource density by biome):');
+  console.log('   chance gradient:', caChainOk?'OK':'FAIL', '| trees='+treeTotal+' desert='+desertTrees, caMapOk?'OK':'FAIL', '|', caOk?'OK':'FAIL');
+  if (!caOk) throw new Error('Scenario CA failed');
 })();
 `;
 try {
