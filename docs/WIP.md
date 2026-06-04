@@ -23,7 +23,8 @@
 
 ## Сейчас в работе
 
-Пусто.
+- [IN PROGRESS] Claude-local 2026-06-04 - capacity частей тела влияет на скорость/работу/стрельбу
+  - Безопасно: целое тело = x1, симуляция не меняется. Мои файлы: _core.js (movement/wmul/fightEnemy), _harness.js. Codex: вода/A*, экосистема — свободно.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
