@@ -1770,6 +1770,23 @@ const test = `
   console.log('SCENARIO CM (RimWorld-style room types + house):');
   console.log('   classify:', classOk?'OK':'FAIL', '| door->house:', (noDoorOk&&doorOk)?'OK':'FAIL', '| label:', JSON.stringify(lbl), labelOk?'OK':'FAIL', '|', cmOk?'OK':'FAIL');
   if (!cmOk) throw new Error('Scenario CM failed');
+
+  // Scenario CN: building quality from builder skill (RimWorld quality)
+  newGame('settlers');
+  const qMapOk = buildingQuality(0)===0 && buildingQuality(6)===1 && buildingQuality(12)===2 && buildingQuality(18)===3;
+  const qLblOk = qualityLabel(3)==='шедевр' && qualityLabel(0)==='обычное' && qualityMul(3)>1 && qualityMul(0)===1;
+  const bpM = { type:'bed', tx:40, ty:40, blueprint:true, done:false, progress:1 };
+  const bldM = G.pawns[0]; bldM.skills = { building:{lvl:18,xp:0} };
+  finishBlueprintIfReady(bldM, bpM);
+  const masterOk = bpM.done===true && bpM.quality===3;
+  const bpN = { type:'bed', tx:41, ty:41, blueprint:true, done:false, progress:1 };
+  const bldN = G.pawns[1]; bldN.skills = {};
+  finishBlueprintIfReady(bldN, bpN);
+  const normalOk = bpN.quality===0;
+  const cnOk = qMapOk && qLblOk && masterOk && normalOk;
+  console.log('SCENARIO CN (building quality from skill):');
+  console.log('   map:', qMapOk?'OK':'FAIL', '| labels:', qLblOk?'OK':'FAIL', '| skill18->шедевр:', masterOk?'OK':'FAIL', '| skill0->обычное:', normalOk?'OK':'FAIL', '|', cnOk?'OK':'FAIL');
+  if (!cnOk) throw new Error('Scenario CN failed');
 })();
 `;
 try {

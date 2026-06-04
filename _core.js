@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.10';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.11';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -1727,10 +1727,17 @@ function deliverBlueprintMaterials(p, bp) {
   return true;
 }
 
+// Качество постройки от навыка строителя (как awful..legendary в RimWorld).
+const QUALITY_LABELS = ['обычное','хорошее','отличное','шедевр'];
+function buildingQuality(lvl) { if (lvl >= 18) return 3; if (lvl >= 12) return 2; if (lvl >= 6) return 1; return 0; }
+function qualityLabel(q) { return QUALITY_LABELS[q||0] || 'обычное'; }
+function qualityMul(q) { return [1, 1.05, 1.1, 1.2][q||0] || 1; }
+
 function finishBlueprintIfReady(p, bp) {
   if (!bp || bp.progress < 1) return false;
   bp.blueprint = false;
   bp.done = true;
+  bp.quality = buildingQuality(skillLvl(p, 'building'));   // качество от навыка
   bp.waitingMissing = '';
   bp.deliveryStatus = '';
   bp.materialsDeliveryReserved = false;
@@ -4614,6 +4621,7 @@ function showBuildingInfo(b, cx, cy) {
     ${b.blueprint ? `<div class="inf-line">🔨 Строится: ${Math.round((b.progress||0)*100)}%</div>` : ''}
     ${blueprintMaterialInfoHtml(b)}
     ${b.done ? `<div class="inf-line">HP: <b>${Math.floor(b.hp||0)}/${b.maxHp||0}</b></div>` : ''}
+    ${b.done && b.quality ? `<div class="inf-line">Качество: <b>${qualityLabel(b.quality)}</b></div>` : ''}
     ${def.prod ? `<div class="inf-line">Производит: <b>${def.prod}</b></div>` : ''}
     ${recipeLines}
     ${recipeControls}

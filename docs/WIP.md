@@ -23,8 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - качество построек от навыка строителя (RimWorld quality)
-  - Мои файлы: _core.js (tryBuild завершение, qualityLabel, showBuildingInfo), _harness.js. Codex: карта-мир/вода/экосистема — свободно.
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -38,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.11 - Building quality from skill (Claude-local). Качество построек обычное/хорошее/отличное/шедевр от навыка building; видно в info. Scenario CN. Harness A-CN (92) green.
 
 - v2.10 - RimWorld room types + Frontier (Claude-local). Кухня/мастерская/лаборатория + салун-зал/барак; признак «ДОМ» (дверь). Research RimWorld-стройки в DESIGN.md. Scenario CM. Harness A-CM (91) green.
 

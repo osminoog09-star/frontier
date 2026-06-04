@@ -1,5 +1,11 @@
 # FRONTIER changelog
 
+## v2.11 - Building quality from builder skill (RimWorld quality)
+
+- Постройки получают КАЧЕСТВО от навыка строителя (как awful..legendary в RimWorld): обычное/хорошее/отличное/шедевр (buildingQuality по навыку building).
+- Записывается при завершении (finishBlueprintIfReady), видно в info-overlay постройки. qualityMul для будущего влияния на уют/красоту.
+- Безопасно: навык 0 => обычное (x1), сим не изменился. Scenario CN. Harness A-CN (92) green.
+
 ## v2.10 - RimWorld-style room types + Frontier rooms + house (Phase 2.5)
 
 - Исследована система стройки RimWorld (docs/DESIGN.md) и расширены авто-типы комнат в том же смысле: кухня (плита), мастерская (кузня), лаборатория.
