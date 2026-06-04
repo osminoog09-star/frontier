@@ -23,8 +23,7 @@
 
 ## Сейчас в работе
 
-- [IN PROGRESS] Claude-local 2026-06-04 - качество мебели влияет на уют
-  - Мои файлы: _core.js (furnitureQualityBonus + roomComfortBonus), _harness.js. Codex: карта-мир/вода/экосистема — свободно.
+Пусто.
 ---
 
 ## Очередь (текущий план — Phase 3: World Simulation)
@@ -38,6 +37,8 @@
 ---
 
 ## Последний завершённый срез
+
+- v2.12 - Furniture quality -> comfort (Claude-local). Среднее качество мебели даёт бонус уюта; обычное=+0 (сим цел). Scenario CO. Harness A-CO (93) green.
 
 - v2.11 - Building quality from skill (Claude-local). Качество построек обычное/хорошее/отличное/шедевр от навыка building; видно в info. Scenario CN. Harness A-CN (92) green.
 

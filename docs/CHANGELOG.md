@@ -1,5 +1,10 @@
 # FRONTIER changelog
 
+## v2.12 - Furniture quality raises comfort (RimWorld)
+
+- Качество мебели теперь влияет на уют: чем выше среднее качество кроватей/столов/декора, тем больше бонус настроения (furnitureQualityBonus).
+- Безопасно: «обычное» качество (навык 0) = +0, поэтому сим/пины комфорта не задеты (AF/AI целы). Scenario CO. Harness A-CO (93) green.
+
 ## v2.11 - Building quality from builder skill (RimWorld quality)
 
 - Постройки получают КАЧЕСТВО от навыка строителя (как awful..legendary в RimWorld): обычное/хорошее/отличное/шедевр (buildingQuality по навыку building).

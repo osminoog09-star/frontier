@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.11';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.12';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -1422,13 +1422,21 @@ function roomTypeLabelAt(tx, ty) {
 function roomComfortScore() {
   return (isFurnitureInRoom('bed') ? 1 : 0) + (isFurnitureInRoom('table') ? 1 : 0) + (isFurnitureInRoom('decor') ? 1 : 0);
 }
+// Средний уровень качества готовой мебели (кровать/стол/декор), 0..3.
+function avgFurnitureQuality() {
+  const fs = G.buildings.filter(b => b.done && !b.blueprint && ['bed','table','decor'].includes(b.type));
+  if (!fs.length) return 0;
+  return fs.reduce((s,b) => s + (b.quality||0), 0) / fs.length;
+}
+// Бонус уюта от качества мебели (0 при «обычном» => сим не задет).
+function furnitureQualityBonus() { return avgFurnitureQuality() * 0.02; }
 function roomComfortBonus() {
   const score = roomComfortScore();
   let base = 0;
   if (score >= 3) base = 0.12;
   else if (score >= 2) base = 0.06;
   else if (score >= 1) base = 0.03;
-  return base + roomFloorBonus();
+  return base + roomFloorBonus() + furnitureQualityBonus();
 }
 function roomComfortLabel() {
   return roomComfortLabelForScore(roomComfortScore());

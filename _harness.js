@@ -1787,6 +1787,18 @@ const test = `
   console.log('SCENARIO CN (building quality from skill):');
   console.log('   map:', qMapOk?'OK':'FAIL', '| labels:', qLblOk?'OK':'FAIL', '| skill18->шедевр:', masterOk?'OK':'FAIL', '| skill0->обычное:', normalOk?'OK':'FAIL', '|', cnOk?'OK':'FAIL');
   if (!cnOk) throw new Error('Scenario CN failed');
+
+  // Scenario CO: furniture quality raises room comfort (normal quality = no change)
+  newGame('settlers'); G.buildings = G.buildings.filter(b=>!['bed','table','decor'].includes(b.type));
+  const coNone = furnitureQualityBonus();
+  G.buildings.push({type:'bed', tx:30, ty:30, done:true, blueprint:false, quality:0});
+  const coNormal = furnitureQualityBonus();
+  G.buildings.push({type:'table', tx:31, ty:30, done:true, blueprint:false, quality:3});
+  const coHigh = furnitureQualityBonus();
+  const coOk = coNone===0 && coNormal===0 && coHigh>coNormal;
+  console.log('SCENARIO CO (furniture quality -> comfort):');
+  console.log('   none/normal/high', coNone+'/'+coNormal+'/'+coHigh.toFixed(3), coOk?'OK':'FAIL', '|', coOk?'OK':'FAIL');
+  if (!coOk) throw new Error('Scenario CO failed');
 })();
 `;
 try {
