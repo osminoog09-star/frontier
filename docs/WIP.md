@@ -38,6 +38,8 @@
 
 ## Последний завершённый срез
 
+- v2.15 - FIX Architect closed groups (Codex). Закрытые группы стройки больше не оставляют скрытые кнопки поверх соседних категорий; live browser smoke: выбор пешки, открытие категории, постановка фермы, скорость, save/load. Harness A-CP (94) green.
+
 - v2.14 - Adobe wall (Claude-local). Саманная стена (Дикий Запад): дёшево, слабее (HP x0.7); блокирует/стена комнаты. Scenario CP. Harness A-CP (94) green.
 
 - v2.13 - Лагерь->Спальный мешок (Claude-local). RimWorld-bedroll; кровать в комнате приоритетнее. Display-only. Harness A-CO (93) green.
