@@ -1,5 +1,11 @@
 # FRONTIER changelog
 
+## 2026-06-05 - Construction/zones design correction
+
+- По уточнению игрока зафиксирован новый строительный курс: нужна не только панель Architect, а RimWorld-like модель приказов, зон, помещений, станков, складов и job loop.
+- Добавлен полный анализ `docs/BUILDING_ZONES_RIMWORLD_ANALYSIS.md`: что у нас сейчас неверно (`farm/mine/stockpile` как magic-buildings), какая целевая модель данных нужна, как должна работать шахта через помещение + станок + склад + зону добычи.
+- Обновлены `ROADMAP.md`, `docs/TECH_ROADMAP.md`, `docs/HANDOFF.md`: следующий безопасный gameplay-срез - Mining zone foundation / Scenario CR. Gameplay и `frontier.html` не менялись.
+
 ## v2.18 - Architect command panel
 
 - UI строительства переделан ближе к RimWorld-паттерну: слева остаётся стабильный список категорий `Архитектор`, а команды выбранной категории открываются отдельной панелью `ПРИКАЗЫ` справа.

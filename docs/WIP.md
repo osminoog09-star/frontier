@@ -38,6 +38,8 @@
 
 ## Последний завершённый срез
 
+- 2026-06-05 - Construction/zones design correction (Codex). По уточнению игрока зафиксирован полный курс стройки как RimWorld-модели: Architect = приказы/зоны/объекты, `farm/mine/stockpile` не должны оставаться magic-зданиями; следующий gameplay-срез - Mining zone foundation / Scenario CR. Добавлен `docs/BUILDING_ZONES_RIMWORLD_ANALYSIS.md`, обновлены ROADMAP/TECH_ROADMAP/HANDOFF/CHANGELOG. Gameplay не менялся.
+
 - v2.18 - Architect command panel (Codex). По жалобе игрока UI строительства переделан ближе к RimWorld: слева стабильные категории Архитектора, справа отдельная панель `ПРИКАЗЫ`; открыта ровно одна категория, build ids сохранены. Browser smoke: все категории, `Зоны -> Грядка`, canvas move, без пересечений с целью/мини-картой/сайдбаром/низом, console/runtime errors = 0. Harness A-CQ (95) green.
 
 - v2.17 - FIX zone/floor preview render crash (Codex). Исправлен runtime из player log: `zone_*` preview больше не читает `BUILDS[buildMode].size`, unknown building types sanitizing/guards; Scenario CQ. Harness A-CQ (95) green.

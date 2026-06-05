@@ -66,6 +66,15 @@
 - Browser smoke covers desktop 1600x900 and mobile 390x844.
 - Future UI slices should keep checking `fix/` screenshots before selecting roadmap work.
 
+## 2026-06-05 RimWorld construction/zones correction
+
+- Player clarified that the issue is not only Architect layout. The actual construction model must move toward RimWorld-like commands/zones/rooms/job loops.
+- Current mismatch: `farm`, `mine`, and `stockpile` still exist as magic buildings in `BUILDS`; this should be migrated carefully, not deleted in one pass.
+- Target model: walls/floors/zones stay tile-based; furniture/workstations/decor later gain `x/y/rot` plus snap modes (`tile`, `half`, `free`, `wall`).
+- Next safe gameplay slice: add `ZONE_DEFS.mine` and a mine-zone job path. `tryMine()` should prefer mining zones / marked rocks and create ore ground stacks that hauling takes to stockpile-zones.
+- Add Scenario CR for mine-zone -> ore stack -> stockpile-zone. Preserve old saves with legacy `mine` buildings until a migration slice replaces them with a station/workbench concept.
+- Full analysis: `docs/BUILDING_ZONES_RIMWORLD_ANALYSIS.md`.
+
 ## v1.44 basic room comfort
 
 - Added first room recognition over small fence/gate enclosures.
