@@ -1814,6 +1814,26 @@ const test = `
   console.log('SCENARIO CP (adobe wall):');
   console.log('   hp adobe/wood/stone '+adobeHp+'/'+woodHp+'/'+stoneHp, cpHpOk?'OK':'FAIL', '| cheap def:', cpDefOk?'OK':'FAIL', '| blocks/room-wall:', cpBlockOk?'OK':'FAIL', '|', cpOk?'OK':'FAIL');
   if (!cpOk) throw new Error('Scenario CP failed');
+
+  // Scenario CQ: zone/floor/invalid build preview must not crash render
+  newGame('settlers');
+  hoverTile = {tx:10, ty:10};
+  let previewOk = true;
+  try {
+    ['zone_grow','zone_stockpile','zone_allowed','floor_wood','floor_stone','unknown_build_mode'].forEach(mode => {
+      G.buildMode = mode;
+      render();
+    });
+  } catch(e) { previewOk = false; }
+  const beforeBad = G.buildings.length;
+  G.buildings.push({type:'missing_build_type', tx:12, ty:12, done:true, blueprint:false, hp:1, maxHp:1});
+  let invalidRenderOk = true;
+  try { render(); normalizeGameState('scenario_cq'); render(); } catch(e) { invalidRenderOk = false; }
+  const sanitizedOk = G.buildings.length === beforeBad && !G.buildings.some(b => b.type === 'missing_build_type');
+  const cqOk = previewOk && invalidRenderOk && sanitizedOk;
+  console.log('SCENARIO CQ (zone/floor preview + invalid building guard):');
+  console.log('   preview:', previewOk?'OK':'FAIL', '| invalid render:', invalidRenderOk?'OK':'FAIL', '| sanitized:', sanitizedOk?'OK':'FAIL', '|', cqOk?'OK':'FAIL');
+  if (!cqOk) throw new Error('Scenario CQ failed');
 })();
 `;
 try {

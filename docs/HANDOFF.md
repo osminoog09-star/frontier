@@ -6,10 +6,10 @@
 
 - Публичный сайт: https://osminoog09-star.github.io/frontier/
 - Публичная игра: https://osminoog09-star.github.io/frontier/frontier.html
-- Последний локальный срез: `v2.16 - UI polish: toast + starter hint`.
+- Последний локальный срез: `v2.17 - FIX zone/floor preview render crash`.
 - Базовая игра: `frontier.html`, сборка через `frontier.template.html` + `_core.js`.
-- Текущий `GAME_VERSION`: `2.16`. RimWorld-стройка: типы/качество/bedroll/материал-саман. В v2.15 закрытые группы Архитектора больше не оставляют скрытые кнопки поверх соседних категорий; в v2.16 toast достижений больше не перекрывает цель, стартовая подсказка говорит про спальный мешок. Дальше: песчаник, материал->красота/качество глубже, температура; карта-мир Phase 3.5.
-- Harness: Scenarios A-CP (94) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
+- Текущий `GAME_VERSION`: `2.17`. RimWorld-стройка: типы/качество/bedroll/материал-саман. В v2.17 закрыт критический crash preview для зон/полов (`BUILDS[buildMode].size` на `zone_*`), который давал чёрные провалы карты. Дальше: песчаник, материал->красота/качество глубже, температура; карта-мир Phase 3.5.
+- Harness: Scenarios A-CQ (95) стабильно зелёные. Был флак в AC (RNG-ИИ) — починен пиннингом пешки.
   ПРАВИЛО: тесты детерминированные, прогонять `node _harness.js` несколько раз перед push.
 - Дизайн-курс: **RimWorld-like фундамент + Frontier-идентичность**. Не копировать RimWorld как тему; брать понятные жанровые паттерны и наполнять их Диким Западом.
 
@@ -27,6 +27,13 @@
 - Human audit 1600x900: сайт без horizontal overflow; меню игры открывает `Как играть`, `Роадмап / Обновления`, `Достижения`; новая игра запускается без console/page errors.
 - В игре проверены вкладки sidebar (`Пешки`, `Расп.`, `Наука`, `Лог`), выбор пешки и priority-panel, все группы Архитектора, постановка фермы, speed/save/load.
 - Визуальная правка: achievement toast смещён ниже `objective-hud`, чтобы toast «Первый дом» не перекрывал цель; стартовый help-popup больше не говорит старое «лагерь», теперь «спальный мешок».
+
+## QA для Claude после v2.17
+
+- Пользовательский `frontier-log-day1.json` показал повторяющийся runtime error: `Cannot read properties of undefined (reading 'size')` в `render()`, stack `frontier.html:3652`.
+- Причина: `G.buildMode='zone_grow'`/другие `zone_*` не существуют в `BUILDS`, но hover-preview читал `BUILDS[G.buildMode].size`. Это ломало frame loop и визуально давало чёрные провалы на карте.
+- Исправлено: preview зон рисуется отдельно через `ZONE_DEFS`, неизвестный `buildMode` не падает, `normalizeGameState()` фильтрует неизвестные building types, render/click/tooltip/demolish guard-ят `BUILDS[b.type]`.
+- Проверка: Scenario CQ зелёный; browser smoke 2048x1280 — `Зоны -> Грядка (зона)`, движение мыши по canvas, runtime/page/console errors = 0.
 
 ## Что изменилось в v2.04
 

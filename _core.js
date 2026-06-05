@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.16';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.17';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -2668,6 +2668,17 @@ function normalizeGameState(source='') {
   if (!Array.isArray(G.floorBlueprints)) G.floorBlueprints = [];
   if (!Array.isArray(G.fires)) G.fires = [];
   if (!Array.isArray(G.zones)) G.zones = [];
+  if (!G.map || !G.map.length || !G.map[0] || G.map.length !== MAP_H || G.map[0].length !== MAP_W) {
+    G.map = generateMap();
+    _miniDirty = true;
+    safeDiagRuntime('map_reset_'+source, 'Map was invalid and got regenerated');
+  }
+  if (!Array.isArray(G.buildings)) G.buildings = [];
+  const buildingCountBefore = G.buildings.length;
+  G.buildings = sanitizeBuildings(G.buildings);
+  if (buildingCountBefore !== G.buildings.length && source) {
+    safeDiagRuntime('buildings_sanitized_'+source, `Removed ${buildingCountBefore - G.buildings.length} invalid building(s)`);
+  }
   for (const p of G.pawns || []) {
     if (!p.skills || typeof p.skills !== 'object') p.skills = {};
     if (!p.personality || typeof p.personality !== 'object') p.personality = rollPersonality(p.traits);
@@ -2683,11 +2694,6 @@ function normalizeGameState(source='') {
     if (source) safeDiagRuntime('camera_reset_'+source, 'Camera was invalid and got reset');
   }
   G.camera.zoom = clamp(G.camera.zoom || 1, 0.4, 2.8);
-  if (!G.map || !G.map.length || !G.map[0] || G.map.length !== MAP_H || G.map[0].length !== MAP_W) {
-    G.map = generateMap();
-    _miniDirty = true;
-    safeDiagRuntime('map_reset_'+source, 'Map was invalid and got regenerated');
-  }
   if (!Array.isArray(G.pois) || G.pois.length === 0) G.pois = generatePOIs(G.map);
   G.pois = (G.pois || []).filter(p => p && POI_DEFS[p.type] && p.tx>=0 && p.ty>=0 && p.tx<MAP_W && p.ty<MAP_H)
     .map(p => ({
@@ -2981,22 +2987,36 @@ function render() {
     if (tx>=0 && ty>=0 && tx<MAP_W && ty<MAP_H) {
       if (G.buildMode) {
         const def = BUILDS[G.buildMode];
-        const sz = def.size;
-        let ok = true;
-        for (let dy=0; dy<sz; dy++) for (let dx=0; dx<sz; dx++) {
-          const x2=tx+dx, y2=ty+dy;
-          if (x2>=MAP_W||y2>=MAP_H||G.map[y2][x2].type===TERRAIN.WATER||G.buildings.find(b=>b.tx===x2&&b.ty===y2)) ok=false;
+        if (!def && typeof G.buildMode === 'string' && G.buildMode.startsWith('zone_')) {
+          const zoneType = G.buildMode.slice(5);
+          const zdef = ZONE_DEFS[zoneType];
+          ctx.fillStyle = zdef ? zdef.fill : 'rgba(120,200,120,0.25)';
+          ctx.fillRect(tx*TILE, ty*TILE, TILE, TILE);
+          ctx.strokeStyle = zdef ? zdef.border : '#9cff9c';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(tx*TILE+1, ty*TILE+1, TILE-2, TILE-2);
+        } else if (def) {
+          const sz = def.size || 1;
+          let ok = true;
+          for (let dy=0; dy<sz; dy++) for (let dx=0; dx<sz; dx++) {
+            const x2=tx+dx, y2=ty+dy;
+            if (x2>=MAP_W||y2>=MAP_H||G.map[y2][x2].type===TERRAIN.WATER||G.buildings.find(b=>b.tx===x2&&b.ty===y2)) ok=false;
+          }
+          ctx.fillStyle = ok ? 'rgba(120,200,120,0.30)' : 'rgba(200,80,80,0.35)';
+          ctx.fillRect(tx*TILE, ty*TILE, TILE*sz, TILE*sz);
+          ctx.strokeStyle = ok ? '#9cff9c' : '#ff8080';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(tx*TILE, ty*TILE, TILE*sz, TILE*sz);
+          ctx.font = `${TILE*sz*0.5}px serif`;
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.globalAlpha = 0.6;
+          ctx.fillText(def.icon, tx*TILE+TILE*sz/2, ty*TILE+TILE*sz/2);
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.strokeStyle = 'rgba(255,128,128,0.55)';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(tx*TILE+1, ty*TILE+1, TILE-2, TILE-2);
         }
-        ctx.fillStyle = ok ? 'rgba(120,200,120,0.30)' : 'rgba(200,80,80,0.35)';
-        ctx.fillRect(tx*TILE, ty*TILE, TILE*sz, TILE*sz);
-        ctx.strokeStyle = ok ? '#9cff9c' : '#ff8080';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(tx*TILE, ty*TILE, TILE*sz, TILE*sz);
-        ctx.font = `${TILE*sz*0.5}px serif`;
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.globalAlpha = 0.6;
-        ctx.fillText(def.icon, tx*TILE+TILE*sz/2, ty*TILE+TILE*sz/2);
-        ctx.globalAlpha = 1;
       } else if (G.demolishMode) {
         ctx.fillStyle = 'rgba(200,60,60,0.3)';
         ctx.fillRect(tx*TILE, ty*TILE, TILE, TILE);
@@ -3190,10 +3210,11 @@ function drawDayNightOverlay() {
     ctx.globalCompositeOperation = 'lighter';
     for (const b of G.buildings) {
       if (b.blueprint) continue;
-      if (['saloon','smithy','camp','lab'].includes(b.type)) {
+      const def = BUILDS[b.type];
+      if (def && ['saloon','smithy','camp','lab'].includes(b.type)) {
         const z = G.camera.zoom;
-        const sx = (b.tx*TILE + TILE*BUILDS[b.type].size/2 - G.camera.x)*z;
-        const sy = (b.ty*TILE + TILE*BUILDS[b.type].size/2 - G.camera.y)*z;
+        const sx = (b.tx*TILE + TILE*def.size/2 - G.camera.x)*z;
+        const sy = (b.ty*TILE + TILE*def.size/2 - G.camera.y)*z;
         if (sx<-40||sy<-40||sx>canvas.width+40||sy>canvas.height+40) continue;
         const grd = ctx.createRadialGradient(sx, sy, 2, sx, sy, 40);
         grd.addColorStop(0, 'rgba(255,180,80,0.25)');
@@ -3308,8 +3329,9 @@ function showPoiInfo(poi, cx, cy) {
 }
 
 function drawBuilding(b) {
-  const x = b.tx*TILE, y = b.ty*TILE;
   const def = BUILDS[b.type];
+  if (!def) return;
+  const x = b.tx*TILE, y = b.ty*TILE;
   const S = TILE*def.size;
 
   if (b.blueprint) {
@@ -4427,7 +4449,7 @@ function handleLeftClick(tx, ty, cx, cy) {
   }
 
   // Click on building
-  const bld = G.buildings.find(b=>tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
+  const bld = G.buildings.find(b=>BUILDS[b.type] && tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
   if (bld) {
     showBuildingInfo(bld, cx, cy);
     return;
@@ -4456,7 +4478,7 @@ function handleRightClick(tx, ty) {
 }
 
 function demolishAt(tx, ty) {
-  const b = G.buildings.find(b=> tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
+  const b = G.buildings.find(b=> BUILDS[b.type] && tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
   if (!b) {
     // нет здания — может, тут пол или чертёж пола
     if (G.floorBlueprints && G.floorBlueprints.length) {
@@ -4838,7 +4860,7 @@ function showTooltip(e, tx, ty) {
   const poi = poiAt(tx, ty);
   if (poi) text += ` • ${poiDef(poi.type).name}`;
 
-  const bld = G.buildings.find(b=>tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
+  const bld = G.buildings.find(b=>BUILDS[b.type] && tx>=b.tx && ty>=b.ty && tx<b.tx+BUILDS[b.type].size && ty<b.ty+BUILDS[b.type].size);
   if (bld) text = `${BUILDS[bld.type].name} ${bld.blueprint?'(стройка)':''}`;
 
   tooltip.textContent = text;

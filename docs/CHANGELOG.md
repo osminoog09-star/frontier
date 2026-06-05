@@ -1,5 +1,12 @@
 # FRONTIER changelog
 
+## v2.17 - FIX zone/floor preview render crash
+
+- Исправлен критический баг из `frontier-log-day1.json`: при выборе зон (`zone_grow`, `zone_stockpile`, `zone_allowed`) preview пытался читать `BUILDS[G.buildMode].size`, падал каждый кадр и давал чёрные провалы на карте.
+- Preview теперь отдельно обрабатывает `zone_*`, безопасно игнорирует неизвестный `buildMode`, а `normalizeGameState()` вычищает неизвестные типы зданий из `G.buildings`.
+- Добавлен Scenario CQ: zone/floor preview + invalid building guard. Harness A-CQ (95) green.
+- Live browser smoke: выбран `Зоны -> Грядка (зона)`, движение мыши по canvas, runtime/page/console errors = 0.
+
 ## v2.16 - UI polish: toast + starter hint
 
 - Достижения/toast перенесены ниже блока цели, чтобы не перекрывать `objective-hud` в начале партии.
