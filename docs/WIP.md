@@ -38,6 +38,8 @@
 
 ## Последний завершённый срез
 
+- v2.16 - UI polish: toast + starter hint (Codex). Достижения/toast смещены ниже цели, стартовый совет говорит «спальный мешок» вместо старого «лагерь»; human audit: меню, tabs, Architect, выбор пешки, постановка фермы, speed/save/load. Harness A-CP (94) green.
+
 - v2.15 - FIX Architect closed groups (Codex). Закрытые группы стройки больше не оставляют скрытые кнопки поверх соседних категорий; live browser smoke: выбор пешки, открытие категории, постановка фермы, скорость, save/load. Harness A-CP (94) green.
 
 - v2.14 - Adobe wall (Claude-local). Саманная стена (Дикий Запад): дёшево, слабее (HP x0.7); блокирует/стена комнаты. Scenario CP. Harness A-CP (94) green.

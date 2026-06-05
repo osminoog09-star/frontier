@@ -1,5 +1,12 @@
 # FRONTIER changelog
 
+## v2.16 - UI polish: toast + starter hint
+
+- Достижения/toast перенесены ниже блока цели, чтобы не перекрывать `objective-hud` в начале партии.
+- Стартовая подсказка синхронизирована с текущей постройкой: вместо старого «лагерь» теперь «спальный мешок».
+- Live human audit: меню, howto/roadmap/achievements, вкладки sidebar, все группы Архитектора, выбор пешки, постановка фермы, speed/save/load; runtime/page errors не обнаружены.
+- `frontier.html` пересобран через `node build.js`; harness A-CP (94) green.
+
 ## v2.15 - FIX Architect closed groups
 
 - Исправлен UI-баг Архитектора: кнопки внутри закрытых групп больше не остаются в раскладке и не перехватывают клики под другими категориями.
