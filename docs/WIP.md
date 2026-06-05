@@ -38,6 +38,8 @@
 
 ## Последний завершённый срез
 
+- v2.18 - Architect command panel (Codex). По жалобе игрока UI строительства переделан ближе к RimWorld: слева стабильные категории Архитектора, справа отдельная панель `ПРИКАЗЫ`; открыта ровно одна категория, build ids сохранены. Browser smoke: все категории, `Зоны -> Грядка`, canvas move, без пересечений с целью/мини-картой/сайдбаром/низом, console/runtime errors = 0. Harness A-CQ (95) green.
+
 - v2.17 - FIX zone/floor preview render crash (Codex). Исправлен runtime из player log: `zone_*` preview больше не читает `BUILDS[buildMode].size`, unknown building types sanitizing/guards; Scenario CQ. Harness A-CQ (95) green.
 
 - v2.16 - UI polish: toast + starter hint (Codex). Достижения/toast смещены ниже цели, стартовый совет говорит «спальный мешок» вместо старого «лагерь»; human audit: меню, tabs, Architect, выбор пешки, постановка фермы, speed/save/load. Harness A-CP (94) green.

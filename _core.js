@@ -1,6 +1,6 @@
 
 // ==================== CONFIG ====================
-const GAME_VERSION = '2.17';   // обновлять при каждом релизном срезе (см. AGENTS.md)
+const GAME_VERSION = '2.18';   // обновлять при каждом релизном срезе (см. AGENTS.md)
 const TILE = 24;
 const MAP_W = 80, MAP_H = 60;
 // Скорость хода игровых часов. Раньше было 0.5 (сутки ~48с на x1 — слишком быстро).
@@ -4917,6 +4917,17 @@ function setupButtons() {
           if (other !== group) other.open = false;
         });
       }
+      updateBottomUiMetrics();
+    });
+  });
+
+  document.querySelectorAll('#architect .build-group summary').forEach(summary => {
+    summary.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const group = summary.parentElement;
+      const shouldOpen = !group.open;
+      document.querySelectorAll('#architect .build-group').forEach(other => { other.open = false; });
+      group.open = shouldOpen;
       updateBottomUiMetrics();
     });
   });

@@ -60,8 +60,8 @@
 ## v1.43 build bar groups + minimap clearance
 
 - Fixed feedback from `fix/Screenshot 2026-06-02 171333.png`: minimap overlapped the build area and bottom build buttons occupied too much space.
-- Bottom build actions are grouped into `details.build-group` folders while preserving the existing button ids.
-- Active build mode highlights the owning group; choosing a building closes the folder.
+- As of v2.18, Architect uses a RimWorld-like split: category rail on the left, selected category commands in a separate fixed panel to the right, while preserving the existing button ids.
+- Active build mode highlights the owning group; choosing a command keeps that command panel open for quick repeated placement.
 - `updateBottomUiMetrics()` writes `--bottom-ui-height` from the measured bottom bar height so minimap/zoom controls stay clear.
 - Browser smoke covers desktop 1600x900 and mobile 390x844.
 - Future UI slices should keep checking `fix/` screenshots before selecting roadmap work.
